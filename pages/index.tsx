@@ -349,8 +349,11 @@ export default function Example() {
           <Card maxWidth="max-w-md" hFull={true}>
             <Text>Total stake</Text>
             <Metric>
-              {indexerData.indexer.stakedTokens -
-                indexerData.indexer.lockedTokens}{" "}
+              {(
+                (indexerData.indexer.stakedTokens -
+                  indexerData.indexer.lockedTokens) /
+                1000000000000000000
+              ).toFixed(0)}{" "}
               GRT
             </Metric>
             {/* <CategoryBar
@@ -370,21 +373,36 @@ export default function Example() {
         <Col>
           <Card maxWidth="max-w-md" hFull={true}>
             <Text>Allocated</Text>
-            <Metric>{indexerData.indexer.allocatedTokens} GRT</Metric>
+            <Metric>
+              {(
+                indexerData.indexer.allocatedTokens / 1000000000000000000
+              ).toFixed(0)}{" "}
+              GRT
+            </Metric>
             {/* <ProgressBar percentageValue={90} color="teal" marginTop="mt-2" /> */}
           </Card>
         </Col>
         <Col>
           <Card maxWidth="max-w-md" hFull={true}>
             <Text>Unallocated</Text>
-            <Metric>{indexerData.indexer.availableStake} GRT</Metric>
+            <Metric>
+              {(
+                indexerData.indexer.availableStake / 1000000000000000000
+              ).toFixed(0)}{" "}
+              GRT
+            </Metric>
             {/* <ProgressBar percentageValue={10} color="teal" marginTop="mt-2" /> */}
           </Card>
         </Col>
         <Col>
           <Card maxWidth="max-w-md" hFull={true}>
-            <Text>Available capacity</Text>
-            <Metric>{indexerData.indexer.delegatedCapacity} GRT</Metric>
+            <Text>Delegated capacity</Text>
+            <Metric>
+              {(
+                indexerData.indexer.delegatedCapacity / 1000000000000000000
+              ).toFixed(0)}{" "}
+              GRT
+            </Metric>
             {/* <ProgressBar percentageValue={70} color="teal" marginTop="mt-2" /> */}
           </Card>
         </Col>

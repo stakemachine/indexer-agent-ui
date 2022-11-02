@@ -411,6 +411,43 @@ export default function Example() {
             <IndexerDeploymentsTable data={agentData.indexerDeployments} />
           </Card>
         </Col>
+        <Col numColSpanLg={4}>
+          <Card>
+            <div className="overflow-x-auto p-4">
+              <span className="text-lg">Active allocations</span>
+              <table className="table table-compact w-full">
+                <thead>
+                  <tr>
+                    <th>Allocation ID</th>
+                    <th>SubgraphDeployment</th>
+                    <th>signalledTokens</th>
+                    <th>stakedTokens</th>
+                    <th>allocatedTokens</th>
+                    <th>createdAtEpoch</th>
+                    <th>closedAtEpoch</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {agentData.indexerAllocations?.map((allo, index) => {
+                    return (
+                      <>
+                        <tr>
+                          <td>{allo.id}</td>
+                          <td>{allo.subgraphDeployment}</td>
+                          <td>{allo.signalledTokens.slice(0, -18)}</td>
+                          <td>{allo.stakedTokens.slice(0, -18)}</td>
+                          <td>{allo.allocatedTokens.slice(0, -18)} </td>
+                          <td>{allo.createdAtEpoch}</td>
+                          <td>{allo.closedAtEpoch}</td>
+                        </tr>
+                      </>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </Col>
       </ColGrid>
     </>
   );

@@ -374,21 +374,19 @@ export default function RemoteDataDemo() {
   return (
     <>
       <Metric>Actions</Metric>
-      <Card marginTop="mt-3">
-        <div
-          tabIndex={0}
-          className="collapse collapse-arrow border-base-300 bg-base-100 m-3 rounded-box border max-w-fit"
-        >
-          <input type="checkbox" />
-          <div className="collapse-title text-xl font-medium">
-            Create action
-          </div>
-          <div className="collapse-content">
-            <CreateActionForm />
-          </div>
-        </div>
 
-        <div className="remote-data-demo m-3">
+      <div
+        tabIndex={0}
+        className="collapse collapse-arrow border-base-300 bg-base-100 m-3 rounded-box border max-w-fit"
+      >
+        <input type="checkbox" />
+        <div className="collapse-title text-xl font-medium">Create action</div>
+        <div className="collapse-content">
+          <CreateActionForm />
+        </div>
+      </div>
+      <Card marginTop="mt-3">
+        <div className="m-3">
           {/* <button onClick={() => {
                     const indexerAction: Action = {
                         id: "49",

@@ -1,0 +1,30 @@
+version: '2.1'
+
+x-logging:
+  &default-logging
+  options:
+    max-file: '1'
+    compress: 'false'
+  driver: local
+
+networks:
+  monitor-net:
+    driver: bridge
+
+services:
+  indexer-agent-ui:
+    image: ${INDEXER_AGENT_GUI:-ghcr.io/stakemachine/indexer-agent-ui}
+    container_name: indexer-agent-ui
+    restart: unless-stopped
+    expose:
+      - 3000
+    environment:
+      UI_LOGIN: ${UI_LOGIN:-user}
+      UI_PASS: ${UI_PASS:-password}
+      AGENT_ENDPOINT: ${AGENT_ENDPOINT:-http://indexer-agent:8000}
+      SUBGRAPH_ENDPOINT: ${SUBGRAPH_ENDPOINT:-https://gateway.testnet.thegraph.com/network}
+    ports:
+      - 3000:3000
+    networks:
+      - monitor-net
+    logging: *default-logging

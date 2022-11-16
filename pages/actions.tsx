@@ -17,6 +17,7 @@ import {
   showLoading,
   updateData,
 } from "ka-table/actionCreators";
+
 import {
   ActionType,
   DataType,
@@ -31,8 +32,9 @@ import { ChildComponents } from "ka-table/models";
 import { ICellTextProps, IDataRowProps, IHeadCellProps } from "ka-table/props";
 import { kaPropsUtils } from "ka-table/utils";
 import CreateActionForm from "../components/Forms/CreateActionForm";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { Card, Metric, Title } from "@tremor/react";
+import { INDEXER_ERROR_MESSAGES } from "../lib/errors";
 
 const APPROVE_ACTIONS_MUTATION = gql`
   mutation approveActions($actionIDs: [Int!]!) {
@@ -149,7 +151,7 @@ const SelectionHeader: React.FC<IHeadCellProps> = ({
   );
 };
 
-const CustomCell: React.FC<ICellTextProps> = ({ value }) => {
+const CustomCell: React.FC<ICellTextProps> = ({ rowData, value }) => {
   return (
     <div
       className={
@@ -163,7 +165,16 @@ const CustomCell: React.FC<ICellTextProps> = ({ value }) => {
         }[value]
       }
     >
-      {value}
+      {value === "failed" ? (
+        <div
+          className="tooltip"
+          data-tip={INDEXER_ERROR_MESSAGES[rowData.failureReason]}
+        >
+          {value}
+        </div>
+      ) : (
+        value
+      )}
     </div>
   );
 };
@@ -221,11 +232,7 @@ const DetailsButton: React.FC<ICellTextProps> = ({
 const DetailsRow: React.FC<IDataRowProps> = ({ rowData }) => {
   return (
     <div>
-      <h3>DetailsRow #{rowData.id}</h3>
-      <p>Transaction: {rowData.transaction}</p>
-      <p>Failure reason: {rowData.failureReason}</p>
-      <p>Column 3: {rowData.column3}</p>
-      <p>Column 4: {rowData.column4}</p>
+      <pre>{JSON.stringify(rowData, null, 2)}</pre>
     </div>
   );
 };
@@ -349,6 +356,7 @@ const daisyComponents: ChildComponents = {
 
 export default function RemoteDataDemo() {
   const [tableProps, changeTableProps] = useState(tablePropsInit);
+
   const { data: agentData, error: agentError } = useSWR(queryStatus, (query) =>
     request("/api/agent", query)
   );

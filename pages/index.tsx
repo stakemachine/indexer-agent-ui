@@ -1,3 +1,4 @@
+import { Row } from "@tanstack/react-table";
 import {
   Card,
   Title,
@@ -17,6 +18,21 @@ import {
 import request, { gql } from "graphql-request";
 import useSWR from "swr";
 import IndexerDeploymentsTable from "../components/IndexerDeploymentsTable";
+import { activeAllocationColumns } from "../components/Table/Allocations/activeColumns";
+import { allocationColumns } from "../components/Table/Allocations/columns";
+import {
+  IndexerDeployment,
+  indexerDeploymentsColumns,
+} from "../components/Table/IndexerDeployments/columns";
+import TableComponent from "../components/Table/table";
+
+const renderSubComponent = ({ row }: { row: Row<IndexerDeployment> }) => {
+  return (
+    <pre style={{ fontSize: "10px" }}>
+      <code>{JSON.stringify(row.original, null, 2)}</code>
+    </pre>
+  );
+};
 
 const queryStatus = gql`
   {
@@ -140,12 +156,37 @@ const indexerInfoQuery = `query indexerByIdQuery($id: String) {
     account {
       image
     }
+    allocations(
+      first: 1000
+      orderBy: createdAt
+      orderDirection: desc
+      where: { indexer: $id }
+    ) {
+      id
+      allocatedTokens
+      createdAtEpoch
+      closedAtEpoch
+      createdAt
+      closedAt
+      status
+      indexingRewards
+      indexingIndexerRewards
+      indexingDelegatorRewards
+      queryFeesCollected
+      poi
+      subgraphDeployment {
+        ipfsHash
+        originalName
+      }
+    }
   }
 }`;
 
 export default function Example() {
-  const { data: agentData, error: agentError } = useSWR(queryStatus, (query) =>
-    request("/api/agent", query)
+  const { data: agentData, error: agentError } = useSWR(
+    queryStatus,
+    (query) => request("/api/agent", query),
+    { refreshInterval: 5000 }
   );
   const { data: indexerData, error: indexerError } = useSWR(
     () => [
@@ -407,46 +448,28 @@ export default function Example() {
           </Card>
         </Col>
         <Col numColSpanLg={4}>
-          <Card>
-            <IndexerDeploymentsTable data={agentData.indexerDeployments} />
-          </Card>
+          <div className="card w-full bg-base-100 shadow-xl p-4">
+            <span className="text-xl">Indexer Deployments</span>
+            <div className="overflow-x-auto p-4">
+              <TableComponent
+                data={agentData.indexerDeployments}
+                columns={indexerDeploymentsColumns}
+                renderSubComponent={renderSubComponent}
+              />
+            </div>
+          </div>
         </Col>
         <Col numColSpanLg={4}>
-          <Card>
+          <div className="card w-full bg-base-100 shadow-xl p-4">
+            <span className="text-xl">Active Allocations</span>
             <div className="overflow-x-auto p-4">
-              <span className="text-lg">Active allocations</span>
-              <table className="table table-compact w-full">
-                <thead>
-                  <tr>
-                    <th>Allocation ID</th>
-                    <th>SubgraphDeployment</th>
-                    <th>signalledTokens</th>
-                    <th>stakedTokens</th>
-                    <th>allocatedTokens</th>
-                    <th>createdAtEpoch</th>
-                    <th>closedAtEpoch</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {agentData.indexerAllocations?.map((allo, index) => {
-                    return (
-                      <>
-                        <tr>
-                          <td>{allo.id}</td>
-                          <td>{allo.subgraphDeployment}</td>
-                          <td>{allo.signalledTokens.slice(0, -18)}</td>
-                          <td>{allo.stakedTokens.slice(0, -18)}</td>
-                          <td>{allo.allocatedTokens.slice(0, -18)} </td>
-                          <td>{allo.createdAtEpoch}</td>
-                          <td>{allo.closedAtEpoch}</td>
-                        </tr>
-                      </>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <TableComponent
+                data={agentData.indexerAllocations}
+                columns={activeAllocationColumns}
+                renderSubComponent={renderSubComponent}
+              />
             </div>
-          </Card>
+          </div>
         </Col>
       </ColGrid>
     </>

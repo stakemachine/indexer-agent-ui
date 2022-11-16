@@ -11,9 +11,8 @@ import {
 import request, { gql } from "graphql-request";
 import { useState } from "react";
 import useSWR from "swr";
-import SubgraphsTable, {
-  IndeterminateCheckbox,
-} from "../components/SubgraphsTable";
+import SubgraphsTable from "../components/SubgraphsTable";
+import { IndeterminateCheckbox } from "../components/Table/table";
 
 const queryStatus = gql`
   {

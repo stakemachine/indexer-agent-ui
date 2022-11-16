@@ -122,9 +122,10 @@ export default function TableComponent({ data, columns, renderSubComponent }) {
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
+              {headerGroup.headers.map((header, k) => {
                 return (
                   <th
+                    key={k}
                     {...{
                       key: header.id,
                       colSpan: header.colSpan,

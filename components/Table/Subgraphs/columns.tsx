@@ -3,7 +3,7 @@ import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import Image from "next/image";
 import { IndeterminateCheckbox } from "../table";
 
-type Subgraph = {
+export type Subgraph = {
   id: string;
   displayName: string;
   image: string | null;

@@ -1,6 +1,11 @@
-import { Metric, Card } from "@tremor/react";
+import { Row } from "@tanstack/react-table";
 import request, { gql } from "graphql-request";
 import useSWR from "swr";
+import {
+  IndexingRule,
+  indexingRuleColumns,
+} from "../components/Table/IndexingRules/columns";
+import TableComponent from "../components/Table/table";
 const queryStatus = gql`
   {
     indexingRules(merged: true) {
@@ -22,6 +27,14 @@ const queryStatus = gql`
   }
 `;
 
+const renderSubComponent = ({ row }: { row: Row<IndexingRule> }) => {
+  return (
+    <pre style={{ fontSize: "10px" }}>
+      <code>{JSON.stringify(row.original, null, 2)}</code>
+    </pre>
+  );
+};
+
 export default function RulesPage() {
   const { data, error } = useSWR(queryStatus, (query) =>
     request("/api/agent", query)
@@ -31,55 +44,16 @@ export default function RulesPage() {
   if (!data) return <div>Loading...</div>;
   return (
     <>
-      <Metric>Indexing Rules</Metric>
-      <Card marginTop="mt-3">
-        <div className="overflow-x-auto p-4">
-          <span className="text-lg">Indexing Rules</span>
-          <table className="table table-compact w-full">
-            <thead>
-              <tr>
-                <th>Identifier</th>
-                <th>identifierType</th>
-                <th>allocationAmount</th>
-                <th>allocationLifetime</th>
-                <th>autoRenewal</th>
-                <th>parallelAllocations</th>
-                <th>maxAllocationPercentage</th>
-                <th>minSignal</th>
-                <th>maxSignal</th>
-                <th>minStake</th>
-                <th>minAverageQueryFees</th>
-                <th>custom</th>
-                <th>decisionBasis</th>
-                <th>requireSupported</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.indexingRules?.map((rule, index) => {
-                return (
-                  <>
-                    <tr>
-                      <td>{rule.identifier}</td>
-                      <td>{rule.identifierType}</td>
-                      <td>{rule.allocationAmount}</td>
-                      <td>{rule.allocationLifetime}</td>
-                      <td>{rule.autoRenewal}</td>
-                      <td>{rule.parallelAllocations}</td>
-                      <td>{rule.maxAllocationPercentage}</td>
-                      <td>{rule.minSignal}</td>
-                      <td>{rule.maxSignal}</td>
-                      <td>{rule.minAverageQueryFees}</td>
-                      <td>{rule.custom}</td>
-                      <td>{rule.decisionBasis}</td>
-                      <td>{rule.requireSupported}</td>
-                    </tr>
-                  </>
-                );
-              })}
-            </tbody>
-          </table>
+      <span className="text-3xl font-semibold">Indexing Rules</span>
+      <div className="card w-full bg-base-100 shadow-xl mt-3">
+        <div className="overflow-x-auto">
+          <TableComponent
+            data={data.indexingRules}
+            columns={indexingRuleColumns}
+            renderSubComponent={renderSubComponent}
+          />
         </div>
-      </Card>
+      </div>
     </>
   );
 }

@@ -381,7 +381,7 @@ export default function RemoteDataDemo() {
 
   return (
     <>
-      <Metric>Actions</Metric>
+      <span className="text-3xl font-semibold">Cost Models</span>
 
       <div
         tabIndex={0}
@@ -393,7 +393,7 @@ export default function RemoteDataDemo() {
           <CreateActionForm />
         </div>
       </div>
-      <Card marginTop="mt-3">
+      <div className="card w-full bg-base-100 shadow-xl mt-3">
         <div className="m-3">
           {/* <button onClick={() => {
                     const indexerAction: Action = {
@@ -471,7 +471,7 @@ export default function RemoteDataDemo() {
             </div>
           )}
         </div>
-      </Card>
+      </div>
     </>
   );
 }

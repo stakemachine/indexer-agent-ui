@@ -67,11 +67,11 @@ export const indexerDeploymentsColumns: ColumnDef<IndexerDeployment>[] = [
     cell: (info) =>
       info.getValue() ? (
         <div className="tooltip" data-tip="Synced">
-          <CheckCircleIcon className="h-6 w-6 text-green-500" />
+          <CheckCircleIcon className="h-6 w-6 fill-success" />
         </div>
       ) : (
         <div className="tooltip" data-tip="Unsynced">
-          <XCircleIcon className="h-6 w-6 text-red-500" />
+          <XCircleIcon className="h-6 w-6 fill-error" />
         </div>
       ),
   }),
@@ -85,11 +85,11 @@ export const indexerDeploymentsColumns: ColumnDef<IndexerDeployment>[] = [
           className="tooltip tooltip-error"
           data-tip={info.row.original.fatalError.message}
         >
-          <ExclamationCircleIcon className="h-6 w-6 text-red-500" />
+          <ExclamationCircleIcon className="h-6 w-6 fill-error" />
         </div>
       ) : info.getValue() === "healthy" ? (
-        <div className="tooltip tooltip-success" data-tip="Helath">
-          <CheckCircleIcon className="h-6 w-6 text-green-500" />
+        <div className="tooltip tooltip-success" data-tip="Healthy">
+          <CheckCircleIcon className="h-6 w-6 fill-success" />
         </div>
       ) : (
         info.getValue()

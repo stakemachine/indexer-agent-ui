@@ -381,7 +381,7 @@ export default function RemoteDataDemo() {
 
   return (
     <>
-      <span className="text-3xl font-semibold">Cost Models</span>
+      <span className="text-3xl font-semibold">Actions Queue</span>
 
       <div
         tabIndex={0}

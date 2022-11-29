@@ -1,7 +1,9 @@
 import request, { gql } from "graphql-request";
 import Link from "next/link";
+import Image from "next/image";
 import useSWR from "swr";
 import { CutAddress } from "../../lib/utils";
+import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/solid";
 
 const queryStatus = gql`
   {
@@ -108,7 +110,12 @@ export default function Navbar() {
       <div className="navbar-end">
         <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
           <div className="w-10 rounded-full">
-            <img src={indexerData.indexer?.account.image} />
+            <Image
+              src={indexerData.indexer?.account.image}
+              alt={indexerData.indexer?.account.name}
+              width={64}
+              height={64}
+            />
           </div>
         </label>
         <div className="pr-2 pl-2 ">
@@ -117,6 +124,9 @@ export default function Navbar() {
             {CutAddress(agentData.indexerRegistration.address.toLowerCase())}
           </div>
         </div>
+        <Link href="/api/auth/signout">
+          <ArrowRightOnRectangleIcon className="h-6 w-6" />
+        </Link>
       </div>
     </div>
   );

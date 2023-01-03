@@ -118,7 +118,7 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor(
-    (row) => row.currentVersion.subgraphDeployment.network.id,
+    (row) => row.currentVersion.subgraphDeployment.network?.id,
     {
       id: "network",
       header: () => <span>Network</span>,

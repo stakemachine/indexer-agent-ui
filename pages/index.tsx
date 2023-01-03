@@ -188,12 +188,13 @@ export default function Example() {
     (query) => request("/api/agent", query),
     { refreshInterval: 5000 }
   );
+
   const { data: indexerData, error: indexerError } = useSWR(
     () => [
       indexerInfoQuery,
       agentData.indexerRegistration.address.toLowerCase(),
     ],
-    (query, id) => request("/api/subgraph", query, { id })
+    ([query, id]) => request("/api/subgraph", query, { id })
   );
 
   if (agentError) return <div>failed to load</div>;

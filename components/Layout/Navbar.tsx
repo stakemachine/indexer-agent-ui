@@ -31,21 +31,29 @@ const indexerInfoQuery = gql`
 `;
 
 export default function Navbar() {
-  const { data: agentData, error: agentError } = useSWR(queryStatus, (query) =>
-    request("/api/agent", query)
-  );
-  const { data: indexerData, error: indexerError } = useSWR(
+  const {
+    data: agentData,
+    isLoading: agentIsLoading,
+    error: agentError,
+  } = useSWR(queryStatus, (query) => request("/api/agent", query));
+
+  const {
+    data: indexerData,
+    isLoading: indexerIsLoading,
+    error: indexerError,
+  } = useSWR(
     () => [
       indexerInfoQuery,
       agentData.indexerRegistration.address.toLowerCase(),
     ],
-    (query, id) => request("/api/subgraph", query, { id })
+    ([query, id]) => request("/api/subgraph", query, { id })
   );
-  if (indexerError) return <div>failed to load</div>;
-  if (!indexerData) return <div>Loading...</div>;
 
+  if (indexerIsLoading) return <div>Loading...</div>;
+  if (indexerError) return <div>failed to load</div>;
+
+  if (agentIsLoading) return <div>Loading...</div>;
   if (agentError) return <div>failed to load</div>;
-  if (!agentData) return <div>Loading...</div>;
   return (
     <div className="navbar bg-base-100">
       <div className="navbar-start">

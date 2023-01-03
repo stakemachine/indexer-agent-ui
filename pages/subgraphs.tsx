@@ -78,7 +78,7 @@ export default function ReactTablePage() {
 
   const { data, error } = useSWR(
     () => [subgraphsQuery, agentData.indexerRegistration.address.toLowerCase()],
-    (query, indexer) => request("/api/subgraph", query, { indexer })
+    ([query, indexer]) => request("/api/subgraph", query, { indexer })
   );
 
   if (error) return <p>Error</p>;

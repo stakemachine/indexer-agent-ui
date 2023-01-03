@@ -75,7 +75,7 @@ export default function AllocationsPage() {
       allocationsQuery,
       agentData.indexerRegistration.address.toLowerCase(),
     ],
-    (query, indexer) => request("/api/subgraph", query, { indexer })
+    ([query, indexer]) => request("/api/subgraph", query, { indexer })
   );
   useEffect(() => {
     if (data) {

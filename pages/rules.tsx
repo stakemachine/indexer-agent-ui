@@ -6,6 +6,7 @@ import {
   indexingRuleColumns,
 } from "../components/Table/IndexingRules/columns";
 import TableComponent from "../components/Table/table";
+import { EmptyBatchControl } from "../lib/utils";
 const queryStatus = gql`
   {
     indexingRules(merged: true) {
@@ -51,6 +52,7 @@ export default function RulesPage() {
             data={data.indexingRules}
             columns={indexingRuleColumns}
             renderSubComponent={renderSubComponent}
+            batchControlsComponent={EmptyBatchControl}
           />
         </div>
       </div>

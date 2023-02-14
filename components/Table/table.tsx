@@ -86,7 +86,12 @@ export function IndeterminateCheckbox({
   );
 }
 
-export default function TableComponent({ data, columns, renderSubComponent }) {
+export default function TableComponent({
+  data,
+  columns,
+  renderSubComponent,
+  batchControlsComponent,
+}) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
@@ -110,13 +115,23 @@ export default function TableComponent({ data, columns, renderSubComponent }) {
   });
   return (
     <>
-      <div className="p-3">
-        <input
-          value={globalFilter ?? ""}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          className="input input-bordered w-full max-w-xs"
-          placeholder="Search all columns..."
-        />
+      <div className="p-3 flex w-full items-center">
+        <div className="flex-none w-96">
+          <input
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="input input-bordered w-full max-w-xs"
+            placeholder="Search all columns..."
+          />
+        </div>
+        <div className="flex-auto flex w-full justify-end items-center space-x-3">
+          <div>
+            {table.getSelectedRowModel().rows.length > 0
+              ? "Selected " + Object.keys(rowSelection).length + " item(s)"
+              : ""}
+          </div>
+          {batchControlsComponent(table.getSelectedRowModel().rows)}
+        </div>
       </div>
       <table className="table table-compact w-full overflow-x-auto">
         <thead>
@@ -209,7 +224,7 @@ export default function TableComponent({ data, columns, renderSubComponent }) {
           </tr>
         </tfoot>
       </table>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 m-2">
         <button
           className="border rounded p-1"
           onClick={() => table.setPageIndex(0)}
@@ -270,13 +285,14 @@ export default function TableComponent({ data, columns, renderSubComponent }) {
           ))}
         </select>
       </div>
-      {/* <div>
+
+      <div className="m-2">
         {Object.keys(rowSelection).length} of{" "}
         {table.getPreFilteredRowModel().rows.length} Total Rows Selected
-        {table.getSelectedRowModel().rows.map((row) => (
+        {/* {table.getSelectedRowModel().rows.map((row) => (
           <li>{JSON.stringify(row.original, null, 2)}</li>
-        ))}
-      </div> */}
+        ))} */}
+      </div>
     </>
   );
 }

@@ -19,6 +19,11 @@ export type Allocation = {
   subgraphDeployment: {
     ipfsHash: string;
     originalName: string;
+    stakedTokens: bigint;
+    signalledTokens: bigint;
+    network: {
+      id: string;
+    };
   };
 };
 
@@ -29,13 +34,15 @@ export const allocationColumns: ColumnDef<Allocation>[] = [
     id: "select",
     size: 1,
     header: ({ table }) => (
-      <IndeterminateCheckbox
-        {...{
-          checked: table.getIsAllRowsSelected(),
-          indeterminate: table.getIsSomeRowsSelected(),
-          onChange: table.getToggleAllRowsSelectedHandler(),
-        }}
-      />
+      <div className="px-1 w-6">
+        <IndeterminateCheckbox
+          {...{
+            checked: table.getIsAllRowsSelected(),
+            indeterminate: table.getIsSomeRowsSelected(),
+            onChange: table.getToggleAllRowsSelectedHandler(),
+          }}
+        />
+      </div>
     ),
     cell: ({ row }) => (
       <div className="px-1 w-6">
@@ -73,9 +80,13 @@ export const allocationColumns: ColumnDef<Allocation>[] = [
     },
   },
   columnHelper.accessor((row) => row.id, {
-    id: "network",
+    id: "id",
     header: () => <span>ID</span>,
     cell: (info) => (info.getValue() ? CutAddress(info.getValue()) : ""),
+  }),
+  columnHelper.accessor("subgraphDeployment.network.id", {
+    header: "network",
+    cell: (info) => info.getValue(),
   }),
   columnHelper.accessor("allocatedTokens", {
     header: "Allocated Tokens",

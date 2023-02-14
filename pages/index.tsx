@@ -18,6 +18,7 @@ import {
 import request, { gql } from "graphql-request";
 import useSWR from "swr";
 import IndexerDeploymentsTable from "../components/IndexerDeploymentsTable";
+import ActionsBatch from "../components/Table/Actions/batchActions";
 import { activeAllocationColumns } from "../components/Table/Allocations/activeColumns";
 import { allocationColumns } from "../components/Table/Allocations/columns";
 import {
@@ -25,6 +26,7 @@ import {
   indexerDeploymentsColumns,
 } from "../components/Table/IndexerDeployments/columns";
 import TableComponent from "../components/Table/table";
+import { EmptyBatchControl } from "../lib/utils";
 
 const renderSubComponent = ({ row }: { row: Row<IndexerDeployment> }) => {
   return (
@@ -456,6 +458,7 @@ export default function Example() {
                 data={agentData.indexerDeployments}
                 columns={indexerDeploymentsColumns}
                 renderSubComponent={renderSubComponent}
+                batchControlsComponent={EmptyBatchControl}
               />
             </div>
           </div>
@@ -468,6 +471,7 @@ export default function Example() {
                 data={agentData.indexerAllocations}
                 columns={activeAllocationColumns}
                 renderSubComponent={renderSubComponent}
+                batchControlsComponent={EmptyBatchControl}
               />
             </div>
           </div>

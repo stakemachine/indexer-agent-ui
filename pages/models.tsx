@@ -6,6 +6,7 @@ import {
   costModelColumns,
 } from "../components/Table/CostModels/columns";
 import TableComponent from "../components/Table/table";
+import { EmptyBatchControl } from "../lib/utils";
 
 const queryStatus = gql`
   {
@@ -42,6 +43,7 @@ export default function ModelsPage() {
             data={data.costModels}
             columns={costModelColumns}
             renderSubComponent={renderSubComponent}
+            batchControlsComponent={EmptyBatchControl}
           />
         </div>
       </div>

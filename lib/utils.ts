@@ -8,3 +8,7 @@ export function NormalizeGRT(amount: bigint) {
   ).toString();
   return Number(normalizedAmount).toFixed(0);
 }
+
+export function EmptyBatchControl(rows) {
+  return;
+}

@@ -8,6 +8,7 @@ import {
   SubgraphColumns,
 } from "../components/Table/Subgraphs/columns";
 import TableComponent from "../components/Table/table";
+import { EmptyBatchControl } from "../lib/utils";
 
 const subgraphsQuery = gql`
   query allocationByIndexerQuery($indexer: String) {
@@ -22,6 +23,7 @@ const subgraphsQuery = gql`
       image
       signalAmount
       signalledTokens
+      active
       currentSignalledTokens
       currentVersion {
         description
@@ -29,6 +31,7 @@ const subgraphsQuery = gql`
           originalName
           ipfsHash
           stakedTokens
+          deniedAt
           signalledTokens
           signalAmount
           pricePerShare
@@ -92,6 +95,7 @@ export default function ReactTablePage() {
             data={data.subgraphs}
             columns={SubgraphColumns}
             renderSubComponent={renderSubComponent}
+            batchControlsComponent={EmptyBatchControl}
           />
         </div>
       </div>

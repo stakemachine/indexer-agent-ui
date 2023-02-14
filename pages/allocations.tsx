@@ -7,6 +7,7 @@ import {
   allocationColumns,
 } from "../components/Table/Allocations/columns";
 import TableComponent from "../components/Table/table";
+import { EmptyBatchControl } from "../lib/utils";
 
 const queryStatus = gql`
   {
@@ -51,6 +52,11 @@ const allocationsQuery = gql`
       subgraphDeployment {
         ipfsHash
         originalName
+        stakedTokens
+        signalledTokens
+        network {
+          id
+        }
       }
     }
   }
@@ -95,6 +101,7 @@ export default function AllocationsPage() {
             data={subgraphData}
             columns={allocationColumns}
             renderSubComponent={renderSubComponent}
+            batchControlsComponent={EmptyBatchControl}
           />
         </div>
       </div>

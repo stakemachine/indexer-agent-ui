@@ -115,7 +115,7 @@ export const indexerDeploymentsColumns: ColumnDef<IndexerDeployment>[] = [
     enableGlobalFilter: false,
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor((row) => row.chains[0].chainHeadBlock.number, {
+  columnHelper.accessor((row) => row.chains[0].chainHeadBlock?.number, {
     header: "Chainhead",
     enableColumnFilter: false,
     enableGlobalFilter: false,
@@ -126,7 +126,7 @@ export const indexerDeploymentsColumns: ColumnDef<IndexerDeployment>[] = [
     enableColumnFilter: false,
     enableGlobalFilter: false,
     cell: (info) =>
-      info.row.original.chains[0].chainHeadBlock.number -
+      info.row.original.chains[0].chainHeadBlock?.number -
       info.row.original.chains[0].latestBlock.number,
   }),
 ];

@@ -120,7 +120,7 @@ export default function Navbar() {
           <div className="w-10 rounded-full">
             <Image
               src={indexerData.indexer?.account.image}
-              alt={indexerData.indexer?.account.name}
+              alt={indexerData.indexer?.defaultDisplayName}
               width={64}
               height={64}
             />

@@ -27,7 +27,7 @@ const renderSubComponent = ({ row }: { row: Row<CostModel> }) => {
 };
 
 export default function ModelsPage() {
-  const { data, error } = useSWR(queryStatus, (query) =>
+  const { data, error, mutate, isValidating } = useSWR(queryStatus, (query) =>
     request("/api/agent", query)
   );
 
@@ -44,6 +44,8 @@ export default function ModelsPage() {
             columns={costModelColumns}
             renderSubComponent={renderSubComponent}
             batchControlsComponent={EmptyBatchControl}
+            mutate={mutate}
+            isValidating={isValidating}
           />
         </div>
       </div>

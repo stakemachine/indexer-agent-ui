@@ -76,7 +76,7 @@ export default function AllocationsPage() {
     request("/api/agent", query)
   );
 
-  const { data, error } = useSWR(
+  const { data, error, mutate, isValidating } = useSWR(
     () => [
       allocationsQuery,
       agentData.indexerRegistration.address.toLowerCase(),
@@ -102,6 +102,8 @@ export default function AllocationsPage() {
             columns={allocationColumns}
             renderSubComponent={renderSubComponent}
             batchControlsComponent={EmptyBatchControl}
+            mutate={mutate}
+            isValidating={isValidating}
           />
         </div>
       </div>

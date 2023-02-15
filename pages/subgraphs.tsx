@@ -75,9 +75,12 @@ const renderSubComponent = ({ row }: { row: Row<Subgraph> }) => {
 };
 
 export default function ReactTablePage() {
-  const { data: agentData, error: agentError } = useSWR(queryStatus, (query) =>
-    request("/api/agent", query)
-  );
+  const {
+    data: agentData,
+    error: agentError,
+    mutate,
+    isValidating,
+  } = useSWR(queryStatus, (query) => request("/api/agent", query));
 
   const { data, error } = useSWR(
     () => [subgraphsQuery, agentData.indexerRegistration.address.toLowerCase()],
@@ -96,6 +99,8 @@ export default function ReactTablePage() {
             columns={SubgraphColumns}
             renderSubComponent={renderSubComponent}
             batchControlsComponent={EmptyBatchControl}
+            mutate={mutate}
+            isValidating={isValidating}
           />
         </div>
       </div>

@@ -184,14 +184,22 @@ const indexerInfoQuery = `query indexerByIdQuery($id: String) {
   }
 }`;
 
-export default function Example() {
-  const { data: agentData, error: agentError } = useSWR(
-    queryStatus,
-    (query) => request("/api/agent", query),
-    { refreshInterval: 5000 }
-  );
+export default function IndexPage() {
+  const {
+    data: agentData,
+    error: agentError,
+    mutate: agentMutate,
+    isValidating: agentIsValidating,
+  } = useSWR(queryStatus, (query) => request("/api/agent", query), {
+    refreshInterval: 5000,
+  });
 
-  const { data: indexerData, error: indexerError } = useSWR(
+  const {
+    data: indexerData,
+    error: indexerError,
+    mutate: indexerMutate,
+    isValidating: indexerIsValidating,
+  } = useSWR(
     () => [
       indexerInfoQuery,
       agentData.indexerRegistration.address.toLowerCase(),
@@ -376,6 +384,7 @@ export default function Example() {
                   agentData.indexerRegistration.location.latitude +
                   ",flag"
                 }
+                alt=""
                 className=" rounded-lg shadow-2xl"
               />
             </Card>
@@ -459,6 +468,8 @@ export default function Example() {
                 columns={indexerDeploymentsColumns}
                 renderSubComponent={renderSubComponent}
                 batchControlsComponent={EmptyBatchControl}
+                mutate={agentMutate}
+                isValidating={agentIsValidating}
               />
             </div>
           </div>
@@ -472,6 +483,8 @@ export default function Example() {
                 columns={activeAllocationColumns}
                 renderSubComponent={renderSubComponent}
                 batchControlsComponent={EmptyBatchControl}
+                mutate={agentMutate}
+                isValidating={agentIsValidating}
               />
             </div>
           </div>

@@ -1,6 +1,7 @@
 import {
   ArrowSmallUpIcon,
   ArrowSmallDownIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/solid";
 import {
   Column,
@@ -14,7 +15,7 @@ import {
   Table,
   useReactTable,
 } from "@tanstack/react-table";
-import { HTMLProps, useEffect, useRef, useState } from "react";
+import { HTMLProps, useEffect, useMemo, useRef, useState } from "react";
 
 function Filter({
   column,
@@ -91,14 +92,17 @@ export default function TableComponent({
   columns,
   renderSubComponent,
   batchControlsComponent,
+  mutate,
+  isValidating,
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
-
+  const memoizedData = useMemo(() => data, [data]);
+  const memoizedColumns = useMemo(() => columns, [columns]);
   const table = useReactTable({
-    data,
-    columns,
+    data: memoizedData,
+    columns: memoizedColumns,
     state: {
       sorting,
       rowSelection,
@@ -130,7 +134,16 @@ export default function TableComponent({
               ? "Selected " + Object.keys(rowSelection).length + " item(s)"
               : ""}
           </div>
-          {batchControlsComponent(table.getSelectedRowModel().rows)}
+          {batchControlsComponent(
+            table.getSelectedRowModel().rows,
+            mutate,
+            table.toggleAllRowsSelected
+          )}
+          <button onClick={() => mutate()}>
+            <ArrowPathIcon
+              className={isValidating ? "h-6 w-6 animate-spin" : "h-6 w-6"}
+            />
+          </button>
         </div>
       </div>
       <table className="table table-compact w-full overflow-x-auto">

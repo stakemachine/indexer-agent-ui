@@ -56,3 +56,21 @@ export const DELETE_ACTIONS_MUTATION = gql`
     }
   }
 `;
+
+export const CREATE_ACTION_MUTATION = gql`
+  mutation queueActions($actions: [ActionInput!]!) {
+    queueActions(actions: $actions) {
+      id
+      type
+      deploymentID
+      allocationID
+      amount
+      poi
+      force
+      source
+      reason
+      priority
+      status
+    }
+  }
+`;

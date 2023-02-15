@@ -6,7 +6,7 @@ import {
   DELETE_ACTIONS_MUTATION,
 } from "../../../lib/graphql/queries";
 
-export default function ActionsBatch(rows) {
+export default function ActionsBatch(rows, mutate, toggleAllRowsSelected) {
   let actionIDs = rows.map((row) => row.original.id);
   var variables = {
     actionIDs: actionIDs,
@@ -18,7 +18,13 @@ export default function ActionsBatch(rows) {
           className="btn btn-sm"
           onClick={() => {
             request("/api/agent", APPROVE_ACTIONS_MUTATION, variables)
-              .then(() => toast.success("Successfully approved action(s)."))
+              .then(
+                () => (
+                  toast.success("Successfully approved action(s)."),
+                  toggleAllRowsSelected(false),
+                  mutate()
+                )
+              )
               .catch(() => toast.error("Failed to approve action(s)."));
           }}
         >
@@ -28,7 +34,13 @@ export default function ActionsBatch(rows) {
           className="btn btn-sm"
           onClick={() => {
             request("/api/agent", CANCEL_ACTIONS_MUTATION, variables)
-              .then(() => toast.success("Successfully canceled action(s)."))
+              .then(
+                () => (
+                  toast.success("Successfully canceled action(s)."),
+                  toggleAllRowsSelected(false),
+                  mutate()
+                )
+              )
               .catch(() => toast.error("Failed to cancel action(s)."));
           }}
         >
@@ -38,7 +50,13 @@ export default function ActionsBatch(rows) {
           className="btn btn-sm"
           onClick={() => {
             request("/api/agent", DELETE_ACTIONS_MUTATION, variables)
-              .then(() => toast.success("Successfully deleted action(s)."))
+              .then(
+                () => (
+                  toast.success("Successfully deleted action(s)."),
+                  toggleAllRowsSelected(false),
+                  mutate()
+                )
+              )
               .catch(() => toast.error("Failed to delete action(s)."));
           }}
         >

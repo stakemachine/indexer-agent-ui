@@ -39,9 +39,12 @@ const renderSubComponent = ({ row }: { row: Row<Action> }) => {
 };
 
 export default function ActionsPage() {
-  const { data: agentData, error: agentError } = useSWR(queryStatus, (query) =>
-    request("/api/agent", query)
-  );
+  const {
+    data: agentData,
+    error: agentError,
+    mutate,
+    isValidating,
+  } = useSWR(queryStatus, (query) => request("/api/agent", query));
 
   if (agentError) return <div>failed to load</div>;
   if (!agentData) return <div>Loading...</div>;
@@ -57,7 +60,7 @@ export default function ActionsPage() {
         <input type="checkbox" />
         <div className="collapse-title text-xl font-medium">Create action</div>
         <div className="collapse-content">
-          <CreateActionForm />
+          <CreateActionForm mutate={mutate} />
         </div>
       </div>
       <div className="card w-full bg-base-100 shadow-xl mt-3">
@@ -67,6 +70,8 @@ export default function ActionsPage() {
             columns={actionsColumns}
             renderSubComponent={renderSubComponent}
             batchControlsComponent={ActionsBatch}
+            mutate={mutate}
+            isValidating={isValidating}
           />
         </div>
       </div>

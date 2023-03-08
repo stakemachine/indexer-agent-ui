@@ -1,8 +1,9 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { ColumnDef, createColumnHelper, RowData } from "@tanstack/react-table";
+import BigNumber from "bignumber.js";
 import Image from "next/image";
+import { GraphNetwork } from "../../../types/types";
 import { IndeterminateCheckbox } from "../table";
-
 export type Subgraph = {
   id: string;
   displayName: string;
@@ -27,6 +28,26 @@ export type Subgraph = {
     };
   };
 };
+
+declare module "@tanstack/table-core" {
+  interface TableMeta<TData extends RowData> {
+    graphNetwork: GraphNetwork;
+  }
+}
+
+// user purely for sorting
+function aprAccessor(row: Subgraph) {
+  return BigNumber(
+    row.currentVersion.subgraphDeployment.signalledTokens.toString()
+  )
+    .dividedBy(
+      new BigNumber(
+        row.currentVersion.subgraphDeployment.stakedTokens.toString()
+      )
+    )
+    .multipliedBy(100)
+    .toFixed(2);
+}
 
 const columnHelper = createColumnHelper<Subgraph>();
 
@@ -140,6 +161,25 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
     cell: (info) =>
       (BigInt(info.getValue()) / BigInt(1000000000000000000)).toLocaleString() +
       " GRT",
+  }),
+  columnHelper.accessor(aprAccessor, {
+    id: "apr",
+    enableSorting: true,
+    enableColumnFilter: false,
+    header: () => "APR",
+    cell: (info) =>
+      BigNumber(
+        info.row.original.currentVersion.subgraphDeployment.signalledTokens.toString()
+      )
+        .dividedBy(info.table.options.meta?.graphNetwork.totalTokensSignalled)
+        .multipliedBy(info.table.options.meta?.graphNetwork.issuancePerYear)
+        .dividedBy(
+          BigNumber(
+            info.row.original.currentVersion.subgraphDeployment.stakedTokens.toString()
+          )
+        )
+        .multipliedBy(100)
+        .toFixed(2) + "%",
   }),
   columnHelper.accessor(
     "currentVersion.subgraphDeployment.indexerAllocations",

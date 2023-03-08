@@ -16,30 +16,32 @@ export type ActiveAllocation = {
 const columnHelper = createColumnHelper<ActiveAllocation>();
 
 export const activeAllocationColumns: ColumnDef<ActiveAllocation>[] = [
-  //   {
-  //     id: "select",
-  //     size: 1,
-  //     header: ({ table }) => (
-  //       <IndeterminateCheckbox
-  //         {...{
-  //           checked: table.getIsAllRowsSelected(),
-  //           indeterminate: table.getIsSomeRowsSelected(),
-  //           onChange: table.getToggleAllRowsSelectedHandler(),
-  //         }}
-  //       />
-  //     ),
-  //     cell: ({ row }) => (
-  //       <div className="px-1 w-6">
-  //         <IndeterminateCheckbox
-  //           {...{
-  //             checked: row.getIsSelected(),
-  //             indeterminate: row.getIsSomeSelected(),
-  //             onChange: row.getToggleSelectedHandler(),
-  //           }}
-  //         />
-  //       </div>
-  //     ),
-  //   },
+  {
+    id: "select",
+    size: 1,
+    header: ({ table }) => (
+      <div className="px-1 w-6">
+        <IndeterminateCheckbox
+          {...{
+            checked: table.getIsAllRowsSelected(),
+            indeterminate: table.getIsSomeRowsSelected(),
+            onChange: table.getToggleAllRowsSelectedHandler(),
+          }}
+        />
+      </div>
+    ),
+    cell: ({ row }) => (
+      <div className="px-1 w-6">
+        <IndeterminateCheckbox
+          {...{
+            checked: row.getIsSelected(),
+            indeterminate: row.getIsSomeSelected(),
+            onChange: row.getToggleSelectedHandler(),
+          }}
+        />
+      </div>
+    ),
+  },
   {
     id: "expander",
     size: 1,

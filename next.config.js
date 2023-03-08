@@ -4,7 +4,17 @@ const nextConfig = {
   swcMinify: true,
   output: 'standalone',
   images:{
-    domains: ['api.thegraph.com','ipfs.network.thegraph.com']
+    domains: ['api.thegraph.com','ipfs.network.thegraph.com'],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+      },
+    ],
   }
 }
 

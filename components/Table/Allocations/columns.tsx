@@ -1,31 +1,8 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
 import { CutAddress, NormalizeGRT } from "../../../lib/utils";
+import { Allocation } from "../../../types/types";
 import { IndeterminateCheckbox } from "../table";
-
-export type Allocation = {
-  id: string;
-  allocatedTokens: bigint;
-  createdAtEpoch: number;
-  closedAtEpoch: number | null;
-  createdAt: string;
-  closedAt: string;
-  status: string;
-  indexingRewards: bigint;
-  indexingIndexerRewards: bigint;
-  indexingDelegatorRewards: bigint;
-  queryFeesCollected: bigint;
-  poi: string | null;
-  subgraphDeployment: {
-    ipfsHash: string;
-    originalName: string;
-    stakedTokens: bigint;
-    signalledTokens: bigint;
-    network: {
-      id: string;
-    };
-  };
-};
 
 const columnHelper = createColumnHelper<Allocation>();
 

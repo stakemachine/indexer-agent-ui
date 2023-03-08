@@ -1,34 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-import request, { gql } from "graphql-request";
+import request from "graphql-request";
 
 import CreateActionForm from "../components/Forms/CreateActionForm";
-import useSWR, { useSWRConfig } from "swr";
+import useSWR from "swr";
 
 import { Action, actionsColumns } from "../components/Table/Actions/columns";
 import TableComponent from "../components/Table/table";
 import { Row } from "@tanstack/react-table";
 import ActionsBatch from "../components/Table/Actions/batchActions";
-
-const queryStatus = gql`
-  {
-    actions(filter: {}) {
-      id
-      type
-      deploymentID
-      allocationID
-      amount
-      poi
-      force
-      source
-      reason
-      priority
-      status
-      failureReason
-      transaction
-    }
-  }
-`;
+import { ActionsListResponse } from "../types/types";
+import { ACTIONS_LIST_QUERY } from "../lib/graphql/queries";
 
 const renderSubComponent = ({ row }: { row: Row<Action> }) => {
   return (
@@ -44,7 +26,9 @@ export default function ActionsPage() {
     error: agentError,
     mutate,
     isValidating,
-  } = useSWR(queryStatus, (query) => request("/api/agent", query));
+  } = useSWR(ACTIONS_LIST_QUERY, (query) =>
+    request<ActionsListResponse>("/api/agent", query)
+  );
 
   if (agentError) return <div>failed to load</div>;
   if (!agentData) return <div>Loading...</div>;
@@ -72,6 +56,7 @@ export default function ActionsPage() {
             batchControlsComponent={ActionsBatch}
             mutate={mutate}
             isValidating={isValidating}
+            meta=""
           />
         </div>
       </div>

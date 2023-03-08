@@ -1,5 +1,4 @@
 import "../styles/globals.css";
-import "../styles/ka-table.css";
 import "@tremor/react/dist/esm/tremor.css";
 
 import type { AppProps } from "next/app";

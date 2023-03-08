@@ -6,10 +6,8 @@ import {
   ColGrid,
   Col,
   Block,
-  CategoryBar,
   Metric,
   Flex,
-  ProgressBar,
   Badge,
   List,
   ListItem,
@@ -17,10 +15,8 @@ import {
 } from "@tremor/react";
 import request, { gql } from "graphql-request";
 import useSWR from "swr";
-import IndexerDeploymentsTable from "../components/IndexerDeploymentsTable";
-import ActionsBatch from "../components/Table/Actions/batchActions";
 import { activeAllocationColumns } from "../components/Table/Allocations/activeColumns";
-import { allocationColumns } from "../components/Table/Allocations/columns";
+import ActiveAllocationsActionsBatch from "../components/Table/Allocations/batchActions";
 import {
   IndexerDeployment,
   indexerDeploymentsColumns,
@@ -190,7 +186,7 @@ export default function IndexPage() {
     error: agentError,
     mutate: agentMutate,
     isValidating: agentIsValidating,
-  } = useSWR(queryStatus, (query) => request("/api/agent", query), {
+  } = useSWR(queryStatus, (query) => request<any>("/api/agent", query), {
     refreshInterval: 5000,
   });
 
@@ -204,7 +200,7 @@ export default function IndexPage() {
       indexerInfoQuery,
       agentData.indexerRegistration.address.toLowerCase(),
     ],
-    ([query, id]) => request("/api/subgraph", query, { id })
+    ([query, id]) => request<any>("/api/subgraph", query, { id })
   );
 
   if (agentError) return <div>failed to load</div>;
@@ -470,6 +466,7 @@ export default function IndexPage() {
                 batchControlsComponent={EmptyBatchControl}
                 mutate={agentMutate}
                 isValidating={agentIsValidating}
+                meta=""
               />
             </div>
           </div>
@@ -482,9 +479,10 @@ export default function IndexPage() {
                 data={agentData.indexerAllocations}
                 columns={activeAllocationColumns}
                 renderSubComponent={renderSubComponent}
-                batchControlsComponent={EmptyBatchControl}
+                batchControlsComponent={ActiveAllocationsActionsBatch}
                 mutate={agentMutate}
                 isValidating={agentIsValidating}
+                meta=""
               />
             </div>
           </div>

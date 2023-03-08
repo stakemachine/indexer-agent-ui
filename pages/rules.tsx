@@ -38,7 +38,7 @@ const renderSubComponent = ({ row }: { row: Row<IndexingRule> }) => {
 
 export default function RulesPage() {
   const { data, error, mutate, isValidating } = useSWR(queryStatus, (query) =>
-    request("/api/agent", query)
+    request<any>("/api/agent", query)
   );
 
   if (error) return <div>failed to load</div>;
@@ -55,6 +55,7 @@ export default function RulesPage() {
             batchControlsComponent={EmptyBatchControl}
             mutate={mutate}
             isValidating={isValidating}
+            meta=""
           />
         </div>
       </div>

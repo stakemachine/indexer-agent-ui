@@ -94,6 +94,7 @@ export default function TableComponent({
   batchControlsComponent,
   mutate,
   isValidating,
+  meta,
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState({});
@@ -116,6 +117,7 @@ export default function TableComponent({
     getPaginationRowModel: getPaginationRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
+    meta: meta,
   });
   return (
     <>
@@ -148,12 +150,16 @@ export default function TableComponent({
       </div>
       <table className="table table-compact w-full overflow-x-auto">
         <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header, k) => {
+          {table.getHeaderGroups().map((headerGroup, index) => (
+            <tr
+              key={index + headerGroup.id}
+              id={index.toString() + headerGroup.id}
+            >
+              {headerGroup.headers.map((header, index) => {
                 return (
                   <th
-                    key={k}
+                    key={index + header.id}
+                    id={index.toString() + header.id}
                     {...{
                       key: header.id,
                       colSpan: header.colSpan,
@@ -193,13 +199,20 @@ export default function TableComponent({
           ))}
         </thead>
         <tbody>
-          {table.getRowModel().rows.map((row) => {
+          {table.getRowModel().rows.map((row, index) => {
             return (
               <>
-                <tr key={row.id} className="hover">
-                  {row.getVisibleCells().map((cell) => {
+                <tr
+                  key={index + row.id + 1}
+                  id={index + row.id + 1}
+                  className="hover"
+                >
+                  {row.getVisibleCells().map((cell, index) => {
                     return (
-                      <td key={cell.id}>
+                      <td
+                        key={index + row.id + cell.id + index}
+                        id={index + row.id + cell.id + index}
+                      >
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -209,7 +222,7 @@ export default function TableComponent({
                   })}
                 </tr>
                 {row.getIsExpanded() && (
-                  <tr>
+                  <tr key={index + row.id + index} id={index + row.id + index}>
                     {/* 2nd row is a custom 1 cell row */}
                     <td colSpan={row.getVisibleCells().length}>
                       {renderSubComponent({ row })}

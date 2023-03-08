@@ -2,7 +2,7 @@ import request, { gql } from "graphql-request";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { CREATE_ACTION_MUTATION } from "../../lib/graphql/queries";
-import { ActionInput, ActionStatus } from "../../types/ActionTypes";
+import { ActionInput, ActionStatus } from "../../types/types";
 
 export default function CreateActionForm({ mutate }) {
   const {

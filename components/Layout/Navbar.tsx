@@ -4,56 +4,51 @@ import Image from "next/image";
 import useSWR from "swr";
 import { CutAddress } from "../../lib/utils";
 import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/router";
+import {
+  INDEXER_INFO_BY_ID_QUERY,
+  AGENT_INDEXER_REGISTRATION_QUERY,
+} from "../../lib/graphql/queries";
+import { Indexer, IndexerRegistration } from "../../types/types";
 
-const queryStatus = gql`
-  {
-    indexerRegistration {
-      url
-      address
-      registered
-      location {
-        latitude
-        longitude
-      }
-    }
-  }
-`;
-
-const indexerInfoQuery = gql`
-  query indexerByIdQuery($id: String) {
-    indexer(id: $id) {
-      defaultDisplayName
-      account {
-        image
-      }
-    }
-  }
-`;
+const MENU_LIST = [
+  { text: "Allocations", href: "/allocations" },
+  { text: "Subgraphs", href: "/subgraphs" },
+  { text: "Actions", href: "/actions" },
+  { text: "Rules", href: "/rules" },
+  { text: "Cost Models", href: "/models" },
+  { text: "Disputes", href: "/disputes" },
+];
 
 export default function Navbar() {
   const {
     data: agentData,
     isLoading: agentIsLoading,
     error: agentError,
-  } = useSWR(queryStatus, (query) => request("/api/agent", query));
+  } = useSWR<IndexerRegistration>(AGENT_INDEXER_REGISTRATION_QUERY, (query) =>
+    request("/api/agent", query)
+  );
 
   const {
     data: indexerData,
     isLoading: indexerIsLoading,
     error: indexerError,
-  } = useSWR(
+  } = useSWR<Indexer>(
     () => [
-      indexerInfoQuery,
+      INDEXER_INFO_BY_ID_QUERY,
       agentData.indexerRegistration.address.toLowerCase(),
     ],
-    ([query, id]) => request("/api/subgraph", query, { id })
+    ([query, id]) => request<Indexer>("/api/subgraph", query, { id })
   );
+  const router = useRouter();
+  const currentRoute = router.pathname;
 
   if (indexerIsLoading) return <div>Loading...</div>;
   if (indexerError) return <div>failed to load</div>;
 
   if (agentIsLoading) return <div>Loading...</div>;
   if (agentError) return <div>failed to load</div>;
+
   return (
     <div className="navbar bg-base-100">
       <div className="navbar-start">
@@ -78,15 +73,20 @@ export default function Navbar() {
             tabIndex={0}
             className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
           >
-            <li>
-              <Link href="/allocations">Allocations</Link>
-            </li>
-            <li>
-              <Link href="/subgraphs">Subgraphs</Link>
-            </li>
-            <li>
-              <Link href="/actions">Actions</Link>
-            </li>
+            {MENU_LIST.map((menu, idx) => (
+              <li key={idx}>
+                <Link
+                  href={menu.href}
+                  className={
+                    currentRoute === menu.href
+                      ? "btn btn-active btn-outline"
+                      : ""
+                  }
+                >
+                  {menu.text}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
         <Link href="/" className="btn btn-ghost normal-case text-xl">
@@ -95,39 +95,35 @@ export default function Navbar() {
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal p-0">
-          <li>
-            <Link href="/allocations">Allocations</Link>
-          </li>
-          <li>
-            <Link href="/subgraphs">Subgraphs</Link>
-          </li>
-          <li>
-            <Link href="/actions">Actions</Link>
-          </li>
-          <li>
-            <Link href="/rules">Rules</Link>
-          </li>
-          <li>
-            <Link href="/models">Cost Models</Link>
-          </li>
-          <li>
-            <Link href="/disputes">Disputes</Link>
-          </li>
+          {MENU_LIST.map((menu, idx) => (
+            <li key={idx}>
+              <Link
+                href={menu.href}
+                className={
+                  currentRoute === menu.href
+                    ? "btn btn-active btn-outline"
+                    : "btn btn-ghost"
+                }
+              >
+                {menu.text}
+              </Link>
+            </li>
+          ))}
         </ul>
       </div>
       <div className="navbar-end">
         <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
           <div className="w-10 rounded-full">
             <Image
-              src={indexerData.indexer?.account.image}
-              alt={indexerData.indexer?.defaultDisplayName}
+              src={indexerData.indexer.account.image}
+              alt={indexerData.indexer.defaultDisplayName}
               width={64}
               height={64}
             />
           </div>
         </label>
         <div className="pr-2 pl-2 ">
-          <div>{indexerData.indexer?.defaultDisplayName}.eth</div>
+          <div>{indexerData.indexer.defaultDisplayName}.eth</div>
           <div className="text-sm">
             {CutAddress(agentData.indexerRegistration.address.toLowerCase())}
           </div>

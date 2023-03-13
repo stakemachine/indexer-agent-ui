@@ -1,11 +1,11 @@
 import { Row } from "@tanstack/react-table";
+import Image from "next/image";
 import {
   Card,
   Title,
   Text,
-  ColGrid,
+  Grid,
   Col,
-  Block,
   Metric,
   Flex,
   Badge,
@@ -212,104 +212,94 @@ export default function IndexPage() {
   return (
     <>
       <Metric>Dashboard</Metric>
-      <ColGrid numColsLg={6} gapX="gap-x-6" gapY="gap-y-6" marginTop="mt-3">
+      <Grid numColsLg={6} className="gap-6 mt-3">
         {/* Main section */}
         <Col numColSpanLg={4}>
-          <Card hFull={true}>
-            <Block>
-              <Flex spaceX="space-x-6" justifyContent="justify-between">
-                <img
+          <Card className="h-full">
+            <div>
+              <Flex className="justify-start space-x-6">
+                <Image
                   src={indexerData.indexer?.account.image}
                   className="rounded-full w-24"
+                  width={128}
+                  height={128}
+                  alt=""
                 />
 
-                <Block truncate={true}>
-                  <Block>
+                <div className="truncate">
+                  <div>
                     <Metric>
                       {indexerData.indexer?.defaultDisplayName}.eth
                     </Metric>
-                  </Block>
-                  <Block marginTop="mt-3" truncate={true}>
-                    <Flex
-                      justifyContent="justify-between"
-                      spaceX="space-x-6"
-                      truncate={true}
-                    >
-                      <Block truncate={true}>
-                        <Flex
-                          justifyContent="justify-between"
-                          alignItems="items-center"
-                        >
+                  </div>
+                  <div className="mt-3 truncate">
+                    <Flex className="justify-between space-x-6 truncate">
+                      <div className="truncate">
+                        <Flex className="justify-between items-center">
                           <Title>Indexer Address</Title>
-                          <Badge
-                            color="green"
-                            text={
-                              agentData.indexerRegistration.registered
-                                ? "registered"
-                                : "unregistered"
-                            }
-                          />
+                          <Badge color="green">
+                            {agentData.indexerRegistration.registered
+                              ? "registered"
+                              : "unregistered"}
+                          </Badge>
                         </Flex>
-                        <Text truncate={true}>
+                        <Text className="truncate">
                           {agentData.indexerRegistration.address}
                         </Text>
-                      </Block>
-                      <Block truncate={true}>
-                        <Flex
-                          justifyContent="justify-between"
-                          alignItems="items-center"
-                        >
+                      </div>
+                      <div className="truncate">
+                        <Flex className="justify-between items-center">
                           <Title>Operator Address</Title>
-                          <Badge text="TODO ETH" />
+                          <Badge>TODO ETH</Badge>
                         </Flex>
-                        <Text truncate={true}>0xTODO</Text>
-                      </Block>
+                        <Text className="truncate">0xTODO</Text>
+                      </div>
                     </Flex>
-                  </Block>
-                </Block>
+                  </div>
+                </div>
               </Flex>
-            </Block>
+            </div>
 
-            <Block maxWidth="max-w-xs" marginTop="mt-6">
-              <List marginTop="mt-0">
-                <ListItem spaceX="space-x-0">
+            <div className="max-w-xs mt-6">
+              <List className="mt-0">
+                <ListItem className="space-x-0">
                   <Bold>Indexing Reward Cut</Bold>
                   <span>{indexerData.indexer.indexingRewardCut / 10000}%</span>
                 </ListItem>
-                <ListItem spaceX="space-x-0">
+                <ListItem className="space-x-0">
                   <Bold>Indexing Reward Effective Cut </Bold>
                   <span>
                     {indexerData.indexer.indexingRewardEffectiveCut / 10000}%
                   </span>
                 </ListItem>
-                <ListItem spaceX="space-x-0">
+                <ListItem className="space-x-0">
                   <Bold>Query Fee Cut </Bold>
                   <span>{indexerData.indexer.queryFeeCut / 10000}%</span>
                 </ListItem>
-                <ListItem spaceX="space-x-0">
+                <ListItem className="space-x-0">
                   <Bold>Query Fee Effective Cut </Bold>
                   <span>
                     {indexerData.indexer.queryFeeEffectiveCut / 10000}%
                   </span>
                 </ListItem>
-                <ListItem spaceX="space-x-0">
+                <ListItem className="space-x-0">
                   <Bold>Delegator Parameter Cooldown</Bold>
                   <span>{indexerData.indexer.delegatorParameterCooldown}</span>
                 </ListItem>
-                <ListItem spaceX="space-x-0">
+                <ListItem className="space-x-0">
                   <Bold>Last Delegation Parameter Update</Bold>
                   <div className="tooltip tooltip-left" data-tip="Block number">
                     {indexerData.indexer.lastDelegationParameterUpdate}
                   </div>
                 </ListItem>
               </List>
-            </Block>
+            </div>
           </Card>
         </Col>
 
         {/* KPI sidebar */}
         <Col numColSpanLg={2}>
-          <Block spaceY="space-y-6">
+          <div className="space-y-6">
             {/* <Card maxWidth="max-w-md">
                             <Block spaceY='space-y-6'>
                                 <Block>
@@ -328,47 +318,35 @@ export default function IndexPage() {
                                 </Block>
                             </Block>
                         </Card> */}
-            <Card maxWidth="max-w-md">
-              <Block spaceY="space-y-6">
-                <Block>
-                  <Flex
-                    justifyContent="justify-between"
-                    alignItems="items-center"
-                  >
+            <Card className="max-w-md">
+              <div className="space-y-6">
+                <div>
+                  <Flex className="justify-between items-center">
                     <Title>Status URL</Title>
-                    <Badge
-                      color="green"
-                      text={
-                        agentData.indexerEndpoints.status.healthy
-                          ? "healthy"
-                          : "unhealthy"
-                      }
-                    />
+                    <Badge color="green">
+                      {agentData.indexerEndpoints.status.healthy
+                        ? "healthy"
+                        : "unhealthy"}
+                    </Badge>
                   </Flex>
                   <Text>{agentData.indexerEndpoints.status.url}</Text>
-                </Block>
-                <Block>
-                  <Flex
-                    justifyContent="justify-between"
-                    alignItems="items-center"
-                  >
+                </div>
+                <div>
+                  <Flex className="justify-between items-center">
                     <Title>Service URL</Title>
-                    <Badge
-                      color="green"
-                      text={
-                        agentData.indexerEndpoints.service.healthy
-                          ? "healthy"
-                          : "unhealthy"
-                      }
-                    />
+                    <Badge color="green">
+                      {agentData.indexerEndpoints.service.healthy
+                        ? "healthy"
+                        : "unhealthy"}
+                    </Badge>
                   </Flex>
                   <Text>{agentData.indexerEndpoints.service.url}</Text>
-                </Block>
-              </Block>
+                </div>
+              </div>
             </Card>
-            <Card maxWidth="max-w-md">
+            <Card className="max-w-md">
               <Title>Indexer Location</Title>
-              <img
+              <Image
                 src={
                   "https://static-maps.yandex.ru/1.x/?lang=en-US&ll=" +
                   agentData.indexerRegistration.location.longitude +
@@ -381,21 +359,17 @@ export default function IndexPage() {
                   ",flag"
                 }
                 alt=""
+                width={650}
+                height={400}
                 className=" rounded-lg shadow-2xl"
               />
             </Card>
-          </Block>
+          </div>
         </Col>
-      </ColGrid>
-      <ColGrid
-        numCols={4}
-        numColsMd={4}
-        gapX="gap-x-6"
-        gapY="gap-y-6"
-        marginTop="mt-6"
-      >
+      </Grid>
+      <Grid numCols={4} numColsMd={4} className="gap-6 mt-6">
         <Col>
-          <Card maxWidth="max-w-md" hFull={true}>
+          <Card className="max-w-md h-full">
             <Text>Total stake</Text>
             <Metric>
               {(
@@ -420,7 +394,7 @@ export default function IndexPage() {
           </Card>
         </Col>
         <Col>
-          <Card maxWidth="max-w-md" hFull={true}>
+          <Card className="max-w-md h-full">
             <Text>Allocated</Text>
             <Metric>
               {(
@@ -432,7 +406,7 @@ export default function IndexPage() {
           </Card>
         </Col>
         <Col>
-          <Card maxWidth="max-w-md" hFull={true}>
+          <Card className="max-w-md h-full">
             <Text>Unallocated</Text>
             <Metric>
               {(
@@ -444,7 +418,7 @@ export default function IndexPage() {
           </Card>
         </Col>
         <Col>
-          <Card maxWidth="max-w-md" hFull={true}>
+          <Card className="max-w-md h-full">
             <Text>Delegated capacity</Text>
             <Metric>
               {(
@@ -487,7 +461,7 @@ export default function IndexPage() {
             </div>
           </div>
         </Col>
-      </ColGrid>
+      </Grid>
     </>
   );
 }

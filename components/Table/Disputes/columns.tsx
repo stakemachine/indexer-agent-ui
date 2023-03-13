@@ -1,12 +1,12 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
-import { SubgraphDeploymentID } from "../../../lib/subgraphs";
-import { CostModel } from "../../../types/types";
+import { POIDispute } from "../../../types/types";
+
 import { IndeterminateCheckbox } from "../table";
 
-const columnHelper = createColumnHelper<CostModel>();
+const columnHelper = createColumnHelper<POIDispute>();
 
-export const costModelColumns: ColumnDef<CostModel>[] = [
+export const disputeColumns: ColumnDef<POIDispute>[] = [
   {
     id: "select",
     size: 1,
@@ -54,16 +54,16 @@ export const costModelColumns: ColumnDef<CostModel>[] = [
       );
     },
   },
-  columnHelper.accessor((row) => row.deployment, {
-    header: "DeploymentID",
-    cell: (info) => new SubgraphDeploymentID(info.getValue()).ipfsHash,
-  }),
-  columnHelper.accessor((row) => row.model, {
-    header: "Model",
+  columnHelper.accessor((row) => row.allocationID, {
+    header: "AllocationID",
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor((row) => row.variables, {
-    header: "Variables",
+  columnHelper.accessor((row) => row.allocationIndexer, {
+    header: "Allocation Indexer",
+    cell: (info) => info.getValue(),
+  }),
+  columnHelper.accessor((row) => row.allocationAmount, {
+    header: "Allocation Amount",
     cell: (info) => info.getValue(),
   }),
 ];

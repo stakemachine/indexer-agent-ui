@@ -1,32 +1,12 @@
 import { Row } from "@tanstack/react-table";
 import request, { gql } from "graphql-request";
 import useSWR from "swr";
-import {
-  IndexingRule,
-  indexingRuleColumns,
-} from "../components/Table/IndexingRules/columns";
+import CreateIndexingRuleForm from "../components/Forms/CreateIndexingRule";
+import IndexingRulesActionsBatch from "../components/Table/IndexingRules/batchActions";
+import { indexingRuleColumns } from "../components/Table/IndexingRules/columns";
 import TableComponent from "../components/Table/table";
-import { EmptyBatchControl } from "../lib/utils";
-const queryStatus = gql`
-  {
-    indexingRules(merged: true) {
-      identifier
-      identifierType
-      allocationAmount
-      allocationLifetime
-      autoRenewal
-      parallelAllocations
-      maxAllocationPercentage
-      minSignal
-      maxSignal
-      minStake
-      minAverageQueryFees
-      custom
-      decisionBasis
-      requireSupported
-    }
-  }
-`;
+import { INDEXING_RULES_LIST_QUERY } from "../lib/graphql/queries";
+import { IndexingRule } from "../types/types";
 
 const renderSubComponent = ({ row }: { row: Row<IndexingRule> }) => {
   return (
@@ -37,8 +17,9 @@ const renderSubComponent = ({ row }: { row: Row<IndexingRule> }) => {
 };
 
 export default function RulesPage() {
-  const { data, error, mutate, isValidating } = useSWR(queryStatus, (query) =>
-    request<any>("/api/agent", query)
+  const { data, error, mutate, isValidating } = useSWR(
+    INDEXING_RULES_LIST_QUERY,
+    (query) => request<any>("/api/agent", query)
   );
 
   if (error) return <div>failed to load</div>;
@@ -46,13 +27,25 @@ export default function RulesPage() {
   return (
     <>
       <span className="text-3xl font-semibold">Indexing Rules</span>
+      <div
+        tabIndex={0}
+        className="collapse collapse-arrow border-base-300 bg-base-100 m-3 rounded-box border"
+      >
+        <input type="checkbox" />
+        <div className="collapse-title text-xl font-medium">
+          Create indexing rule
+        </div>
+        <div className="collapse-content">
+          <CreateIndexingRuleForm mutate={mutate} />
+        </div>
+      </div>
       <div className="card w-full bg-base-100 shadow-xl mt-3">
         <div className="overflow-x-auto">
           <TableComponent
             data={data.indexingRules}
             columns={indexingRuleColumns}
             renderSubComponent={renderSubComponent}
-            batchControlsComponent={EmptyBatchControl}
+            batchControlsComponent={IndexingRulesActionsBatch}
             mutate={mutate}
             isValidating={isValidating}
             meta=""

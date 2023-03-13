@@ -95,3 +95,56 @@ export enum ActionType {
   UNALLOCATE = "unallocate",
   REALLOCATE = "reallocate",
 }
+
+export interface POIDispute {
+  allocationID: string;
+  subgraphDeploymentID: string;
+  allocationIndexer: string;
+  allocationAmount: string;
+  allocationProof: string;
+  closedEpoch: number;
+  closedEpochReferenceProof: string | null;
+  closedEpochStartBlockHash: string;
+  closedEpochStartBlockNumber: number;
+  previousEpochReferenceProof: string | null;
+  previousEpochStartBlockHash: string;
+  previousEpochStartBlockNumber: number;
+  status: string;
+}
+
+export interface IndexingRule {
+  identifier: string;
+  identifierType: SubgraphIdentifierType;
+  allocationAmount: string | null;
+  allocationLifetime: number | null;
+  autoRenewal: boolean;
+  parallelAllocations: number | null;
+  maxAllocationPercentage: number | null;
+  minSignal: string | null;
+  maxSignal: string | null;
+  minStake: string | null;
+  minAverageQueryFees: string | null;
+  custom: string | null;
+  decisionBasis: IndexingDecisionBasis;
+  requireSupported: boolean;
+  safety: boolean;
+}
+
+export enum IndexingDecisionBasis {
+  RULES = "rules",
+  NEVER = "never",
+  ALWAYS = "always",
+  OFFCHAIN = "offchain",
+}
+
+export enum SubgraphIdentifierType {
+  DEPLOYMENT = "deployment",
+  SUBGRAPH = "subgraph",
+  GROUP = "group",
+}
+
+export interface CostModel {
+  deployment: string;
+  model: string | null | undefined;
+  variables: string | null | undefined;
+}

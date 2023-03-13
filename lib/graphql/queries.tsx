@@ -75,6 +75,25 @@ export const CREATE_ACTION_MUTATION = gql`
   }
 `;
 
+export const AGENT_DISPUTES_QUERY = gql`
+  {
+    disputes(status: "potential", minClosedEpoch: 100) {
+      allocationID
+      allocationIndexer
+      allocationAmount
+      allocationProof
+      closedEpoch
+      closedEpochStartBlockHash
+      closedEpochStartBlockNumber
+      closedEpochReferenceProof
+      previousEpochStartBlockHash
+      previousEpochStartBlockNumber
+      previousEpochReferenceProof
+      status
+    }
+  }
+`;
+
 export const GRAPH_NETWORK_INFO_QUERY = gql`
   {
     graphNetwork(id: 1) {
@@ -208,6 +227,86 @@ export const ACTIONS_LIST_QUERY = gql`
       status
       failureReason
       transaction
+    }
+  }
+`;
+
+export const COST_MODELS_LIST_QUERY = gql`
+  {
+    costModels {
+      deployment
+      model
+      variables
+    }
+  }
+`;
+
+export const SET_COST_MODEL_MUTATION = gql`
+  mutation setCostModel($costModel: CostModelInput!) {
+    setCostModel(costModel: $costModel) {
+      deployment
+      model
+      variables
+    }
+  }
+`;
+
+export const INDEXING_RULES_LIST_QUERY = gql`
+  {
+    indexingRules(merged: true) {
+      identifier
+      identifierType
+      allocationAmount
+      allocationLifetime
+      autoRenewal
+      parallelAllocations
+      maxAllocationPercentage
+      minSignal
+      maxSignal
+      minStake
+      minAverageQueryFees
+      custom
+      decisionBasis
+      requireSupported
+      safety
+    }
+  }
+`;
+
+export const SET_INDEXING_RULE_MUTATION = gql`
+  mutation setIndexingRule($rule: IndexingRuleInput!) {
+    setIndexingRule(rule: $rule) {
+      identifier
+      identifierType
+      allocationAmount
+      allocationLifetime
+      autoRenewal
+      parallelAllocations
+      maxAllocationPercentage
+      minSignal
+      maxSignal
+      minStake
+      minAverageQueryFees
+      custom
+      decisionBasis
+      requireSupported
+      safety
+    }
+  }
+`;
+
+export const DELETE_INDEXING_RULES_MUTATION = gql`
+  mutation deleteIndexingRules($deployments: [String!]!) {
+    deleteIndexingRules(identifiers: $deployments)
+  }
+`;
+
+export const DELETE_COST_MODELS_MUTATION = gql`
+  mutation deleteCostModels($deployments: [String!]!) {
+    deleteCostModels(deployments: $deployments) {
+      deployment
+      model
+      variables
     }
   }
 `;

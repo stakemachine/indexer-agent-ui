@@ -38,7 +38,7 @@ function Filter({
             column.setFilterValue((old: any) => [e.target.value, old?.[1]])
           }
           placeholder={`Min`}
-          className="input input-bordered input-xs w-full font-light"
+          className="input-bordered input input-xs w-full font-light"
         />
       </div>
       <div>
@@ -49,7 +49,7 @@ function Filter({
             column.setFilterValue((old: any) => [old?.[0], e.target.value])
           }
           placeholder={`Max`}
-          className="input input-bordered input-xs w-full font-light"
+          className="input-bordered input input-xs w-full font-light"
         />
       </div>
     </>
@@ -59,7 +59,7 @@ function Filter({
       value={(column.getFilterValue() ?? "") as string}
       onChange={(e) => column.setFilterValue(e.target.value)}
       placeholder={`Search...`}
-      className="input input-bordered input-xs w-full max-w-xs font-light"
+      className="input-bordered input input-xs w-full max-w-xs font-light"
     />
   );
 }
@@ -121,16 +121,16 @@ export default function TableComponent({
   });
   return (
     <>
-      <div className="p-3 flex w-full items-center">
-        <div className="flex-none w-96">
+      <div className="flex w-full items-center p-3">
+        <div className="w-96 flex-none">
           <input
             value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="input input-bordered w-full max-w-xs"
+            className="input-bordered input w-full max-w-xs"
             placeholder="Search all columns..."
           />
         </div>
-        <div className="flex-auto flex w-full justify-end items-center space-x-3">
+        <div className="flex w-full flex-auto items-center justify-end space-x-3">
           <div>
             {table.getSelectedRowModel().rows.length > 0
               ? "Selected " + Object.keys(rowSelection).length + " item(s)"
@@ -148,7 +148,7 @@ export default function TableComponent({
           </button>
         </div>
       </div>
-      <table className="table table-compact w-full overflow-x-auto">
+      <table className="table-compact table w-full overflow-x-auto">
         <thead>
           {table.getHeaderGroups().map((headerGroup, index) => (
             <tr
@@ -236,7 +236,7 @@ export default function TableComponent({
         <tfoot>
           <tr>
             <td>
-              <div className="px-1 w-6">
+              <div className="w-6 px-1">
                 <IndeterminateCheckbox
                   {...{
                     checked: table.getIsAllPageRowsSelected(),
@@ -250,30 +250,30 @@ export default function TableComponent({
           </tr>
         </tfoot>
       </table>
-      <div className="flex items-center gap-2 m-2">
+      <div className="m-2 flex items-center gap-2">
         <button
-          className="border rounded p-1"
+          className="rounded border p-1"
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
         >
           {"<<"}
         </button>
         <button
-          className="border rounded p-1"
+          className="rounded border p-1"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
           {"<"}
         </button>
         <button
-          className="border rounded p-1"
+          className="rounded border p-1"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
           {">"}
         </button>
         <button
-          className="border rounded p-1"
+          className="rounded border p-1"
           onClick={() => table.setPageIndex(table.getPageCount() - 1)}
           disabled={!table.getCanNextPage()}
         >
@@ -295,7 +295,7 @@ export default function TableComponent({
               const page = e.target.value ? Number(e.target.value) - 1 : 0;
               table.setPageIndex(page);
             }}
-            className="border p-1 rounded w-16"
+            className="w-16 rounded border p-1"
           />
         </span>
         <select

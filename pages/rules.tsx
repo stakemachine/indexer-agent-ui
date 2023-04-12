@@ -29,7 +29,7 @@ export default function RulesPage() {
       <span className="text-3xl font-semibold">Indexing Rules</span>
       <div
         tabIndex={0}
-        className="collapse collapse-arrow border-base-300 bg-base-100 m-3 rounded-box border"
+        className="collapse-arrow rounded-box collapse m-3 border border-base-300 bg-base-100"
       >
         <input type="checkbox" />
         <div className="collapse-title text-xl font-medium">
@@ -39,7 +39,7 @@ export default function RulesPage() {
           <CreateIndexingRuleForm mutate={mutate} />
         </div>
       </div>
-      <div className="card w-full bg-base-100 shadow-xl mt-3">
+      <div className="card mt-3 w-full bg-base-100 shadow-xl">
         <div className="overflow-x-auto">
           <TableComponent
             data={data.indexingRules}

@@ -16,9 +16,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
     mode: "onChange",
   });
   const onSubmit: SubmitHandler<IndexingRule> = async (data: IndexingRule) => {
-    data.allocationAmount = ethers.parseEther(data.allocationAmount).toString(); // BigNumber(data.allocationAmount)
-    //   .multipliedBy("1000000000000000000")
-    //   .toString();
+    data.allocationAmount = ethers.parseEther(data.allocationAmount).toString();
     var variables = {
       rule: data,
     };
@@ -43,7 +41,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
           type="text"
           placeholder="Deployment ID"
           {...register("identifier", { required: true, maxLength: 80 })}
-          className="input input-bordered w-full"
+          className="input-bordered input w-full"
         />
 
         <input
@@ -55,7 +53,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
             min: 1,
             maxLength: 100,
           })}
-          className="input input-bordered w-full"
+          className="input-bordered input w-full"
         />
 
         <div className="form-control w-full">
@@ -64,7 +62,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
           </label>
           <select
             {...register("decisionBasis", { required: true })}
-            className="select select-bordered"
+            className="select-bordered select"
           >
             <option value="rules">rules</option>
             <option value="never">never</option>
@@ -84,19 +82,19 @@ export default function CreateIndexingRuleForm({ mutate }) {
                 <input
                   type="text"
                   placeholder="Identifier Type"
-                  defaultValue={"group"}
+                  defaultValue={"deployment"}
                   {...register("identifierType", {
                     required: true,
                     maxLength: 80,
                   })}
-                  className="input input-bordered w-full"
+                  className="input-bordered input w-full"
                 />
               </div>
               <input
                 type="number"
                 placeholder="Allocation Lifetime"
                 {...register("allocationLifetime", { valueAsNumber: true })}
-                className="input input-bordered w-full"
+                className="input-bordered input w-full"
               />
 
               <div className="form-control w-28 justify-center">
@@ -106,7 +104,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
                     type="checkbox"
                     placeholder="Auto Renewal"
                     {...register("autoRenewal", {})}
-                    className="toggle toggle-accent"
+                    className="toggle-accent toggle"
                     defaultChecked
                   />
                 </label>
@@ -117,7 +115,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
                 {...register("maxAllocationPercentage", {
                   valueAsNumber: true,
                 })}
-                className="input input-bordered w-full"
+                className="input-bordered input w-full"
               />
               <input
                 type="number"
@@ -125,7 +123,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
                 {...register("parallelAllocations", {
                   valueAsNumber: true,
                 })}
-                className="input input-bordered w-full"
+                className="input-bordered input w-full"
               />
               {/* <input
               type="text"
@@ -154,8 +152,8 @@ export default function CreateIndexingRuleForm({ mutate }) {
               <input
                 type="text"
                 placeholder="Custom"
-                {...register("custom", {})}
-                className="input input-bordered w-full"
+                {...register("custom")}
+                className="input-bordered input w-full"
               />
 
               <div className="form-control w-28 justify-center">
@@ -167,7 +165,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
                     {...register("requireSupported", {
                       shouldUnregister: true,
                     })}
-                    className="toggle toggle-accent"
+                    className="toggle-accent toggle"
                     defaultChecked
                   />
                 </label>
@@ -180,7 +178,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
                     type="checkbox"
                     placeholder="Safety"
                     {...register("safety", {})}
-                    className="toggle toggle-accent"
+                    className="toggle-accent toggle"
                     defaultChecked
                   />
                 </label>
@@ -192,7 +190,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
           <div className="item w-auto">
             <button
               type="submit"
-              className={isSubmitting ? "btn loading" : "btn btn-primary"}
+              className={isSubmitting ? "loading btn" : "btn-primary btn"}
               disabled={!isValid || isSubmitting}
             >
               {isSubmitting ? "Loading" : "Create rule"}

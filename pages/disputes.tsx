@@ -17,7 +17,7 @@ export default function DisputesPage() {
   return (
     <>
       <span className="text-3xl font-semibold">Disputes</span>
-      <div className="card w-full bg-base-100 shadow-xl mt-3">
+      <div className="card mt-3 w-full bg-base-100 shadow-xl">
         <div className="overflow-x-auto">
           <TableComponent
             data={data.disputes}

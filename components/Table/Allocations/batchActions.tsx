@@ -28,7 +28,7 @@ export default function ActiveAllocationsActionsBatch(
     <div className="info">
       <div className="flex w-full gap-x-1">
         <button
-          className="btn btn-sm"
+          className="btn-sm btn"
           onClick={() => {
             request("/api/agent", CREATE_ACTION_MUTATION, variables)
               .then(

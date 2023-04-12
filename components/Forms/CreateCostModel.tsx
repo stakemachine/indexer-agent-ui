@@ -50,18 +50,18 @@ export default function CreateCostModelForm({ mutate }) {
           type="text"
           placeholder="Deployment ID"
           {...register("deployment", { required: true, maxLength: 80 })}
-          className="input input-bordered w-full"
+          className="input-bordered input w-full"
         />
 
         <textarea
           placeholder="Model"
           {...register("model", {})}
-          className="textarea textarea-bordered w-full"
+          className="textarea-bordered textarea w-full"
         ></textarea>
 
         <textarea
           {...register("variables", {})}
-          className="textarea textarea-bordered w-full"
+          className="textarea-bordered textarea w-full"
           placeholder="Variables"
         ></textarea>
 
@@ -69,7 +69,7 @@ export default function CreateCostModelForm({ mutate }) {
           <div className="item w-auto">
             <button
               type="submit"
-              className={isSubmitting ? "btn loading" : "btn btn-primary"}
+              className={isSubmitting ? "loading btn" : "btn-primary btn"}
               disabled={!isValid || isSubmitting}
             >
               {isSubmitting ? "Loading" : "Create rule"}

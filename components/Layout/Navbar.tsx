@@ -53,7 +53,7 @@ export default function Navbar() {
     <div className="navbar bg-base-100">
       <div className="navbar-start">
         <div className="dropdown">
-          <label tabIndex={0} className="btn btn-ghost lg:hidden">
+          <label tabIndex={0} className="btn-ghost btn lg:hidden">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5"
@@ -71,7 +71,7 @@ export default function Navbar() {
           </label>
           <ul
             tabIndex={0}
-            className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
+            className="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-base-100 p-2 shadow"
           >
             {MENU_LIST.map((menu, idx) => (
               <li key={idx}>
@@ -79,7 +79,7 @@ export default function Navbar() {
                   href={menu.href}
                   className={
                     currentRoute === menu.href
-                      ? "btn btn-active btn-outline"
+                      ? "btn-outline btn-active btn"
                       : ""
                   }
                 >
@@ -89,7 +89,7 @@ export default function Navbar() {
             ))}
           </ul>
         </div>
-        <Link href="/" className="btn btn-ghost normal-case text-xl">
+        <Link href="/" className="btn-ghost btn text-xl normal-case">
           Agent UI
         </Link>
       </div>
@@ -101,8 +101,8 @@ export default function Navbar() {
                 href={menu.href}
                 className={
                   currentRoute === menu.href
-                    ? "btn btn-active btn-outline"
-                    : "btn btn-ghost"
+                    ? "btn-outline btn-active btn"
+                    : "btn-ghost btn"
                 }
               >
                 {menu.text}
@@ -112,7 +112,7 @@ export default function Navbar() {
         </ul>
       </div>
       <div className="navbar-end">
-        <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+        <label tabIndex={0} className="btn-ghost btn-circle avatar btn">
           <div className="w-10 rounded-full">
             <Image
               src={indexerData.indexer.account.image}

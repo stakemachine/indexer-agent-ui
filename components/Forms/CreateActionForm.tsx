@@ -49,7 +49,7 @@ export default function CreateActionForm({ mutate }) {
           <div className="item w-32">
             <select
               {...register("type", { required: true })}
-              className="select select-bordered"
+              className="select-bordered select"
             >
               <option value="allocate">Allocate</option>
               <option value="unallocate">Unallocate</option>
@@ -65,7 +65,7 @@ export default function CreateActionForm({ mutate }) {
                   type="text"
                   placeholder="Deployment ID"
                   {...register("deploymentID", { required: true })}
-                  className="input input-bordered w-full"
+                  className="input-bordered input w-full"
                 />
               </div>
 
@@ -74,7 +74,7 @@ export default function CreateActionForm({ mutate }) {
                   type="text"
                   placeholder="Amount"
                   {...register("amount", {})}
-                  className="input input-bordered w-full"
+                  className="input-bordered input w-full"
                   disabled={
                     watchActionType === "reallocate" ||
                     watchActionType === "allocate"
@@ -90,7 +90,7 @@ export default function CreateActionForm({ mutate }) {
                 <input
                   placeholder="Allocation ID"
                   {...register("allocationID", { shouldUnregister: true })}
-                  className="input input-bordered w-full"
+                  className="input-bordered input w-full"
                   disabled={
                     watchActionType === "reallocate" ||
                     watchActionType === "unallocate"
@@ -106,7 +106,7 @@ export default function CreateActionForm({ mutate }) {
                 <input
                   placeholder="POI"
                   {...register("poi", { shouldUnregister: true })}
-                  className="input input-bordered w-full"
+                  className="input-bordered input w-full"
                   disabled={
                     watchActionType === "reallocate" ||
                     watchActionType === "unallocate"
@@ -122,7 +122,7 @@ export default function CreateActionForm({ mutate }) {
                     type="checkbox"
                     placeholder="Force"
                     {...register("force", { shouldUnregister: true })}
-                    className="toggle toggle-accent"
+                    className="toggle-accent toggle"
                     disabled={
                       watchActionType === "reallocate" ||
                       watchActionType === "unallocate"
@@ -138,7 +138,7 @@ export default function CreateActionForm({ mutate }) {
               <div className="item w-auto">
                 <button
                   type="submit"
-                  className={isSubmitting ? "btn loading" : "btn btn-primary"}
+                  className={isSubmitting ? "loading btn" : "btn-primary btn"}
                   disabled={!isValid || isSubmitting}
                 >
                   {isSubmitting ? "Loading" : "Create action"}

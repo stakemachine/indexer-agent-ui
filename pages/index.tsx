@@ -212,7 +212,7 @@ export default function IndexPage() {
   return (
     <>
       <Metric>Dashboard</Metric>
-      <Grid numColsLg={6} className="gap-6 mt-3">
+      <Grid numColsLg={6} className="mt-3 gap-6">
         {/* Main section */}
         <Col numColSpanLg={4}>
           <Card className="h-full">
@@ -220,7 +220,7 @@ export default function IndexPage() {
               <Flex className="justify-start space-x-6">
                 <Image
                   src={indexerData.indexer?.account.image}
-                  className="rounded-full w-24"
+                  className="w-24 rounded-full"
                   width={128}
                   height={128}
                   alt=""
@@ -235,7 +235,7 @@ export default function IndexPage() {
                   <div className="mt-3 truncate">
                     <Flex className="justify-between space-x-6 truncate">
                       <div className="truncate">
-                        <Flex className="justify-between items-center">
+                        <Flex className="items-center justify-between">
                           <Title>Indexer Address</Title>
                           <Badge color="green">
                             {agentData.indexerRegistration.registered
@@ -248,7 +248,7 @@ export default function IndexPage() {
                         </Text>
                       </div>
                       <div className="truncate">
-                        <Flex className="justify-between items-center">
+                        <Flex className="items-center justify-between">
                           <Title>Operator Address</Title>
                           <Badge>TODO ETH</Badge>
                         </Flex>
@@ -260,7 +260,7 @@ export default function IndexPage() {
               </Flex>
             </div>
 
-            <div className="max-w-xs mt-6">
+            <div className="mt-6 max-w-xs">
               <List className="mt-0">
                 <ListItem className="space-x-0">
                   <Bold>Indexing Reward Cut</Bold>
@@ -321,7 +321,7 @@ export default function IndexPage() {
             <Card className="max-w-md">
               <div className="space-y-6">
                 <div>
-                  <Flex className="justify-between items-center">
+                  <Flex className="items-center justify-between">
                     <Title>Status URL</Title>
                     <Badge color="green">
                       {agentData.indexerEndpoints.status.healthy
@@ -332,7 +332,7 @@ export default function IndexPage() {
                   <Text>{agentData.indexerEndpoints.status.url}</Text>
                 </div>
                 <div>
-                  <Flex className="justify-between items-center">
+                  <Flex className="items-center justify-between">
                     <Title>Service URL</Title>
                     <Badge color="green">
                       {agentData.indexerEndpoints.service.healthy
@@ -367,9 +367,9 @@ export default function IndexPage() {
           </div>
         </Col>
       </Grid>
-      <Grid numCols={4} numColsMd={4} className="gap-6 mt-6">
+      <Grid numCols={4} numColsMd={4} className="mt-6 gap-6">
         <Col>
-          <Card className="max-w-md h-full">
+          <Card className="h-full max-w-md">
             <Text>Total stake</Text>
             <Metric>
               {(
@@ -394,7 +394,7 @@ export default function IndexPage() {
           </Card>
         </Col>
         <Col>
-          <Card className="max-w-md h-full">
+          <Card className="h-full max-w-md">
             <Text>Allocated</Text>
             <Metric>
               {(
@@ -406,7 +406,7 @@ export default function IndexPage() {
           </Card>
         </Col>
         <Col>
-          <Card className="max-w-md h-full">
+          <Card className="h-full max-w-md">
             <Text>Unallocated</Text>
             <Metric>
               {(
@@ -418,7 +418,7 @@ export default function IndexPage() {
           </Card>
         </Col>
         <Col>
-          <Card className="max-w-md h-full">
+          <Card className="h-full max-w-md">
             <Text>Delegated capacity</Text>
             <Metric>
               {(
@@ -430,7 +430,7 @@ export default function IndexPage() {
           </Card>
         </Col>
         <Col numColSpanLg={4}>
-          <div className="card w-full bg-base-100 shadow-xl p-4">
+          <div className="card w-full bg-base-100 p-4 shadow-xl">
             <span className="text-xl">Indexer Deployments</span>
             <div className="overflow-x-auto p-4">
               <TableComponent
@@ -446,7 +446,7 @@ export default function IndexPage() {
           </div>
         </Col>
         <Col numColSpanLg={4}>
-          <div className="card w-full bg-base-100 shadow-xl p-4">
+          <div className="card w-full bg-base-100 p-4 shadow-xl">
             <span className="text-xl">Active Allocations</span>
             <div className="overflow-x-auto p-4">
               <TableComponent

@@ -11,7 +11,7 @@ export const allocationColumns: ColumnDef<Allocation>[] = [
     id: "select",
     size: 1,
     header: ({ table }) => (
-      <div className="px-1 w-6">
+      <div className="w-6 px-1">
         <IndeterminateCheckbox
           {...{
             checked: table.getIsAllRowsSelected(),
@@ -22,7 +22,7 @@ export const allocationColumns: ColumnDef<Allocation>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="px-1 w-6">
+      <div className="w-6 px-1">
         <IndeterminateCheckbox
           {...{
             checked: row.getIsSelected(),

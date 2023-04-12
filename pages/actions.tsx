@@ -39,7 +39,7 @@ export default function ActionsPage() {
 
       <div
         tabIndex={0}
-        className="collapse collapse-arrow border-base-300 bg-base-100 m-3 rounded-box border"
+        className="collapse-arrow rounded-box collapse m-3 border border-base-300 bg-base-100"
       >
         <input type="checkbox" />
         <div className="collapse-title text-xl font-medium">Create action</div>
@@ -47,7 +47,7 @@ export default function ActionsPage() {
           <CreateActionForm mutate={mutate} />
         </div>
       </div>
-      <div className="card w-full bg-base-100 shadow-xl mt-3">
+      <div className="card mt-3 w-full bg-base-100 shadow-xl">
         <div className="m-3">
           <TableComponent
             data={agentData.actions}

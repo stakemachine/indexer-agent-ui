@@ -16,7 +16,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         </Head>
         <main className="min-h-screen w-full bg-gray-100">
           <Navbar />
-          <div className="flex flex-col min-h-screen overflow-hidden p-4 sm:p-8">
+
+          <div className="flex min-h-screen flex-col overflow-hidden p-4 sm:p-8">
             <Component {...pageProps} />
           </div>
           <Toaster toastOptions={{ position: "bottom-center" }} />

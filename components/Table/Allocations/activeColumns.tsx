@@ -2,6 +2,7 @@ import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
 import { CutAddress, NormalizeGRT } from "../../../lib/utils";
 import { IndeterminateCheckbox } from "../table";
+import { ethers } from "ethers";
 
 export type ActiveAllocation = {
   id: string;
@@ -12,6 +13,18 @@ export type ActiveAllocation = {
   signalledTokens: number;
   stakedTokens: number;
 };
+
+function stakedTokensAccessor(row: ActiveAllocation) {
+  return Number(
+    Number(ethers.formatEther(row.stakedTokens).toString()).toFixed(0)
+  );
+}
+
+function signalledTokensAccessor(row: ActiveAllocation) {
+  return Number(
+    Number(ethers.formatEther(row.signalledTokens).toString()).toFixed(0)
+  );
+}
 
 const columnHelper = createColumnHelper<ActiveAllocation>();
 
@@ -72,23 +85,23 @@ export const activeAllocationColumns: ColumnDef<ActiveAllocation>[] = [
   columnHelper.accessor((row) => row.subgraphDeployment, {
     header: "Deployment ID",
   }),
-  columnHelper.accessor((row) => row.signalledTokens, {
-    header: "Signalled Tokens",
+  columnHelper.accessor(signalledTokensAccessor, {
+    header: "Signalled",
     enableColumnFilter: false,
     enableGlobalFilter: false,
-    cell: (info) => NormalizeGRT(BigInt(info.getValue())) + " GRT",
+    cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor((row) => row.stakedTokens, {
-    header: "Staked Tokens",
+  columnHelper.accessor(stakedTokensAccessor, {
+    header: "Staked",
     enableColumnFilter: false,
     enableGlobalFilter: false,
-    cell: (info) => NormalizeGRT(BigInt(info.getValue())) + " GRT",
   }),
   columnHelper.accessor((row) => row.allocatedTokens, {
-    header: "Allocated Tokens",
+    header: "Allocated",
     enableColumnFilter: false,
     enableGlobalFilter: false,
-    cell: (info) => NormalizeGRT(BigInt(info.getValue())) + " GRT",
+    cell: (info) =>
+      Number(Number(ethers.formatEther(info.getValue()).toString()).toFixed(0)),
   }),
   columnHelper.accessor("createdAtEpoch", {
     enableGlobalFilter: false,

@@ -32,6 +32,14 @@ export type IndexerDeployment = {
 
 const columnHelper = createColumnHelper<IndexerDeployment>();
 
+// used purely for sorting
+function behindAccessor(row: IndexerDeployment) {
+  return (
+    Number(row.chains[0].chainHeadBlock.number.toString()) -
+    Number(row.chains[0].latestBlock.number.toString())
+  );
+}
+
 export const indexerDeploymentsColumns: ColumnDef<IndexerDeployment>[] = [
   {
     id: "expander",
@@ -121,12 +129,9 @@ export const indexerDeploymentsColumns: ColumnDef<IndexerDeployment>[] = [
     enableGlobalFilter: false,
     cell: (info) => info.getValue(),
   }),
-  columnHelper.accessor((row) => row.chains[0], {
+  columnHelper.accessor(behindAccessor, {
     header: "Behind",
     enableColumnFilter: false,
     enableGlobalFilter: false,
-    cell: (info) =>
-      info.row.original.chains[0].chainHeadBlock?.number -
-      info.row.original.chains[0].latestBlock.number,
   }),
 ];

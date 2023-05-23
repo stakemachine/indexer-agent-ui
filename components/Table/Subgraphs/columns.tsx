@@ -4,6 +4,7 @@ import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { GraphNetwork } from "../../../types/types";
 import { IndeterminateCheckbox } from "../table";
+import { ethers } from "ethers";
 export type Subgraph = {
   id: string;
   displayName: string;
@@ -35,7 +36,7 @@ declare module "@tanstack/table-core" {
   }
 }
 
-// user purely for sorting
+// used purely for sorting
 function aprAccessor(row: Subgraph) {
   return BigNumber(
     row.currentVersion.subgraphDeployment.signalledTokens.toString()
@@ -56,7 +57,7 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
     id: "select",
     size: 1,
     header: ({ table }) => (
-      <div className="px-1 w-6">
+      <div className="w-6 px-1">
         <IndeterminateCheckbox
           {...{
             checked: table.getIsAllRowsSelected(),
@@ -67,7 +68,7 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="px-1 w-6">
+      <div className="w-6 px-1">
         <IndeterminateCheckbox
           {...{
             checked: row.getIsSelected(),
@@ -109,7 +110,7 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
     enableHiding: false,
     cell: (info) => (
       <div className="avatar">
-        <div className="mask mask-squircle w-12 h-12">
+        <div className="mask mask-squircle h-12 w-12">
           <Image
             src={info.row.getValue("image")}
             alt={
@@ -150,17 +151,13 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
     id: "stakedTokens",
     header: () => <span>Staked Tokens</span>,
     enableColumnFilter: false,
-    cell: (info) =>
-      (BigInt(info.getValue()) / BigInt(1000000000000000000)).toLocaleString() +
-      " GRT",
+    cell: (info) => (+ethers.formatEther(info.getValue())).toFixed(2) + " GRT",
   }),
   columnHelper.accessor("currentVersion.subgraphDeployment.signalledTokens", {
     id: "signalledTokens",
     header: () => <span>Signalled Tokens</span>,
     enableColumnFilter: false,
-    cell: (info) =>
-      (BigInt(info.getValue()) / BigInt(1000000000000000000)).toLocaleString() +
-      " GRT",
+    cell: (info) => (+ethers.formatEther(info.getValue())).toFixed(2) + " GRT",
   }),
   columnHelper.accessor(aprAccessor, {
     id: "apr",

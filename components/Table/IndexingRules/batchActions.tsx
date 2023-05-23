@@ -7,7 +7,6 @@ export default function IndexingRulesActionsBatch(
   mutate,
   toggleAllRowsSelected
 ) {
-  console.log(JSON.stringify(rows));
   let identifiers = rows.map((row) => row.original.identifier);
 
   var variables = {
@@ -17,7 +16,7 @@ export default function IndexingRulesActionsBatch(
     <div className="info">
       <div className="flex w-full gap-x-1">
         <button
-          className="btn btn-sm"
+          className="btn-sm btn"
           onClick={() => {
             request("/api/agent", DELETE_INDEXING_RULES_MUTATION, variables)
               .then(

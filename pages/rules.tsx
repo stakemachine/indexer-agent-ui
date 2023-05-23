@@ -1,5 +1,5 @@
 import { Row } from "@tanstack/react-table";
-import request, { gql } from "graphql-request";
+import request from "graphql-request";
 import useSWR from "swr";
 import CreateIndexingRuleForm from "../components/Forms/CreateIndexingRule";
 import IndexingRulesActionsBatch from "../components/Table/IndexingRules/batchActions";
@@ -36,7 +36,11 @@ export default function RulesPage() {
           Create indexing rule
         </div>
         <div className="collapse-content">
-          <CreateIndexingRuleForm mutate={mutate} />
+          <CreateIndexingRuleForm
+            mutate={mutate}
+            defaultValues={{}}
+            toggleVisible={() => {}}
+          />
         </div>
       </div>
       <div className="card mt-3 w-full bg-base-100 shadow-xl">
@@ -48,7 +52,7 @@ export default function RulesPage() {
             batchControlsComponent={IndexingRulesActionsBatch}
             mutate={mutate}
             isValidating={isValidating}
-            meta=""
+            meta={{ mutate }}
           />
         </div>
       </div>

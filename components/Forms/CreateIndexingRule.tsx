@@ -1,4 +1,3 @@
-import BigNumber from "bignumber.js";
 import { ethers } from "ethers";
 import request from "graphql-request";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -6,7 +5,11 @@ import toast from "react-hot-toast";
 import { SET_INDEXING_RULE_MUTATION } from "../../lib/graphql/queries";
 import { IndexingRule } from "../../types/types";
 
-export default function CreateIndexingRuleForm({ mutate }) {
+export default function CreateIndexingRuleForm({
+  mutate,
+  defaultValues,
+  toggleVisible,
+}) {
   const {
     register,
     reset,
@@ -14,6 +17,7 @@ export default function CreateIndexingRuleForm({ mutate }) {
     formState: { isValid, isSubmitting, errors },
   } = useForm<Partial<IndexingRule>>({
     mode: "onChange",
+    defaultValues: defaultValues,
   });
   const onSubmit: SubmitHandler<IndexingRule> = async (data: IndexingRule) => {
     data.allocationAmount = ethers.parseEther(data.allocationAmount).toString();
@@ -25,14 +29,14 @@ export default function CreateIndexingRuleForm({ mutate }) {
       await request("/api/agent", SET_INDEXING_RULE_MUTATION, variables);
 
       toast.success("Successfully created new action.");
-      reset();
       mutate();
+      reset();
+      toggleVisible();
     } catch (error) {
       console.error("err: " + JSON.stringify(error, undefined, 2));
       toast.error("Failed to create new action.");
     }
   };
-  console.log(errors);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -45,13 +49,11 @@ export default function CreateIndexingRuleForm({ mutate }) {
         />
 
         <input
-          type="number"
+          type="string"
           placeholder="Allocation Amount"
           {...register("allocationAmount", {
             required: true,
-            max: 1000000000,
-            min: 1,
-            maxLength: 100,
+            maxLength: 10,
           })}
           className="input-bordered input w-full"
         />

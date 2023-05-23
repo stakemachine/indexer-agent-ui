@@ -1,12 +1,25 @@
-import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  PencilSquareIcon,
+} from "@heroicons/react/24/solid";
+import { ColumnDef, RowData, createColumnHelper } from "@tanstack/react-table";
 import { ethers } from "ethers";
-import { NormalizeGRT } from "../../../lib/utils";
 import { IndexingRule } from "../../../types/types";
 
 import { IndeterminateCheckbox } from "../table";
+import CreateIndexingRuleForm from "../../Forms/CreateIndexingRule";
+import { KeyedMutator } from "swr";
+import { useState } from "react";
+import { Modal } from "react-daisyui";
 
 const columnHelper = createColumnHelper<IndexingRule>();
+
+declare module "@tanstack/table-core" {
+  interface TableMeta<TData extends RowData> {
+    mutate: KeyedMutator<any>;
+  }
+}
 
 export const indexingRuleColumns: ColumnDef<IndexingRule>[] = [
   {
@@ -22,7 +35,7 @@ export const indexingRuleColumns: ColumnDef<IndexingRule>[] = [
       />
     ),
     cell: ({ row }) => (
-      <div className="px-1 w-6">
+      <div className="w-6 px-1">
         <IndeterminateCheckbox
           {...{
             checked: row.getIsSelected(),
@@ -117,5 +130,41 @@ export const indexingRuleColumns: ColumnDef<IndexingRule>[] = [
     header: "decisionBasis",
     enableGlobalFilter: false,
     cell: (info) => info.getValue(),
+  }),
+  columnHelper.display({
+    id: "actions",
+    cell: (props) => {
+      const [visible, setVisible] = useState<boolean>(false);
+
+      const toggleVisible = () => {
+        setVisible(!visible);
+      };
+      const rule = props.row.original;
+      return (
+        <>
+          <div className="flex flex-row space-x-2">
+            <PencilSquareIcon
+              className="h-6 w-6 hover:cursor-pointer"
+              onClick={toggleVisible}
+            />
+
+            <Modal open={visible} onClickBackdrop={toggleVisible}>
+              <Modal.Header className="font-bold">Edit rule</Modal.Header>
+
+              <Modal.Body>
+                <CreateIndexingRuleForm
+                  mutate={props.table.options.meta.mutate}
+                  defaultValues={{
+                    ...rule,
+                    allocationAmount: ethers.formatEther(rule.allocationAmount),
+                  }}
+                  toggleVisible={toggleVisible}
+                />
+              </Modal.Body>
+            </Modal>
+          </div>
+        </>
+      );
+    },
   }),
 ];

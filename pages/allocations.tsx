@@ -59,7 +59,7 @@ export default function AllocationsPage() {
             batchControlsComponent={EmptyBatchControl}
             mutate={mutate}
             isValidating={isValidating}
-            meta=""
+            meta={{ mutate }}
           />
         </div>
       </div>

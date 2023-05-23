@@ -44,7 +44,11 @@ export default function ActionsPage() {
         <input type="checkbox" />
         <div className="collapse-title text-xl font-medium">Create action</div>
         <div className="collapse-content">
-          <CreateActionForm mutate={mutate} />
+          <CreateActionForm
+            mutate={mutate}
+            defaultValues={{}}
+            toggleVisible={() => {}}
+          />
         </div>
       </div>
       <div className="card mt-3 w-full bg-base-100 shadow-xl">

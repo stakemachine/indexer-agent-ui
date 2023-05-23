@@ -4,7 +4,11 @@ import toast from "react-hot-toast";
 import { CREATE_ACTION_MUTATION } from "../../lib/graphql/queries";
 import { ActionInput, ActionStatus } from "../../types/types";
 
-export default function CreateActionForm({ mutate }) {
+export default function CreateActionForm({
+  mutate,
+  defaultValues,
+  toggleVisible,
+}) {
   const {
     register,
     reset,
@@ -13,15 +17,24 @@ export default function CreateActionForm({ mutate }) {
     formState: { isValid, isSubmitting, errors },
   } = useForm({
     mode: "onChange",
+    defaultValues: defaultValues,
   });
 
   const onSubmit = async (data: ActionInput) => {
     data.source = "Agent UI";
     data.reason = "manual";
-    data.status = ActionStatus.QUEUED;
     data.priority = 0;
-    if (data.poi == "") {
-      data.poi = null;
+    console.log(data);
+    switch (data.poi) {
+      case "0x0":
+        data.poi =
+          "0x0000000000000000000000000000000000000000000000000000000000000000";
+        break;
+      case "":
+        data.poi = null;
+        break;
+      default:
+        break;
     }
     let actions: ActionInput[] = [data];
     var variables = {
@@ -34,9 +47,38 @@ export default function CreateActionForm({ mutate }) {
       toast.success("Successfully created new action.");
       reset();
       mutate();
+      toggleVisible();
     } catch (error) {
-      console.error("err: " + JSON.stringify(error, undefined, 2));
+      console.log(error);
       toast.error("Failed to create new action.");
+      toast.custom(
+        (t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } pointer-events-auto flex w-full max-w-xl rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5`}
+          >
+            <div className="w-0 flex-1 p-4">
+              <div className="flex items-start">
+                <div className="ml-3 flex-1">
+                  <p className="mt-1 text-sm text-gray-500">{error?.message}</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex border-l border-gray-200">
+              <button
+                onClick={() => toast.dismiss(t.id)}
+                className="flex w-full items-center justify-center rounded-none rounded-r-lg border border-transparent p-4 text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        ),
+        {
+          duration: 10000,
+        }
+      );
     }
   };
 
@@ -87,33 +129,53 @@ export default function CreateActionForm({ mutate }) {
 
             <div className="gap-3 md:flex">
               <div className="item min-w-[27rem]">
-                <input
-                  placeholder="Allocation ID"
-                  {...register("allocationID", { shouldUnregister: true })}
-                  className="input-bordered input w-full"
-                  disabled={
-                    watchActionType === "reallocate" ||
-                    watchActionType === "unallocate"
-                      ? false
-                      : true
-                  }
-                />
+                <div>
+                  <input
+                    placeholder="Allocation ID"
+                    {...register("allocationID", {
+                      shouldUnregister: true,
+                      pattern: {
+                        value: /^0x[a-fA-F0-9]{40}$/,
+                        message: "Invalid Allocation ID",
+                      },
+                    })}
+                    className="input-bordered input w-full"
+                    disabled={
+                      watchActionType === "reallocate" ||
+                      watchActionType === "unallocate"
+                        ? false
+                        : true
+                    }
+                  />
+                </div>
+                <div className="text-red-800">
+                  {errors?.allocationID?.message}
+                </div>
               </div>
             </div>
 
             <div className="gap-3 md:flex">
               <div className="item min-w-[27rem]">
-                <input
-                  placeholder="POI"
-                  {...register("poi", { shouldUnregister: true })}
-                  className="input-bordered input w-full"
-                  disabled={
-                    watchActionType === "reallocate" ||
-                    watchActionType === "unallocate"
-                      ? false
-                      : true
-                  }
-                />
+                <div>
+                  <input
+                    placeholder="POI"
+                    {...register("poi", {
+                      shouldUnregister: true,
+                      pattern: {
+                        value: /^0x([a-fA-F0-9]{64}|0)$/,
+                        message: "Invalid POI",
+                      },
+                    })}
+                    className="input-bordered input w-full"
+                    disabled={
+                      watchActionType === "reallocate" ||
+                      watchActionType === "unallocate"
+                        ? false
+                        : true
+                    }
+                  />
+                </div>
+                <div className="text-red-800">{errors?.poi?.message}</div>
               </div>
               <div className="form-control w-28 justify-center">
                 <label className="label cursor-pointer">
@@ -134,7 +196,20 @@ export default function CreateActionForm({ mutate }) {
               </div>
             </div>
 
-            <div className="justify-end md:flex">
+            <div className="justify-end space-x-2 md:flex">
+              <div className="item w-auto">
+                <select
+                  {...register("status", { required: true })}
+                  className="select-bordered select"
+                >
+                  <option value={ActionStatus.QUEUED}>
+                    {ActionStatus.QUEUED}
+                  </option>
+                  <option value={ActionStatus.APPROVED}>
+                    {ActionStatus.APPROVED}
+                  </option>
+                </select>
+              </div>
               <div className="item w-auto">
                 <button
                   type="submit"

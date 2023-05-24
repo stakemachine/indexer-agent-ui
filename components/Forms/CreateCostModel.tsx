@@ -15,7 +15,11 @@ export const parseDeploymentID = (s: string): SubgraphDeploymentIDIsh => {
   }
 };
 
-export default function CreateCostModelForm({ mutate }) {
+export default function CreateCostModelForm({
+  mutate,
+  defaultValues,
+  toggleVisible,
+}) {
   const {
     register,
     reset,
@@ -23,6 +27,7 @@ export default function CreateCostModelForm({ mutate }) {
     formState: { isValid, isSubmitting, errors },
   } = useForm<Partial<CostModel>>({
     mode: "onChange",
+    defaultValues: defaultValues,
   });
   const onSubmit: SubmitHandler<CostModel> = async (data: CostModel) => {
     data.deployment = parseDeploymentID(data.deployment).toString();
@@ -34,14 +39,14 @@ export default function CreateCostModelForm({ mutate }) {
       await request("/api/agent", SET_COST_MODEL_MUTATION, variables);
 
       toast.success("Successfully created new cost model.");
-      reset();
       mutate();
+      reset();
+      toggleVisible();
     } catch (error) {
       console.error("err: " + JSON.stringify(error, undefined, 2));
-      toast.error("Failed to create new cost model.");
+      toast.error(error?.response.errors[0].message);
     }
   };
-  console.log(errors);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

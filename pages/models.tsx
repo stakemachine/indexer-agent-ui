@@ -7,6 +7,9 @@ import { costModelColumns } from "../components/Table/CostModels/columns";
 import TableComponent from "../components/Table/table";
 import { COST_MODELS_LIST_QUERY } from "../lib/graphql/queries";
 import { CostModel } from "../types/types";
+import { useState } from "react";
+import { Button, Modal } from "react-daisyui";
+import { PlusIcon } from "@heroicons/react/24/solid";
 
 const renderSubComponent = ({ row }: { row: Row<CostModel> }) => {
   return (
@@ -21,25 +24,42 @@ export default function ModelsPage() {
     COST_MODELS_LIST_QUERY,
     (query) => request<any>("/api/agent", query)
   );
-
+  const [visible, setVisible] = useState<boolean>(false);
+  const toggleVisible = () => {
+    setVisible(!visible);
+  };
   if (error) return <div>failed to load</div>;
   if (!data) return <div>Loading...</div>;
 
   return (
     <>
-      <span className="text-3xl font-semibold">Cost Models</span>
-      <div
-        tabIndex={0}
-        className="collapse-arrow rounded-box collapse m-3 border border-base-300 bg-base-100"
-      >
-        <input type="checkbox" />
-        <div className="collapse-title text-xl font-medium">
-          Create cost model
-        </div>
-        <div className="collapse-content">
-          <CreateCostModelForm mutate={mutate} />
-        </div>
+      <div className="flex justify-between">
+        <span className="text-3xl font-semibold">Cost Models</span>
+        <Button
+          color="primary"
+          startIcon={<PlusIcon className="w-4" />}
+          animation={true}
+          onClick={toggleVisible}
+        >
+          New Model
+        </Button>
+        <Modal
+          open={visible}
+          onClickBackdrop={toggleVisible}
+          className="min-w-96 max-w-screen max-h-screen"
+        >
+          <Modal.Header className="font-bold">New Cost Model</Modal.Header>
+
+          <Modal.Body>
+            <CreateCostModelForm
+              mutate={mutate}
+              defaultValues={{}}
+              toggleVisible={toggleVisible}
+            />
+          </Modal.Body>
+        </Modal>
       </div>
+
       <div className="card mt-3 w-full bg-base-100 shadow-xl">
         <div className="overflow-x-auto">
           <TableComponent
@@ -49,7 +69,7 @@ export default function ModelsPage() {
             batchControlsComponent={CostModelsActionsBatch}
             mutate={mutate}
             isValidating={isValidating}
-            meta=""
+            meta={{ mutate }}
           />
         </div>
       </div>

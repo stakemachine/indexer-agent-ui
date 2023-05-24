@@ -7,6 +7,9 @@ import { indexingRuleColumns } from "../components/Table/IndexingRules/columns";
 import TableComponent from "../components/Table/table";
 import { INDEXING_RULES_LIST_QUERY } from "../lib/graphql/queries";
 import { IndexingRule } from "../types/types";
+import { useState } from "react";
+import { PlusIcon } from "@heroicons/react/24/solid";
+import { Button, Modal } from "react-daisyui";
 
 const renderSubComponent = ({ row }: { row: Row<IndexingRule> }) => {
   return (
@@ -21,28 +24,41 @@ export default function RulesPage() {
     INDEXING_RULES_LIST_QUERY,
     (query) => request<any>("/api/agent", query)
   );
-
+  const [visible, setVisible] = useState<boolean>(false);
+  const toggleVisible = () => {
+    setVisible(!visible);
+  };
   if (error) return <div>failed to load</div>;
   if (!data) return <div>Loading...</div>;
   return (
     <>
-      <span className="text-3xl font-semibold">Indexing Rules</span>
-      <div
-        tabIndex={0}
-        className="collapse-arrow rounded-box collapse m-3 border border-base-300 bg-base-100"
-      >
-        <input type="checkbox" />
-        <div className="collapse-title text-xl font-medium">
-          Create indexing rule
-        </div>
-        <div className="collapse-content">
-          <CreateIndexingRuleForm
-            mutate={mutate}
-            defaultValues={{}}
-            toggleVisible={() => {}}
-          />
-        </div>
+      <div className="flex justify-between">
+        <span className="text-3xl font-semibold">Indexing Rules</span>
+        <Button
+          color="primary"
+          startIcon={<PlusIcon className="w-4" />}
+          animation={true}
+          onClick={toggleVisible}
+        >
+          New Rule
+        </Button>
+        <Modal
+          open={visible}
+          onClickBackdrop={toggleVisible}
+          className=" max-w-fit"
+        >
+          <Modal.Header className="font-bold">New action</Modal.Header>
+
+          <Modal.Body>
+            <CreateIndexingRuleForm
+              mutate={mutate}
+              defaultValues={{}}
+              toggleVisible={toggleVisible}
+            />
+          </Modal.Body>
+        </Modal>
       </div>
+
       <div className="card mt-3 w-full bg-base-100 shadow-xl">
         <div className="overflow-x-auto">
           <TableComponent

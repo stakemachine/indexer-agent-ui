@@ -72,7 +72,7 @@ export default function CreateIndexingRuleForm({
             <option value="offchain">offchain</option>
           </select>
         </div>
-        <div className="collapse">
+        <div className="collapse-arrow collapse">
           <input type="checkbox" />
           <div className="collapse-title text-xl font-medium">Advanced</div>
           <div className="collapse-content">

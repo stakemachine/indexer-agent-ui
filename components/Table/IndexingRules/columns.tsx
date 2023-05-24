@@ -133,7 +133,7 @@ export const indexingRuleColumns: ColumnDef<IndexingRule>[] = [
   }),
   columnHelper.display({
     id: "actions",
-    cell: (props) => {
+    cell: function Cell(props) {
       const [visible, setVisible] = useState<boolean>(false);
 
       const toggleVisible = () => {

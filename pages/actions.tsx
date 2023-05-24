@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import request from "graphql-request";
 
@@ -11,6 +11,8 @@ import { Row } from "@tanstack/react-table";
 import ActionsBatch from "../components/Table/Actions/batchActions";
 import { ActionsListResponse } from "../types/types";
 import { ACTIONS_LIST_QUERY } from "../lib/graphql/queries";
+import { Button, Modal } from "react-daisyui";
+import { PlusIcon } from "@heroicons/react/24/solid";
 
 const renderSubComponent = ({ row }: { row: Row<Action> }) => {
   return (
@@ -30,27 +32,43 @@ export default function ActionsPage() {
     request<ActionsListResponse>("/api/agent", query)
   );
 
+  const [visible, setVisible] = useState<boolean>(false);
+
   if (agentError) return <div>failed to load</div>;
   if (!agentData) return <div>Loading...</div>;
 
+  const toggleVisible = () => {
+    setVisible(!visible);
+  };
   return (
     <>
-      <span className="text-3xl font-semibold">Actions Queue</span>
+      <div className="flex justify-between">
+        <span className="text-3xl font-semibold">Actions Queue</span>
+        <Button
+          color="primary"
+          startIcon={<PlusIcon className="w-4" />}
+          animation={true}
+          onClick={toggleVisible}
+        >
+          New Action
+        </Button>
+        <Modal
+          open={visible}
+          onClickBackdrop={toggleVisible}
+          className="max-h-fit max-w-fit"
+        >
+          <Modal.Header className="font-bold">New action</Modal.Header>
 
-      <div
-        tabIndex={0}
-        className="collapse-arrow rounded-box collapse m-3 border border-base-300 bg-base-100"
-      >
-        <input type="checkbox" />
-        <div className="collapse-title text-xl font-medium">Create action</div>
-        <div className="collapse-content">
-          <CreateActionForm
-            mutate={mutate}
-            defaultValues={{}}
-            toggleVisible={() => {}}
-          />
-        </div>
+          <Modal.Body>
+            <CreateActionForm
+              mutate={mutate}
+              defaultValues={{}}
+              toggleVisible={toggleVisible}
+            />
+          </Modal.Body>
+        </Modal>
       </div>
+
       <div className="card mt-3 w-full bg-base-100 shadow-xl">
         <div className="m-3">
           <TableComponent

@@ -15,7 +15,7 @@ export default function CreateActionForm({
     handleSubmit,
     watch,
     formState: { isValid, isSubmitting, errors },
-  } = useForm({
+  } = useForm<ActionInput>({
     mode: "onChange",
     defaultValues: defaultValues,
   });

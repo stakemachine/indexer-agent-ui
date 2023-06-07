@@ -16,7 +16,7 @@
     "bignumber.js": "^9.1.1",
     "daisyui": "^2.52.0",
     "dayjs": "^1.11.7",
-    "ethers": "^6.4.0",
+    "ethers": "^6.4.2",
     "graphql-request": "^6.1.0",
     "next": "^13.4.4",
     "next-auth": "^4.22.1",

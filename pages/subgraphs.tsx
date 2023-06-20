@@ -53,7 +53,7 @@ export default function ReactTablePage() {
 
   const pctIssuancePerBlock = new BigNumber(
     Web3.utils
-      .fromWei(graphNetworkData.graphNetwork.networkGRTIssuance)
+      .fromWei(graphNetworkData.graphNetwork.networkGRTIssuance, "ether")
       .toString()
   ).minus(1);
   let bigNumber = BigNumber;

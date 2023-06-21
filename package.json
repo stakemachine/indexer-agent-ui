@@ -11,11 +11,10 @@
   "dependencies": {
     "@heroicons/react": "^2.0.18",
     "@tanstack/react-table": "^8.9.2",
-    "@tremor/react": "^3.2.2",
     "autoprefixer": "^10.4.14",
     "bignumber.js": "^9.1.1",
     "bs58": "^5.0.0",
-    "daisyui": "^3.1.1",
+    "daisyui": "^2.51.5",
     "dayjs": "^1.11.8",
     "ethers": "^6.6.0",
     "graphql-request": "^6.1.0",

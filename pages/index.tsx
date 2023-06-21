@@ -1,18 +1,5 @@
 import { Row } from "@tanstack/react-table";
 import Image from "next/image";
-import {
-  Card,
-  Title,
-  Text,
-  Grid,
-  Col,
-  Metric,
-  Flex,
-  Badge,
-  List,
-  ListItem,
-  Bold,
-} from "@tremor/react";
 import request, { gql } from "graphql-request";
 import useSWR from "swr";
 import { activeAllocationColumns } from "../components/Table/Allocations/activeColumns";
@@ -211,13 +198,15 @@ export default function IndexPage() {
 
   return (
     <>
-      <Metric>Dashboard</Metric>
-      <Grid numColsLg={6} className="mt-3 gap-6">
+      <span className="text-3xl font-semibold">Dashboard</span>
+
+      <div className="mt-3 grid grid-cols-1 gap-6 lg:grid-cols-6">
         {/* Main section */}
-        <Col numColSpanLg={4}>
-          <Card className="h-full">
+
+        <div className="card col-span-1 bg-base-100 shadow-xl lg:col-span-4">
+          <div className="relative h-full w-full p-6 text-left">
             <div>
-              <Flex className="justify-start space-x-6">
+              <div className="flex w-full flex-row items-center justify-start space-x-6">
                 <Image
                   src={indexerData.indexer?.account.image}
                   className="w-24 rounded-full"
@@ -228,124 +217,109 @@ export default function IndexPage() {
 
                 <div className="truncate">
                   <div>
-                    <Metric>
+                    <p className="font-semibold">
                       {indexerData.indexer?.defaultDisplayName}.eth
-                    </Metric>
+                    </p>
                   </div>
                   <div className="mt-3 truncate">
-                    <Flex className="justify-between space-x-6 truncate">
+                    <div className="flex w-full flex-row items-center justify-between space-x-6 truncate">
                       <div className="truncate">
-                        <Flex className="items-center justify-between">
-                          <Title>Indexer Address</Title>
-                          <Badge color="green">
+                        <div className="flex w-full flex-row items-center justify-between">
+                          <p className="font-medium">Indexer Address</p>
+                          <div className="badge-success badge text-green-900">
                             {agentData.indexerRegistration.registered
                               ? "registered"
                               : "unregistered"}
-                          </Badge>
-                        </Flex>
-                        <Text className="truncate">
+                          </div>
+                        </div>
+                        <p className="truncate font-light">
                           {agentData.indexerRegistration.address}
-                        </Text>
+                        </p>
                       </div>
                       <div className="truncate">
-                        <Flex className="items-center justify-between">
-                          <Title>Operator Address</Title>
-                          <Badge>TODO ETH</Badge>
-                        </Flex>
-                        <Text className="truncate">0xTODO</Text>
+                        <div className="flex w-full flex-row items-center justify-between">
+                          <p className="font-medium">Operator Address</p>
+                          <div className="badge-info badge text-cyan-900">
+                            TODO ETH
+                          </div>
+                        </div>
+                        <p className="truncate font-light">0xTODO</p>
                       </div>
-                    </Flex>
+                    </div>
                   </div>
                 </div>
-              </Flex>
+              </div>
             </div>
 
             <div className="mt-6 max-w-xs">
-              <List className="mt-0">
-                <ListItem className="space-x-0">
-                  <Bold>Indexing Reward Cut</Bold>
+              <div className=" mt-0 table w-full  divide-y overflow-hidden">
+                <div className="flex w-full items-center justify-between space-x-0 truncate py-2 tabular-nums">
+                  <b className="font-medium">Indexing Reward Cut</b>
                   <span>{indexerData.indexer.indexingRewardCut / 10000}%</span>
-                </ListItem>
-                <ListItem className="space-x-0">
-                  <Bold>Indexing Reward Effective Cut </Bold>
+                </div>
+                <div className="flex w-full items-center justify-between space-x-0 truncate py-2 tabular-nums">
+                  <b className="font-medium">Indexing Reward Effective Cut </b>
                   <span>
                     {indexerData.indexer.indexingRewardEffectiveCut / 10000}%
                   </span>
-                </ListItem>
-                <ListItem className="space-x-0">
-                  <Bold>Query Fee Cut </Bold>
+                </div>
+                <div className="flex w-full items-center justify-between space-x-0 truncate py-2 tabular-nums">
+                  <b className="font-medium">Query Fee Cut </b>
                   <span>{indexerData.indexer.queryFeeCut / 10000}%</span>
-                </ListItem>
-                <ListItem className="space-x-0">
-                  <Bold>Query Fee Effective Cut </Bold>
+                </div>
+                <div className="flex w-full items-center justify-between space-x-0 truncate py-2 tabular-nums">
+                  <b className="font-medium">Query Fee Effective Cut </b>
                   <span>
                     {indexerData.indexer.queryFeeEffectiveCut / 10000}%
                   </span>
-                </ListItem>
-                <ListItem className="space-x-0">
-                  <Bold>Delegator Parameter Cooldown</Bold>
+                </div>
+                <div className="flex w-full items-center justify-between space-x-0 truncate py-2 tabular-nums">
+                  <b className="font-medium">Delegator Parameter Cooldown</b>
                   <span>{indexerData.indexer.delegatorParameterCooldown}</span>
-                </ListItem>
-                <ListItem className="space-x-0">
-                  <Bold>Last Delegation Parameter Update</Bold>
+                </div>
+                <div className="flex w-full items-center justify-between space-x-0 truncate py-2 tabular-nums">
+                  <b className="font-medium">
+                    Last Delegation Parameter Update
+                  </b>
                   <div className="tooltip tooltip-left" data-tip="Block number">
                     {indexerData.indexer.lastDelegationParameterUpdate}
                   </div>
-                </ListItem>
-              </List>
+                </div>
+              </div>
             </div>
-          </Card>
-        </Col>
+          </div>
+        </div>
 
-        {/* KPI sidebar */}
-        <Col numColSpanLg={2}>
+        <div className="card col-span-1 gap-6 bg-base-100 p-6 shadow-xl lg:col-span-2">
           <div className="space-y-6">
-            {/* <Card maxWidth="max-w-md">
-                            <Block spaceY='space-y-6'>
-                                <Block>
-                                    <Flex justifyContent="justify-between" alignItems="items-center">
-                                        <Title>Indexer Address</Title>
-                                        <Badge color="green" text="registered" />
-                                    </Flex>
-                                    <Text>0x00000e11bFc9759a2645CF75Ba7940296740A679</Text>
-                                </Block>
-                                <Block>
-                                    <Flex justifyContent="justify-between" alignItems="items-center">
-                                        <Title>Operator Address</Title>
-                                        <Badge text="0.01223 ETH" />
-                                    </Flex>
-                                    <Text>0x00000e11bFc9759a2645CF75Ba7940296740A679</Text>
-                                </Block>
-                            </Block>
-                        </Card> */}
-            <Card className="max-w-md">
+            <div className="max-w-md">
               <div className="space-y-6">
                 <div>
-                  <Flex className="items-center justify-between">
-                    <Title>Status URL</Title>
-                    <Badge color="green">
+                  <div className="flex w-full flex-row items-center justify-between">
+                    <p className="font-medium">Status URL</p>
+                    <div className="badge-success badge text-green-900">
                       {agentData.indexerEndpoints.status.healthy
                         ? "healthy"
                         : "unhealthy"}
-                    </Badge>
-                  </Flex>
-                  <Text>{agentData.indexerEndpoints.status.url}</Text>
+                    </div>
+                  </div>
+                  {agentData.indexerEndpoints.status.url}
                 </div>
                 <div>
-                  <Flex className="items-center justify-between">
-                    <Title>Service URL</Title>
-                    <Badge color="green">
+                  <div className="flex w-full flex-row items-center justify-between">
+                    <p className="font-medium">Service URL</p>
+                    <div className="badge-success badge text-green-900">
                       {agentData.indexerEndpoints.service.healthy
                         ? "healthy"
                         : "unhealthy"}
-                    </Badge>
-                  </Flex>
-                  <Text>{agentData.indexerEndpoints.service.url}</Text>
+                    </div>
+                  </div>
+                  {agentData.indexerEndpoints.service.url}
                 </div>
               </div>
-            </Card>
-            <Card className="max-w-md">
-              <Title>Indexer Location</Title>
+            </div>
+            <div className="card max-w-md">
+              <p className="font-medium">Indexer Location</p>
               <Image
                 src={
                   "https://static-maps.yandex.ru/1.x/?lang=en-US&ll=" +
@@ -361,107 +335,89 @@ export default function IndexPage() {
                 alt=""
                 width={650}
                 height={400}
-                className=" rounded-lg shadow-2xl"
+                className="mt-2 rounded-lg shadow-2xl"
               />
-            </Card>
+            </div>
           </div>
-        </Col>
-      </Grid>
-      <Grid numCols={4} numColsMd={4} className="mt-6 gap-6">
-        <Col>
-          <Card className="h-full max-w-md">
-            <Text>Total stake</Text>
-            <Metric>
+        </div>
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4">
+        <div className="col-span-1">
+          <div className="card relative h-full w-full max-w-md bg-base-100 p-6 text-left shadow-xl">
+            Total stake
+            <p className="text-2xl font-semibold">
               {(
                 (indexerData.indexer.stakedTokens -
                   indexerData.indexer.lockedTokens) /
                 1000000000000000000
               ).toFixed(0)}{" "}
               GRT
-            </Metric>
-            {/* <CategoryBar
-              categoryPercentageValues={[30, 70]}
-              colors={["emerald", "red"]}
-              marginTop="mt-4"
-              showLabels={false}
-              showAnimation={true}
-            /> */}
-            {/* <Legend
-                            categories={["Self Stake", "Delegated"]}
-                            colors={["emerald", "red"]}
-                            marginTop="mt-3"
-                        /> */}
-          </Card>
-        </Col>
-        <Col>
-          <Card className="h-full max-w-md">
-            <Text>Allocated</Text>
-            <Metric>
+            </p>
+          </div>
+        </div>
+        <div className="col-span-1">
+          <div className="card relative h-full w-full max-w-md bg-base-100 p-6 text-left shadow-xl">
+            Allocated
+            <p className="text-2xl font-semibold">
               {(
                 indexerData.indexer.allocatedTokens / 1000000000000000000
               ).toFixed(0)}{" "}
               GRT
-            </Metric>
-            {/* <ProgressBar percentageValue={90} color="teal" marginTop="mt-2" /> */}
-          </Card>
-        </Col>
-        <Col>
-          <Card className="h-full max-w-md">
-            <Text>Unallocated</Text>
-            <Metric>
+            </p>
+          </div>
+        </div>
+        <div className="col-span-1">
+          <div className="card relative h-full w-full max-w-md bg-base-100 p-6 text-left shadow-xl">
+            Unallocated
+            <p className="text-2xl font-semibold">
               {(
                 indexerData.indexer.availableStake / 1000000000000000000
               ).toFixed(0)}{" "}
               GRT
-            </Metric>
-            {/* <ProgressBar percentageValue={10} color="teal" marginTop="mt-2" /> */}
-          </Card>
-        </Col>
-        <Col>
-          <Card className="h-full max-w-md">
-            <Text>Delegated capacity</Text>
-            <Metric>
+            </p>
+          </div>
+        </div>
+        <div className="col-span-1">
+          <div className="card relative h-full w-full max-w-md bg-base-100 p-6 text-left shadow-xl">
+            Delegated capacity
+            <p className="text-2xl font-semibold">
               {(
                 indexerData.indexer.delegatedCapacity / 1000000000000000000
               ).toFixed(0)}{" "}
               GRT
-            </Metric>
-            {/* <ProgressBar percentageValue={70} color="teal" marginTop="mt-2" /> */}
-          </Card>
-        </Col>
-        <Col numColSpanLg={4}>
-          <div className="card w-full bg-base-100 p-4 shadow-xl">
-            <span className="text-xl">Indexer Deployments</span>
-            <div className="overflow-x-auto p-4">
-              <TableComponent
-                data={agentData.indexerDeployments}
-                columns={indexerDeploymentsColumns}
-                renderSubComponent={renderSubComponent}
-                batchControlsComponent={EmptyBatchControl}
-                mutate={agentMutate}
-                isValidating={agentIsValidating}
-                meta=""
-              />
-            </div>
+            </p>
           </div>
-        </Col>
-        <Col numColSpanLg={4}>
-          <div className="card w-full bg-base-100 p-4 shadow-xl">
-            <span className="text-xl">Active Allocations</span>
-            <div className="overflow-x-auto p-4">
-              <TableComponent
-                data={agentData.indexerAllocations}
-                columns={activeAllocationColumns}
-                renderSubComponent={renderSubComponent}
-                batchControlsComponent={ActiveAllocationsActionsBatch}
-                mutate={agentMutate}
-                isValidating={agentIsValidating}
-                meta=""
-              />
-            </div>
-          </div>
-        </Col>
-      </Grid>
+        </div>
+      </div>
+      <div className="card mt-6 w-full bg-base-100 p-4 shadow-xl">
+        <span className="text-xl">Indexer Deployments</span>
+        <div className="overflow-x-auto p-4">
+          <TableComponent
+            data={agentData.indexerDeployments}
+            columns={indexerDeploymentsColumns}
+            renderSubComponent={renderSubComponent}
+            batchControlsComponent={EmptyBatchControl}
+            mutate={agentMutate}
+            isValidating={agentIsValidating}
+            meta=""
+          />
+        </div>
+      </div>
+      <div className="card mt-6 w-full bg-base-100 p-4 shadow-xl">
+        <span className="text-xl">Active Allocations</span>
+        <div className="overflow-x-auto p-4">
+          <TableComponent
+            data={agentData.indexerAllocations}
+            columns={activeAllocationColumns}
+            renderSubComponent={renderSubComponent}
+            batchControlsComponent={ActiveAllocationsActionsBatch}
+            mutate={agentMutate}
+            isValidating={agentIsValidating}
+            meta=""
+          />
+        </div>
+      </div>
     </>
   );
 }

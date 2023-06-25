@@ -14,7 +14,7 @@
     "autoprefixer": "^10.4.14",
     "bignumber.js": "^9.1.1",
     "bs58": "^5.0.0",
-    "daisyui": "^2.51.5",
+    "daisyui": "^2.52.0",
     "dayjs": "^1.11.8",
     "ethers": "^6.6.0",
     "graphql-request": "^6.1.0",

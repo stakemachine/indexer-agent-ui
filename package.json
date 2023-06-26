@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.0.18",
-    "@tanstack/react-table": "^8.9.2",
+    "@tanstack/react-table": "^8.9.3",
     "autoprefixer": "^10.4.14",
     "bignumber.js": "^9.1.1",
     "bs58": "^5.0.0",

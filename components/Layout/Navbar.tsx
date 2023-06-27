@@ -71,7 +71,7 @@ export default function Navbar() {
           </label>
           <ul
             tabIndex={0}
-            className="dropdown-content menu rounded-box menu-compact mt-3 w-52 bg-base-100 p-2 shadow"
+            className="menu-compact dropdown-content menu rounded-box mt-3 w-52 bg-base-100 p-2 shadow"
           >
             {MENU_LIST.map((menu, idx) => (
               <li key={idx}>
@@ -99,11 +99,7 @@ export default function Navbar() {
             <li key={idx}>
               <Link
                 href={menu.href}
-                className={
-                  currentRoute === menu.href
-                    ? "btn-outline btn-active btn"
-                    : "btn-ghost btn"
-                }
+                className={currentRoute === menu.href ? " btn-active" : ""}
               >
                 {menu.text}
               </Link>
@@ -122,7 +118,7 @@ export default function Navbar() {
             />
           </div>
         </label>
-        <div className="pr-2 pl-2 ">
+        <div className="pl-2 pr-2 ">
           <div>{indexerData.indexer.defaultDisplayName}.eth</div>
           <div className="text-sm">
             {CutAddress(agentData.indexerRegistration.address.toLowerCase())}

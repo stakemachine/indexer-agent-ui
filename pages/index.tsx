@@ -10,6 +10,7 @@ import {
 } from "../components/Table/IndexerDeployments/columns";
 import TableComponent from "../components/Table/table";
 import { EmptyBatchControl } from "../lib/utils";
+import CopyButton from "../components/Buttons/CopyButton";
 
 const renderSubComponent = ({ row }: { row: Row<IndexerDeployment> }) => {
   return (
@@ -217,7 +218,7 @@ export default function IndexPage() {
 
                 <div className="truncate">
                   <div>
-                    <p className="font-semibold">
+                    <p className="text-2xl">
                       {indexerData.indexer?.defaultDisplayName}.eth
                     </p>
                   </div>
@@ -232,8 +233,11 @@ export default function IndexPage() {
                               : "unregistered"}
                           </div>
                         </div>
-                        <p className="truncate font-light">
+                        <p className="group truncate font-light">
                           {agentData.indexerRegistration.address}
+                          <CopyButton
+                            data={agentData.indexerRegistration.address}
+                          />
                         </p>
                       </div>
                       <div className="truncate">
@@ -303,7 +307,10 @@ export default function IndexPage() {
                         : "unhealthy"}
                     </div>
                   </div>
-                  {agentData.indexerEndpoints.status.url}
+                  <div className="group flex items-center">
+                    {agentData.indexerEndpoints.status.url}
+                    <CopyButton data={agentData.indexerEndpoints.status.url} />
+                  </div>
                 </div>
                 <div>
                   <div className="flex w-full flex-row items-center justify-between">
@@ -314,7 +321,10 @@ export default function IndexPage() {
                         : "unhealthy"}
                     </div>
                   </div>
-                  {agentData.indexerEndpoints.service.url}
+                  <div className="group flex items-center">
+                    {agentData.indexerEndpoints.service.url}
+                    <CopyButton data={agentData.indexerEndpoints.service.url} />
+                  </div>
                 </div>
               </div>
             </div>

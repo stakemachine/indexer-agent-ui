@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 
 import request from "graphql-request";
 
@@ -29,17 +29,20 @@ export default function ActionsPage() {
     mutate,
     isValidating,
   } = useSWR(ACTIONS_LIST_QUERY, (query) =>
-    request<ActionsListResponse>("/api/agent", query)
+    request<ActionsListResponse>("/api/agent", query),
   );
-
+  const ref = useRef<HTMLDialogElement>(null);
+  const toggleVisible = () => {
+    setVisible(!visible);
+  };
+  const handleShow = useCallback(() => {
+    ref.current?.showModal();
+  }, [ref]);
   const [visible, setVisible] = useState<boolean>(false);
 
   if (agentError) return <div>failed to load</div>;
   if (!agentData) return <div>Loading...</div>;
 
-  const toggleVisible = () => {
-    setVisible(!visible);
-  };
   return (
     <>
       <div className="flex justify-between">
@@ -48,14 +51,15 @@ export default function ActionsPage() {
           color="primary"
           startIcon={<PlusIcon className="w-4" />}
           animation={true}
-          onClick={toggleVisible}
+          onClick={handleShow}
         >
           New Action
         </Button>
         <Modal
           open={visible}
-          onClickBackdrop={toggleVisible}
+          backdrop={true}
           className="max-h-fit max-w-fit"
+          ref={ref}
         >
           <Modal.Header className="font-bold">New action</Modal.Header>
 
@@ -63,7 +67,7 @@ export default function ActionsPage() {
             <CreateActionForm
               mutate={mutate}
               defaultValues={{}}
-              toggleVisible={toggleVisible}
+              toggleVisible={handleShow}
             />
           </Modal.Body>
         </Modal>

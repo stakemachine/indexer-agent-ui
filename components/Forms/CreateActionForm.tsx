@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { CREATE_ACTION_MUTATION } from "../../lib/graphql/queries";
 import { ActionInput, ActionStatus } from "../../types/types";
+import { useReadLocalStorage } from "usehooks-ts";
 
 export default function CreateActionForm({
   mutate,
@@ -19,10 +20,11 @@ export default function CreateActionForm({
     mode: "onChange",
     defaultValues: defaultValues,
   });
-
+  const selectedNetwork: string = useReadLocalStorage("network");
   const onSubmit = async (data: ActionInput) => {
     data.source = "Agent UI";
     data.reason = "manual";
+    data.protocolNetwork = selectedNetwork;
     data.priority = 0;
     console.log(data);
     switch (data.poi) {
@@ -77,7 +79,7 @@ export default function CreateActionForm({
         ),
         {
           duration: 10000,
-        }
+        },
       );
     }
   };

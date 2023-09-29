@@ -1,16 +1,19 @@
 import request from "graphql-request";
 import toast from "react-hot-toast";
 import { DELETE_INDEXING_RULES_MUTATION } from "../../../lib/graphql/queries";
+import { IndexingRuleIdentifier } from "../../../types/types";
 
 export default function IndexingRulesActionsBatch(
   rows,
   mutate,
-  toggleAllRowsSelected
+  toggleAllRowsSelected,
 ) {
-  let identifiers = rows.map((row) => row.original.identifier);
-
+  let identifiers: IndexingRuleIdentifier[] = rows.map((row) => ({
+    identifier: row.original.identifier,
+    protocolNetwork: row.original.protocolNetwork,
+  }));
   var variables = {
-    deployments: identifiers,
+    identifiers: identifiers,
   };
   return (
     <div className="info">
@@ -24,7 +27,7 @@ export default function IndexingRulesActionsBatch(
                   toast.success("Successfully deleted rule(s)."),
                   toggleAllRowsSelected(false),
                   mutate()
-                )
+                ),
               )
               .catch(() => toast.error("Failed to delete rule(s)."));
           }}

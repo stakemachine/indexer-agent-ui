@@ -10,6 +10,8 @@ import {
   AGENT_INDEXER_REGISTRATION_QUERY,
 } from "../../lib/graphql/queries";
 import { Indexer, IndexerRegistration } from "../../types/types";
+import NetworkSelect from "../NetworkSelect";
+import { useReadLocalStorage } from "usehooks-ts";
 
 const MENU_LIST = [
   { text: "Allocations", href: "/allocations" },
@@ -21,12 +23,16 @@ const MENU_LIST = [
 ];
 
 export default function Navbar() {
+  const selectedNetwork = useReadLocalStorage("network");
+  const variables = {
+    protocolNetwork: selectedNetwork,
+  };
   const {
     data: agentData,
     isLoading: agentIsLoading,
     error: agentError,
   } = useSWR<IndexerRegistration>(AGENT_INDEXER_REGISTRATION_QUERY, (query) =>
-    request("/api/agent", query)
+    request("/api/agent", query, variables),
   );
 
   const {
@@ -38,16 +44,25 @@ export default function Navbar() {
       INDEXER_INFO_BY_ID_QUERY,
       agentData.indexerRegistration.address.toLowerCase(),
     ],
-    ([query, id]) => request<Indexer>("/api/subgraph", query, { id })
+    ([query, id]) =>
+      request<Indexer>("/api/subgraph/" + selectedNetwork, query, { id }),
   );
   const router = useRouter();
   const currentRoute = router.pathname;
 
-  if (indexerIsLoading) return <div>Loading...</div>;
-  if (indexerError) return <div>failed to load</div>;
+  if (indexerIsLoading) return <div>Indexer Loading...</div>;
+  if (indexerError) return <div>indexer failed to load</div>;
 
-  if (agentIsLoading) return <div>Loading...</div>;
-  if (agentError) return <div>failed to load</div>;
+  if (agentIsLoading) return <div>Agent Loading...</div>;
+  if (agentError) {
+    console.error("err: " + JSON.stringify(agentError, undefined, 2));
+    return (
+      <>
+        <div>{agentError.response.errors[0].message}</div>
+        <NetworkSelect />
+      </>
+    );
+  }
 
   return (
     <div className="navbar bg-base-100">
@@ -92,6 +107,7 @@ export default function Navbar() {
         <Link href="/" className="btn-ghost btn text-xl normal-case">
           Agent UI
         </Link>
+        <NetworkSelect />
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal p-0">
@@ -111,15 +127,27 @@ export default function Navbar() {
         <label tabIndex={0} className="btn-ghost btn-circle avatar btn">
           <div className="w-10 rounded-full">
             <Image
-              src={indexerData.indexer.account.image}
-              alt={indexerData.indexer.defaultDisplayName}
+              src={
+                indexerData.indexer.account.image
+                  ? indexerData.indexer.account.image
+                  : ""
+              }
+              alt={
+                indexerData.indexer.defaultDisplayName
+                  ? indexerData.indexer.defaultDisplayName
+                  : ""
+              }
               width={64}
               height={64}
             />
           </div>
         </label>
         <div className="pl-2 pr-2 ">
-          <div>{indexerData.indexer.defaultDisplayName}.eth</div>
+          <div>
+            {indexerData.indexer.defaultDisplayName
+              ? indexerData.indexer.defaultDisplayName + ".eth"
+              : "unknown"}
+          </div>
           <div className="text-sm">
             {CutAddress(agentData.indexerRegistration.address.toLowerCase())}
           </div>

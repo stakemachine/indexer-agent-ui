@@ -14,6 +14,7 @@ export interface ActionInput {
   reason: string;
   status: ActionStatus;
   priority: number | undefined;
+  protocolNetwork: string;
 }
 
 export interface AllocationsListResponse {
@@ -65,6 +66,7 @@ export interface GraphNetwork {
   totalTokensStaked: string;
   totalTokensSignalled: string;
   totalDelegatedTokens: string;
+  totalTokensAllocated: string;
   networkGRTIssuance: string;
   epochLength: number;
   currentEpoch: number;
@@ -112,6 +114,11 @@ export interface POIDispute {
   status: string;
 }
 
+export interface IndexingRuleIdentifier {
+  identifier: string;
+  protocolNetwork: string;
+}
+
 export interface IndexingRule {
   identifier: string;
   identifierType: SubgraphIdentifierType;
@@ -128,6 +135,7 @@ export interface IndexingRule {
   decisionBasis: IndexingDecisionBasis;
   requireSupported: boolean;
   safety: boolean;
+  protocolNetwork: string;
 }
 
 export enum IndexingDecisionBasis {

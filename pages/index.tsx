@@ -11,6 +11,7 @@ import {
 import TableComponent from "../components/Table/table";
 import { EmptyBatchControl } from "../lib/utils";
 import CopyButton from "../components/Buttons/CopyButton";
+import { useReadLocalStorage } from "usehooks-ts";
 
 const renderSubComponent = ({ row }: { row: Row<IndexerDeployment> }) => {
   return (
@@ -21,8 +22,8 @@ const renderSubComponent = ({ row }: { row: Row<IndexerDeployment> }) => {
 };
 
 const queryStatus = gql`
-  {
-    indexerRegistration {
+  query getStatus($protocolNetwork: String!) {
+    indexerRegistration(protocolNetwork: $protocolNetwork) {
       url
       address
       registered
@@ -30,6 +31,7 @@ const queryStatus = gql`
         latitude
         longitude
       }
+      protocolNetwork
     }
     indexerDeployments {
       subgraphDeployment
@@ -52,20 +54,25 @@ const queryStatus = gql`
           number
         }
       }
+      protocolNetwork
     }
-    indexerAllocations {
+    indexerAllocations(protocolNetwork: $protocolNetwork) {
       id
+      indexer
+      protocolNetwork
       allocatedTokens
       createdAtEpoch
       closedAtEpoch
       subgraphDeployment
       signalledTokens
       stakedTokens
+      ageInEpochs
     }
-    indexerEndpoints {
+    indexerEndpoints(protocolNetwork: $protocolNetwork) {
       service {
         url
         healthy
+        protocolNetwork
         tests {
           test
           error
@@ -75,6 +82,7 @@ const queryStatus = gql`
       status {
         url
         healthy
+        protocolNetwork
         tests {
           test
           error
@@ -169,14 +177,22 @@ const indexerInfoQuery = `query indexerByIdQuery($id: String) {
 }`;
 
 export default function IndexPage() {
+  const selectedNetwork = useReadLocalStorage("network");
+  const variables = {
+    protocolNetwork: selectedNetwork,
+  };
   const {
     data: agentData,
     error: agentError,
     mutate: agentMutate,
     isValidating: agentIsValidating,
-  } = useSWR(queryStatus, (query) => request<any>("/api/agent", query), {
-    refreshInterval: 5000,
-  });
+  } = useSWR(
+    queryStatus,
+    (query) => request<any>("/api/agent", query, variables),
+    {
+      refreshInterval: 5000,
+    },
+  );
 
   const {
     data: indexerData,
@@ -188,7 +204,8 @@ export default function IndexPage() {
       indexerInfoQuery,
       agentData.indexerRegistration.address.toLowerCase(),
     ],
-    ([query, id]) => request<any>("/api/subgraph", query, { id })
+    ([query, id]) =>
+      request<any>("/api/subgraph/" + selectedNetwork, query, { id }),
   );
 
   if (agentError) return <div>failed to load</div>;
@@ -209,7 +226,11 @@ export default function IndexPage() {
             <div>
               <div className="flex w-full flex-row items-center justify-start space-x-6">
                 <Image
-                  src={indexerData.indexer?.account.image}
+                  src={
+                    indexerData.indexer.account.image
+                      ? indexerData.indexer.account.image
+                      : ""
+                  }
                   className="w-24 rounded-full"
                   width={128}
                   height={128}
@@ -227,7 +248,7 @@ export default function IndexPage() {
                       <div className="truncate">
                         <div className="flex w-full flex-row items-center justify-between">
                           <p className="font-medium">Indexer Address</p>
-                          <div className="badge-success badge text-green-900">
+                          <div className="badge badge-success text-green-900">
                             {agentData.indexerRegistration.registered
                               ? "registered"
                               : "unregistered"}
@@ -243,7 +264,7 @@ export default function IndexPage() {
                       <div className="truncate">
                         <div className="flex w-full flex-row items-center justify-between">
                           <p className="font-medium">Operator Address</p>
-                          <div className="badge-info badge text-cyan-900">
+                          <div className="badge badge-info text-cyan-900">
                             TODO ETH
                           </div>
                         </div>
@@ -301,29 +322,33 @@ export default function IndexPage() {
                 <div>
                   <div className="flex w-full flex-row items-center justify-between">
                     <p className="font-medium">Status URL</p>
-                    <div className="badge-success badge text-green-900">
-                      {agentData.indexerEndpoints.status.healthy
+                    <div className="badge badge-success text-green-900">
+                      {agentData.indexerEndpoints[0].status.healthy
                         ? "healthy"
                         : "unhealthy"}
                     </div>
                   </div>
                   <div className="group flex items-center">
-                    {agentData.indexerEndpoints.status.url}
-                    <CopyButton data={agentData.indexerEndpoints.status.url} />
+                    {agentData.indexerEndpoints[0].status.url}
+                    <CopyButton
+                      data={agentData.indexerEndpoints[0].status.url}
+                    />
                   </div>
                 </div>
                 <div>
                   <div className="flex w-full flex-row items-center justify-between">
                     <p className="font-medium">Service URL</p>
-                    <div className="badge-success badge text-green-900">
-                      {agentData.indexerEndpoints.service.healthy
+                    <div className="badge badge-success text-green-900">
+                      {agentData.indexerEndpoints[0].service.healthy
                         ? "healthy"
                         : "unhealthy"}
                     </div>
                   </div>
                   <div className="group flex items-center">
-                    {agentData.indexerEndpoints.service.url}
-                    <CopyButton data={agentData.indexerEndpoints.service.url} />
+                    {agentData.indexerEndpoints[0].service.url}
+                    <CopyButton
+                      data={agentData.indexerEndpoints[0].service.url}
+                    />
                   </div>
                 </div>
               </div>

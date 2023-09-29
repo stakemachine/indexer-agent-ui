@@ -1,6 +1,5 @@
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { createColumnHelper, ColumnDef } from "@tanstack/react-table";
-import { CutAddress, NormalizeGRT } from "../../../lib/utils";
 import { IndeterminateCheckbox } from "../table";
 import { ethers } from "ethers";
 
@@ -16,13 +15,13 @@ export type ActiveAllocation = {
 
 function stakedTokensAccessor(row: ActiveAllocation) {
   return Number(
-    Number(ethers.formatEther(row.stakedTokens).toString()).toFixed(0)
+    Number(ethers.formatEther(row.stakedTokens).toString()).toFixed(0),
   );
 }
 
 function signalledTokensAccessor(row: ActiveAllocation) {
   return Number(
-    Number(ethers.formatEther(row.signalledTokens).toString()).toFixed(0)
+    Number(ethers.formatEther(row.signalledTokens).toString()).toFixed(0),
   );
 }
 

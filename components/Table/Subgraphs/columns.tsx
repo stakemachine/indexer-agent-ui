@@ -18,6 +18,7 @@ export type Subgraph = {
       signalledTokens: bigint | null;
       signalAmount: string;
       pricePerShare: string;
+      deniedAt: number;
       indexingRewardAmount: string;
       network: {
         id: string;
@@ -39,15 +40,25 @@ declare module "@tanstack/table-core" {
 // used purely for sorting
 function aprAccessor(row: Subgraph) {
   return BigNumber(
-    row.currentVersion.subgraphDeployment.signalledTokens.toString()
+    row.currentVersion.subgraphDeployment.signalledTokens.toString(),
   )
     .dividedBy(
       new BigNumber(
-        row.currentVersion.subgraphDeployment.stakedTokens.toString()
-      )
+        row.currentVersion.subgraphDeployment.stakedTokens.toString(),
+      ),
     )
     .multipliedBy(100)
     .toFixed(2);
+}
+
+function availableCapacity(row: Subgraph) {
+  return BigNumber(info.table.options.meta?.graphNetwork.totalTokensAllocated)
+    .multipliedBy(
+      BigNumber(
+        row.currentVersion.subgraphDeployment.signalledTokens.toString(),
+      ).dividedBy(info.table.options.meta?.graphNetwork.totalTokensSignalled),
+    )
+    .minus(row.currentVersion.subgraphDeployment.stakedTokens.toString());
 }
 
 const columnHelper = createColumnHelper<Subgraph>();
@@ -109,14 +120,21 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
     enableSorting: false,
     enableHiding: false,
     cell: (info) => (
-      <div className="avatar">
+      <div className="avatar indicator">
+        {info.row.original.currentVersion.subgraphDeployment.deniedAt === 0 ? (
+          ""
+        ) : (
+          <span className="indicator-item indicator-middle indicator-center badge badge-error">
+            DENIED
+          </span>
+        )}
         <div className="mask mask-squircle h-12 w-12">
           <Image
-            src={info.row.getValue("image")}
+            src={info.row.original.image ? info.row.original.image : ""}
             alt={
-              info.row.original.displayName +
+              info.row.original?.displayName +
               " - " +
-              info.row.original.currentVersion.description
+              info.row.original?.currentVersion.description
             }
             height={32}
             width={32}
@@ -145,19 +163,19 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
       id: "network",
       header: () => <span>Network</span>,
       cell: (info) => info.getValue(),
-    }
+    },
   ),
   columnHelper.accessor("currentVersion.subgraphDeployment.stakedTokens", {
     id: "stakedTokens",
     header: () => <span>Staked Tokens</span>,
     enableColumnFilter: false,
-    cell: (info) => (+ethers.formatEther(info.getValue())).toFixed(2) + " GRT",
+    cell: (info) => (+ethers.formatEther(info.getValue())).toFixed(2),
   }),
   columnHelper.accessor("currentVersion.subgraphDeployment.signalledTokens", {
     id: "signalledTokens",
     header: () => <span>Signalled Tokens</span>,
     enableColumnFilter: false,
-    cell: (info) => (+ethers.formatEther(info.getValue())).toFixed(2) + " GRT",
+    cell: (info) => (+ethers.formatEther(info.getValue())).toFixed(2),
   }),
   columnHelper.accessor(aprAccessor, {
     id: "apr",
@@ -166,17 +184,69 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
     header: () => "APR",
     cell: (info) =>
       BigNumber(
-        info.row.original.currentVersion.subgraphDeployment.signalledTokens.toString()
+        info.row.original.currentVersion.subgraphDeployment.signalledTokens.toString(),
       )
         .dividedBy(info.table.options.meta?.graphNetwork.totalTokensSignalled)
         .multipliedBy(info.table.options.meta?.graphNetwork.issuancePerYear)
         .dividedBy(
           BigNumber(
-            info.row.original.currentVersion.subgraphDeployment.stakedTokens.toString()
-          )
+            info.row.original.currentVersion.subgraphDeployment.stakedTokens.toString(),
+          ),
         )
         .multipliedBy(100)
         .toFixed(2) + "%",
+  }),
+  columnHelper.accessor(aprAccessor, {
+    id: "proportion",
+    enableSorting: true,
+    enableColumnFilter: false,
+    header: () => "Prop",
+    cell: (info) =>
+      BigNumber(
+        info.row.original.currentVersion.subgraphDeployment.signalledTokens.toString(),
+      )
+        .dividedBy(info.table.options.meta?.graphNetwork.totalTokensSignalled)
+        .dividedBy(
+          BigNumber(
+            info.row.original.currentVersion.subgraphDeployment.stakedTokens.toString(),
+          ).dividedBy(
+            info.table.options.meta?.graphNetwork.totalTokensAllocated,
+          ),
+        )
+        .toFixed(3),
+    //   +
+    // " " +
+    // info.row.original.currentVersion.subgraphDeployment.signalledTokens.toString() +
+    // " " +
+    // info.table.options.meta?.graphNetwork.totalTokensSignalled +
+    // " " +
+    // info.row.original.currentVersion.subgraphDeployment.stakedTokens.toString() +
+    // " " +
+    // info.table.options.meta?.graphNetwork.totalTokensAllocated +
+    // " " +
+    // info.table.options.meta?.graphNetwork.totalDelegatedTokens +
+    // " " +
+    // info.table.options.meta?.graphNetwork.totalTokensStaked,
+  }),
+  columnHelper.accessor(aprAccessor, {
+    id: "capacity",
+    enableSorting: true,
+    enableColumnFilter: false,
+    header: () => "Available Capacity",
+    cell: (info) =>
+      BigNumber(info.table.options.meta?.graphNetwork.totalTokensAllocated)
+        .multipliedBy(
+          BigNumber(
+            info.row.original.currentVersion.subgraphDeployment.signalledTokens.toString(),
+          ).dividedBy(
+            info.table.options.meta?.graphNetwork.totalTokensSignalled,
+          ),
+        )
+        .minus(
+          info.row.original.currentVersion.subgraphDeployment.stakedTokens.toString(),
+        )
+        .dividedBy(1000000000000000000)
+        .toFixed(2),
   }),
   columnHelper.accessor(
     "currentVersion.subgraphDeployment.indexerAllocations",
@@ -190,11 +260,11 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
           ? (
               BigInt(
                 info.row.original.currentVersion.subgraphDeployment
-                  .indexerAllocations[0]?.allocatedTokens
+                  .indexerAllocations[0]?.allocatedTokens,
               ) / BigInt(1000000000000000000)
-            ).toLocaleString() + " GRT"
+            ).toLocaleString()
           : "",
       footer: (props) => props.column.id,
-    }
+    },
   ),
 ];

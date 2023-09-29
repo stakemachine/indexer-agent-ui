@@ -4,12 +4,14 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { SET_INDEXING_RULE_MUTATION } from "../../lib/graphql/queries";
 import { IndexingRule } from "../../types/types";
+import { useReadLocalStorage } from "usehooks-ts";
 
 export default function CreateIndexingRuleForm({
   mutate,
   defaultValues,
   toggleVisible,
 }) {
+  const selectedNetwork: string = useReadLocalStorage("network");
   const {
     register,
     reset,
@@ -22,7 +24,7 @@ export default function CreateIndexingRuleForm({
   const onSubmit: SubmitHandler<IndexingRule> = async (data: IndexingRule) => {
     data.allocationAmount = ethers.parseEther(data.allocationAmount).toString();
     var variables = {
-      rule: data,
+      rule: { ...data, protocolNetwork: selectedNetwork },
     };
 
     try {

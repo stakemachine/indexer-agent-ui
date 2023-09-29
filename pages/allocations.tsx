@@ -14,6 +14,7 @@ import {
   AllocationsListResponse,
   IndexerRegistration,
 } from "../types/types";
+import { useReadLocalStorage } from "usehooks-ts";
 
 const renderSubComponent = ({ row }: { row: Row<Allocation> }) => {
   return (
@@ -24,10 +25,14 @@ const renderSubComponent = ({ row }: { row: Row<Allocation> }) => {
 };
 
 export default function AllocationsPage() {
+  const selectedNetwork = useReadLocalStorage("network");
+  const variables = {
+    protocolNetwork: selectedNetwork,
+  };
   const [subgraphData, setSubgraphData] = useState([]);
   const { data: agentData, error: agentError } = useSWR(
     AGENT_INDEXER_REGISTRATION_QUERY,
-    (query) => request<IndexerRegistration>("/api/agent", query)
+    (query) => request<IndexerRegistration>("/api/agent", query, variables),
   );
 
   const { data, error, mutate, isValidating } = useSWR(
@@ -36,7 +41,11 @@ export default function AllocationsPage() {
       agentData.indexerRegistration.address.toLowerCase(),
     ],
     ([query, indexer]) =>
-      request<AllocationsListResponse>("/api/subgraph", query, { indexer })
+      request<AllocationsListResponse>(
+        "/api/subgraph/" + selectedNetwork,
+        query,
+        { indexer },
+      ),
   );
   useEffect(() => {
     if (data) {
@@ -44,7 +53,9 @@ export default function AllocationsPage() {
     }
   }, [data]);
 
-  if (error) return <div>failed to load</div>;
+  if (error) {
+    return <div>failed to load</div>;
+  }
   if (!data) return <div>Loading...</div>;
 
   return (

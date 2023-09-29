@@ -2,7 +2,7 @@ import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import { IndeterminateCheckbox } from "../table";
 import { INDEXER_ERROR_MESSAGES } from "../../../lib/errors";
-import { CutAddress } from "../../../lib/utils";
+import { CutAddress, resolveChainAlias } from "../../../lib/utils";
 export interface Action {
   id: string;
   type: string;
@@ -17,6 +17,7 @@ export interface Action {
   status: string;
   failureReason: string;
   transaction: string;
+  protocolNetwork: string;
 }
 
 const columnHelper = createColumnHelper<Action>();
@@ -101,6 +102,10 @@ export const actionsColumns: ColumnDef<Action>[] = [
     header: "POI",
     enableGlobalFilter: false,
     cell: (info) => (info.getValue() ? CutAddress(info.getValue()) : ""),
+  }),
+  columnHelper.accessor((row) => row.protocolNetwork, {
+    header: "Network",
+    cell: (info) => resolveChainAlias(info.getValue()),
   }),
   columnHelper.accessor((row) => row.status, {
     header: "Status",

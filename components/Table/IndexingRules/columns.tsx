@@ -12,6 +12,7 @@ import CreateIndexingRuleForm from "../../Forms/CreateIndexingRule";
 import { KeyedMutator } from "swr";
 import { useState } from "react";
 import { Modal } from "react-daisyui";
+import { resolveChainAlias } from "../../../lib/utils";
 
 const columnHelper = createColumnHelper<IndexingRule>();
 
@@ -131,6 +132,10 @@ export const indexingRuleColumns: ColumnDef<IndexingRule>[] = [
     enableGlobalFilter: false,
     cell: (info) => info.getValue(),
   }),
+  columnHelper.accessor((row) => row.protocolNetwork, {
+    header: "network",
+    cell: (info) => resolveChainAlias(info.getValue()),
+  }),
   columnHelper.display({
     id: "actions",
     cell: function Cell(props) {
@@ -148,7 +153,7 @@ export const indexingRuleColumns: ColumnDef<IndexingRule>[] = [
               onClick={toggleVisible}
             />
 
-            <Modal open={visible} onClickBackdrop={toggleVisible}>
+            <Modal open={visible} backdrop={true}>
               <Modal.Header className="font-bold">Edit rule</Modal.Header>
 
               <Modal.Body>

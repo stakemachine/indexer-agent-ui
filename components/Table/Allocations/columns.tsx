@@ -126,11 +126,7 @@ export const allocationColumns: ColumnDef<Allocation>[] = [
               onClick={toggleVisible}
             />
 
-            <Modal
-              className="max-w-fit"
-              open={visible}
-              onClickBackdrop={toggleVisible}
-            >
+            <Modal className="max-w-fit" open={visible} backdrop={true}>
               <Modal.Header className="font-bold">
                 Manage allocation
               </Modal.Header>

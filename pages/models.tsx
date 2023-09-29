@@ -22,7 +22,7 @@ const renderSubComponent = ({ row }: { row: Row<CostModel> }) => {
 export default function ModelsPage() {
   const { data, error, mutate, isValidating } = useSWR(
     COST_MODELS_LIST_QUERY,
-    (query) => request<any>("/api/agent", query)
+    (query) => request<any>("/api/agent", query),
   );
   const [visible, setVisible] = useState<boolean>(false);
   const toggleVisible = () => {
@@ -45,7 +45,7 @@ export default function ModelsPage() {
         </Button>
         <Modal
           open={visible}
-          onClickBackdrop={toggleVisible}
+          backdrop={true}
           className="min-w-96 max-w-screen max-h-screen"
         >
           <Modal.Header className="font-bold">New Cost Model</Modal.Header>

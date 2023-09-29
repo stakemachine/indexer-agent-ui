@@ -93,7 +93,7 @@ export const costModelColumns: ColumnDef<CostModel>[] = [
               onClick={toggleVisible}
             />
 
-            <Modal open={visible} onClickBackdrop={toggleVisible}>
+            <Modal open={visible} backdrop={true}>
               <Modal.Header className="font-bold">Edit model</Modal.Header>
 
               <Modal.Body>
@@ -102,7 +102,7 @@ export const costModelColumns: ColumnDef<CostModel>[] = [
                   defaultValues={{
                     ...model,
                     deployment: new SubgraphDeploymentID(
-                      props.row.original.deployment
+                      props.row.original.deployment,
                     ).ipfsHash,
                   }}
                   toggleVisible={toggleVisible}

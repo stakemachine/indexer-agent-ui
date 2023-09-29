@@ -7,7 +7,7 @@ import { indexingRuleColumns } from "../components/Table/IndexingRules/columns";
 import TableComponent from "../components/Table/table";
 import { INDEXING_RULES_LIST_QUERY } from "../lib/graphql/queries";
 import { IndexingRule } from "../types/types";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { Button, Modal } from "react-daisyui";
 
@@ -22,12 +22,16 @@ const renderSubComponent = ({ row }: { row: Row<IndexingRule> }) => {
 export default function RulesPage() {
   const { data, error, mutate, isValidating } = useSWR(
     INDEXING_RULES_LIST_QUERY,
-    (query) => request<any>("/api/agent", query)
+    (query) => request<any>("/api/agent", query),
   );
   const [visible, setVisible] = useState<boolean>(false);
   const toggleVisible = () => {
     setVisible(!visible);
   };
+  const ref = useRef<HTMLDialogElement>(null);
+  const handleShow = useCallback(() => {
+    ref.current?.showModal();
+  }, [ref]);
   if (error) return <div>failed to load</div>;
   if (!data) return <div>Loading...</div>;
   return (
@@ -38,22 +42,18 @@ export default function RulesPage() {
           color="primary"
           startIcon={<PlusIcon className="w-4" />}
           animation={true}
-          onClick={toggleVisible}
+          onClick={handleShow}
         >
           New Rule
         </Button>
-        <Modal
-          open={visible}
-          onClickBackdrop={toggleVisible}
-          className=" max-w-fit"
-        >
+        <Modal open={visible} backdrop={true} className=" max-w-fit" ref={ref}>
           <Modal.Header className="font-bold">New action</Modal.Header>
 
           <Modal.Body>
             <CreateIndexingRuleForm
               mutate={mutate}
               defaultValues={{}}
-              toggleVisible={toggleVisible}
+              toggleVisible={handleShow}
             />
           </Modal.Body>
         </Modal>

@@ -71,6 +71,7 @@ export const CREATE_ACTION_MUTATION = gql`
       reason
       priority
       status
+      protocolNetwork
     }
   }
 `;
@@ -101,6 +102,7 @@ export const GRAPH_NETWORK_INFO_QUERY = gql`
       totalTokensStaked
       totalDelegatedTokens
       totalTokensSignalled
+      totalTokensAllocated
       networkGRTIssuance
       epochLength
       currentEpoch
@@ -111,8 +113,8 @@ export const GRAPH_NETWORK_INFO_QUERY = gql`
 `;
 
 export const AGENT_INDEXER_REGISTRATION_QUERY = gql`
-  {
-    indexerRegistration {
+  query getIndexerRegistration($protocolNetwork: String!) {
+    indexerRegistration(protocolNetwork: $protocolNetwork) {
       url
       address
       registered
@@ -174,7 +176,7 @@ export const SUBGRAPHS_BY_STATUS_QUERY = gql`
       first: 1000
       orderBy: currentSignalledTokens
       orderDirection: desc
-      where: { active: true, entityVersion: 2 }
+      where: { active: true, entityVersion: 2, currentVersion_not: null }
     ) {
       id
       displayName
@@ -227,6 +229,7 @@ export const ACTIONS_LIST_QUERY = gql`
       status
       failureReason
       transaction
+      protocolNetwork
     }
   }
 `;
@@ -269,6 +272,7 @@ export const INDEXING_RULES_LIST_QUERY = gql`
       decisionBasis
       requireSupported
       safety
+      protocolNetwork
     }
   }
 `;
@@ -296,8 +300,8 @@ export const SET_INDEXING_RULE_MUTATION = gql`
 `;
 
 export const DELETE_INDEXING_RULES_MUTATION = gql`
-  mutation deleteIndexingRules($deployments: [String!]!) {
-    deleteIndexingRules(identifiers: $deployments)
+  mutation deleteIndexingRules($identifiers: [IndexingRuleIdentifier!]!) {
+    deleteIndexingRules(identifiers: $identifiers)
   }
 `;
 

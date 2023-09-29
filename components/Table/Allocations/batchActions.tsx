@@ -2,12 +2,14 @@ import request from "graphql-request";
 import toast from "react-hot-toast";
 import { CREATE_ACTION_MUTATION } from "../../../lib/graphql/queries";
 import { ActionInput, ActionStatus, ActionType } from "../../../types/types";
+import { useReadLocalStorage } from "usehooks-ts";
 
 export default function ActiveAllocationsActionsBatch(
   rows,
   mutate,
-  toggleAllRowsSelected
+  toggleAllRowsSelected,
 ) {
+  const selectedNetwork: string = useReadLocalStorage("network");
   let actions: ActionInput[] = [];
   rows.map((row) => {
     let action: ActionInput = {
@@ -18,6 +20,7 @@ export default function ActiveAllocationsActionsBatch(
       status: ActionStatus.QUEUED,
       priority: 0,
       allocationID: row.original.id,
+      protocolNetwork: selectedNetwork,
     };
     actions = [...actions, action];
   });
@@ -36,7 +39,7 @@ export default function ActiveAllocationsActionsBatch(
                   toast.success("Successfully created new action(s)."),
                   toggleAllRowsSelected(false),
                   mutate()
-                )
+                ),
               )
               .catch(() => toast.error("Failed to create new action(s)."));
           }}

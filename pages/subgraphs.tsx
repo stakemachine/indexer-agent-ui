@@ -29,16 +29,15 @@ const renderSubComponent = ({ row }: { row: Row<Subgraph> }) => {
 
 export default function ReactTablePage() {
   const selectedNetwork = useReadLocalStorage("network");
-  const variables = {
-    protocolNetwork: selectedNetwork,
-  };
   const {
     data: agentData,
     error: agentError,
     mutate,
     isValidating,
-  } = useSWR<IndexerRegistration>(AGENT_INDEXER_REGISTRATION_QUERY, (query) =>
-    request("/api/agent", query, variables),
+  } = useSWR<IndexerRegistration>(
+    () => [AGENT_INDEXER_REGISTRATION_QUERY, selectedNetwork],
+    ([query, selectedNetwork]) =>
+      request<any>("/api/agent", query, { protocolNetwork: selectedNetwork }),
   );
 
   const { data, error } = useSWR(
@@ -52,7 +51,7 @@ export default function ReactTablePage() {
 
   const { data: graphNetworkData } = useSWR<GraphNetworkResponse>(
     GRAPH_NETWORK_INFO_QUERY,
-    (query) => request("/api/subgraph/" + selectedNetwork, query),
+    (query) => request<any>("/api/subgraph/" + selectedNetwork, query),
   );
   if (error) return <p>Error</p>;
   if (!data) return <p>Loading...</p>;

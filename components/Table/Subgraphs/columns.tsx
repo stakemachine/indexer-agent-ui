@@ -51,16 +51,6 @@ function aprAccessor(row: Subgraph) {
     .toFixed(2);
 }
 
-function availableCapacity(row: Subgraph) {
-  return BigNumber(info.table.options.meta?.graphNetwork.totalTokensAllocated)
-    .multipliedBy(
-      BigNumber(
-        row.currentVersion.subgraphDeployment.signalledTokens.toString(),
-      ).dividedBy(info.table.options.meta?.graphNetwork.totalTokensSignalled),
-    )
-    .minus(row.currentVersion.subgraphDeployment.stakedTokens.toString());
-}
-
 const columnHelper = createColumnHelper<Subgraph>();
 
 export const SubgraphColumns: ColumnDef<Subgraph>[] = [

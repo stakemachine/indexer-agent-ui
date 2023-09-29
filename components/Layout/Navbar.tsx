@@ -24,15 +24,15 @@ const MENU_LIST = [
 
 export default function Navbar() {
   const selectedNetwork = useReadLocalStorage("network");
-  const variables = {
-    protocolNetwork: selectedNetwork,
-  };
+
   const {
     data: agentData,
     isLoading: agentIsLoading,
     error: agentError,
-  } = useSWR<IndexerRegistration>(AGENT_INDEXER_REGISTRATION_QUERY, (query) =>
-    request("/api/agent", query, variables),
+  } = useSWR<IndexerRegistration>(
+    () => [AGENT_INDEXER_REGISTRATION_QUERY, selectedNetwork],
+    ([query, selectedNetwork]) =>
+      request<any>("/api/agent", query, { protocolNetwork: selectedNetwork }),
   );
 
   const {

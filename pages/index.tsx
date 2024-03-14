@@ -147,9 +147,7 @@ const indexerInfoQuery = `query indexerByIdQuery($id: String) {
     delegatorParameterCooldown
     lastDelegationParameterUpdate
     defaultDisplayName
-    account {
-      image
-    }
+    
     allocations(
       first: 1000
       orderBy: createdAt
@@ -227,8 +225,8 @@ export default function IndexPage() {
               <div className="flex w-full flex-row items-center justify-start space-x-6">
                 <Image
                   src={
-                    indexerData.indexer.account.image
-                      ? indexerData.indexer.account.image
+                    indexerData.indexer.account?.image
+                      ? indexerData.indexer.account?.image
                       : ""
                   }
                   className="w-24 rounded-full"

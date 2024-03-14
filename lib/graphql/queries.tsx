@@ -131,7 +131,7 @@ export const INDEXER_INFO_BY_ID_QUERY = gql`
     indexer(id: $id) {
       defaultDisplayName
       account {
-        image
+        id
       }
     }
   }
@@ -178,16 +178,21 @@ export const SUBGRAPHS_BY_STATUS_QUERY = gql`
       orderDirection: desc
       where: { active: true, entityVersion: 2, currentVersion_not: null }
     ) {
-      id
-      displayName
-      image
+      metadata {
+        id
+        displayName
+        image
+        description
+      }
       signalAmount
       signalledTokens
       active
       currentSignalledTokens
       currentVersion {
-        description
         subgraphDeployment {
+          manifest {
+            network
+          }
           originalName
           ipfsHash
           stakedTokens
@@ -197,9 +202,7 @@ export const SUBGRAPHS_BY_STATUS_QUERY = gql`
           signalAmount
           pricePerShare
           indexingRewardAmount
-          network {
-            id
-          }
+
           indexerAllocations(
             first: 1
             where: { indexer: $indexer, status: "Active" }

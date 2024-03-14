@@ -6,12 +6,20 @@ import { GraphNetwork } from "../../../types/types";
 import { IndeterminateCheckbox } from "../table";
 import { ethers } from "ethers";
 export type Subgraph = {
+  metadata: {
+    displayName: string;
+    description: string | null;
+    image: string | null;
+  };
   id: string;
   displayName: string;
   image: string | null;
   currentVersion: {
     description: string | null;
     subgraphDeployment: {
+      manifest: {
+        network: string;
+      };
       originalName: string;
       ipfsHash: string;
       stakedTokens: bigint | null;
@@ -20,9 +28,6 @@ export type Subgraph = {
       pricePerShare: string;
       deniedAt: number;
       indexingRewardAmount: string;
-      network: {
-        id: string;
-      };
       indexerAllocations: {
         id: string | null;
         allocatedTokens: bigint | null;
@@ -120,11 +125,15 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
         )}
         <div className="mask mask-squircle h-12 w-12">
           <Image
-            src={info.row.original.image ? info.row.original.image : ""}
+            src={
+              info.row.original.metadata?.image
+                ? info.row.original.metadata.image
+                : ""
+            }
             alt={
-              info.row.original?.displayName +
+              info.row.original?.metadata?.displayName +
               " - " +
-              info.row.original?.currentVersion.description
+              info.row.original?.metadata?.description
             }
             height={32}
             width={32}
@@ -138,7 +147,9 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
     id: "displayName",
     cell: (info) => (
       <div>
-        <div className="font-bold">{info.getValue()}</div>
+        <div className="font-bold">
+          {info.row.original.metadata?.displayName}
+        </div>
         <div className="text-sm opacity-50">
           {info.row.original.currentVersion.subgraphDeployment.ipfsHash}
         </div>
@@ -148,7 +159,7 @@ export const SubgraphColumns: ColumnDef<Subgraph>[] = [
     footer: (info) => info.column.id,
   }),
   columnHelper.accessor(
-    (row) => row.currentVersion.subgraphDeployment.network?.id,
+    (row) => row.currentVersion.subgraphDeployment.manifest.network,
     {
       id: "network",
       header: () => <span>Network</span>,

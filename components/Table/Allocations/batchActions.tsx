@@ -44,7 +44,7 @@ export default function ActiveAllocationsActionsBatch(
               .catch(() => toast.error("Failed to create new action(s)."));
           }}
         >
-          Unalocate
+          Unallocate
         </button>
       </div>
     </div>

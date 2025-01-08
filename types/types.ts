@@ -35,13 +35,13 @@ export interface Allocation {
   queryFeesCollected: bigint;
   poi: string | null;
   subgraphDeployment: {
+    manifest: {
+      network: string;
+    };
     ipfsHash: string;
     originalName: string;
     stakedTokens: bigint;
     signalledTokens: bigint;
-    network: {
-      id: string;
-    };
   };
 }
 

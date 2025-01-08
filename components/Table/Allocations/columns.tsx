@@ -68,7 +68,7 @@ export const allocationColumns: ColumnDef<Allocation>[] = [
     header: () => <span>ID</span>,
     cell: (info) => (info.getValue() ? CutAddress(info.getValue()) : ""),
   }),
-  columnHelper.accessor("subgraphDeployment.network.id", {
+  columnHelper.accessor("subgraphDeployment.manifest.network", {
     header: "network",
     cell: (info) => info.getValue(),
   }),

@@ -158,13 +158,13 @@ export const ALLOCATIONS_BY_INDEXER_QUERY = gql`
       queryFeesCollected
       poi
       subgraphDeployment {
+        manifest {
+          network
+        }
         ipfsHash
         originalName
         stakedTokens
         signalledTokens
-        network {
-          id
-        }
       }
     }
   }

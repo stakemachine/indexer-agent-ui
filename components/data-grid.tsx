@@ -210,7 +210,7 @@ export function DataGrid<TData, TValue>({
 							<Button
 								variant="outline"
 								onClick={onRefresh}
-								disabled={isLoading}
+								disabled={isLoading || isValidating}
 							>
 								<RefreshCw
 									className={`h-4 w-4 mr-2 ${isLoading || isValidating ? "animate-spin" : ""}`}

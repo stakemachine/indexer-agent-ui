@@ -36,7 +36,7 @@ import {
 	DropdownMenuContent,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpDown, ChevronDown, RefreshCw, Filter } from "lucide-react";
+import { ChevronDown, RefreshCw, Filter } from "lucide-react";
 import {
 	Popover,
 	PopoverContent,
@@ -54,6 +54,7 @@ interface DataGridProps<TData, TValue> {
 	autoRefreshInterval?: number;
 	error?: string | null;
 	isLoading?: boolean;
+	isValidating?: boolean;
 	initialState?: {
 		sorting?: SortingState;
 		columnFilters?: ColumnFiltersState;
@@ -62,6 +63,8 @@ interface DataGridProps<TData, TValue> {
 			pageSize: number;
 		};
 	};
+	autoRefreshEnabled?: boolean;
+	onAutoRefreshChange?: (enabled: boolean) => void;
 }
 
 function ColumnFilter({ column }: { column: any }) {
@@ -95,7 +98,10 @@ export function DataGrid<TData, TValue>({
 	autoRefreshInterval = 30000,
 	error,
 	isLoading,
+	isValidating,
 	initialState,
+	autoRefreshEnabled,
+	onAutoRefreshChange,
 }: DataGridProps<TData, TValue>) {
 	const [sorting, setSorting] = React.useState<SortingState>(
 		initialState?.sorting || [],
@@ -105,7 +111,16 @@ export function DataGrid<TData, TValue>({
 	);
 	const [globalFilter, setGlobalFilter] = React.useState("");
 	const [rowSelection, setRowSelection] = React.useState({});
-	const [autoRefresh, setAutoRefresh] = React.useState(false);
+	const [internalAutoRefresh, setInternalAutoRefresh] = React.useState(false);
+	const autoRefresh =
+		autoRefreshEnabled !== undefined ? autoRefreshEnabled : internalAutoRefresh;
+	const setAutoRefresh = (value: boolean) => {
+		if (onAutoRefreshChange) {
+			onAutoRefreshChange(value);
+		} else {
+			setInternalAutoRefresh(value);
+		}
+	};
 
 	const autoRefreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -197,7 +212,9 @@ export function DataGrid<TData, TValue>({
 								onClick={onRefresh}
 								disabled={isLoading}
 							>
-								<RefreshCw className="h-4 w-4 mr-2" />
+								<RefreshCw
+									className={`h-4 w-4 mr-2 ${isLoading || isValidating ? "animate-spin" : ""}`}
+								/>
 								Refresh
 							</Button>
 							<div className="flex items-center space-x-2">

@@ -7,7 +7,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { DataGrid } from "@/components/data-grid";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
 import { Badge } from "@/components/ui/badge";
-import { formatDistanceToNow, fromUnixTime, sub } from "date-fns";
+import { formatDistanceToNow, fromUnixTime } from "date-fns";
 import { ethers } from "ethers";
 
 const ALLOCATIONS_BY_INDEXER_QUERY = gql`
@@ -169,7 +169,7 @@ export function Allocations() {
 		client.request(query, {
 			indexer: indexerRegistration?.address.toLowerCase(),
 		});
-	const { data, error, isLoading, mutate } = useSWR(
+	const { data, error, isLoading, isValidating, mutate } = useSWR(
 		indexerRegistration?.address ? ALLOCATIONS_BY_INDEXER_QUERY : null,
 		fetcher,
 	);
@@ -199,6 +199,7 @@ export function Allocations() {
 			onRefresh={() => mutate()}
 			error={error ? "Failed to load allocations" : null}
 			isLoading={isLoading}
+			isValidating={isValidating}
 			initialState={{
 				sorting: [{ id: "createdAt", desc: true }],
 			}}

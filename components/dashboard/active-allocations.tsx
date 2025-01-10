@@ -143,7 +143,7 @@ export function ActiveAllocations() {
 			throw error;
 		}
 	};
-	const { data, error, isLoading, mutate } = useSWR(
+	const { data, error, isLoading, isValidating, mutate } = useSWR(
 		AGENT_ALLOCATIONS_QUERY,
 		fetcher,
 	);
@@ -163,6 +163,7 @@ export function ActiveAllocations() {
 				autoRefreshInterval={60000} // Set to 1 minute
 				error={error ? error.message : null}
 				isLoading={isLoading}
+				isValidating={isValidating}
 				initialState={{
 					sorting: [{ id: "allocatedTokens", desc: true }],
 				}}

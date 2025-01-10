@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { DataGrid } from "@/components/data-grid";
 import { AGENT_INDEXER_DEPLOYMENTS_QUERY } from "@/lib/graphql/queries";
 import { useNetworkStore } from "@/lib/store";
+import { isValid } from "date-fns";
 
 type Deployment = {
 	subgraphDeployment: string;
@@ -101,7 +102,7 @@ export function IndexerDeployments() {
 
 	const fetcher = (query: string, variables: any) =>
 		client.request(query, variables);
-	const { data, error, isLoading, mutate } = useSWR(
+	const { data, error, isLoading, isValidating, mutate } = useSWR(
 		[AGENT_INDEXER_DEPLOYMENTS_QUERY, { protocolNetwork: currentNetwork }],
 		([query, variables]) => fetcher(query, variables),
 	);
@@ -130,9 +131,11 @@ export function IndexerDeployments() {
 				columns={columns}
 				data={deployments}
 				onRefresh={() => mutate()}
+				autoRefreshEnabled={true}
 				autoRefreshInterval={60000} // Set to 1 minute
 				error={error ? "Failed to load deployments" : null}
 				isLoading={isLoading}
+				isValidating={isValidating}
 				initialState={{
 					sorting: [{ id: "behind", desc: true }],
 				}}

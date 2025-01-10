@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { GeistMono } from "geist/font/mono";
 import {
 	Table,
 	TableBody,
@@ -126,6 +127,22 @@ export function DataGrid<TData, TValue>({
 		getPaginationRowModel: getPaginationRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),
+		globalFilterFn: (row, columnId, filterValue) => {
+			const searchableValues = Object.entries(row.original).flatMap(
+				([key, value]) => {
+					if (typeof value === "object" && value !== null) {
+						return Object.values(value);
+					}
+					return value;
+				},
+			);
+
+			return searchableValues.some(
+				(v) =>
+					typeof v === "string" &&
+					v.toLowerCase().includes(filterValue.toLowerCase()),
+			);
+		},
 		initialState: {
 			pagination: initialState?.pagination,
 		},
@@ -155,8 +172,11 @@ export function DataGrid<TData, TValue>({
 				<div className="flex items-center space-x-2">
 					<Input
 						placeholder="Search all columns..."
-						value={globalFilter}
-						onChange={(e) => setGlobalFilter(e.target.value)}
+						value={globalFilter ?? ""}
+						onChange={(e) => {
+							const value = e.target.value;
+							setGlobalFilter(value);
+						}}
 						className="max-w-sm"
 					/>
 					{isFiltered && (
@@ -255,7 +275,7 @@ export function DataGrid<TData, TValue>({
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody>
+					<TableBody className={GeistMono.className}>
 						{isLoading ? (
 							<TableRow>
 								<TableCell

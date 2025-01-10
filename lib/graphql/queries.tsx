@@ -1,5 +1,160 @@
 import { gql } from "graphql-request";
 
+export const AGENT_STATUS_QUERY = gql`
+  query getStatus($protocolNetwork: String!) {
+    indexerRegistration(protocolNetwork: $protocolNetwork) {
+      url
+      address
+      registered
+      location {
+        latitude
+        longitude
+      }
+      protocolNetwork
+    }
+    indexerDeployments {
+      subgraphDeployment
+      synced
+      health
+      fatalError {
+        handler
+        message
+      }
+      node
+      chains {
+        network
+        latestBlock {
+          number
+        }
+        chainHeadBlock {
+          number
+        }
+        earliestBlock {
+          number
+        }
+      }
+      protocolNetwork
+    }
+    indexerAllocations(protocolNetwork: $protocolNetwork) {
+      id
+      indexer
+      protocolNetwork
+      allocatedTokens
+      createdAtEpoch
+      closedAtEpoch
+      subgraphDeployment
+      signalledTokens
+      stakedTokens
+      ageInEpochs
+    }
+    indexerEndpoints(protocolNetwork: $protocolNetwork) {
+      service {
+        url
+        healthy
+        protocolNetwork
+        tests {
+          test
+          error
+          possibleActions
+        }
+      }
+      status {
+        url
+        healthy
+        protocolNetwork
+        tests {
+          test
+          error
+          possibleActions
+        }
+      }
+    }
+    indexingRules(merged: true) {
+      identifier
+      identifierType
+      allocationAmount
+      allocationLifetime
+      autoRenewal
+      parallelAllocations
+      maxAllocationPercentage
+      minSignal
+      maxSignal
+      minStake
+      minAverageQueryFees
+      custom
+      decisionBasis
+      requireSupported
+    }
+
+    costModels {
+      deployment
+      model
+      variables
+    }
+
+    actions(filter: {}) {
+      id
+      type
+      deploymentID
+      allocationID
+      amount
+      poi
+      force
+      source
+      reason
+      priority
+      status
+      failureReason
+      transaction
+    }
+  }
+`;
+
+export const AGENT_INDEXER_DEPLOYMENTS_QUERY = gql`
+  query getIndexerDeployments($protocolNetwork: String!) {
+    indexerDeployments(protocolNetwork: $protocolNetwork) {
+      subgraphDeployment
+      synced
+      health
+      fatalError {
+        handler
+        message
+      }
+      node
+      chains {
+        network
+        latestBlock {
+          number
+        }
+        chainHeadBlock {
+          number
+        }
+        earliestBlock {
+          number
+        }
+      }
+      protocolNetwork
+    }
+  }
+`;
+
+export const AGENT_ALLOCATIONS_QUERY = gql`
+  query getAgentAllocations($protocolNetwork: String!) {
+    indexerAllocations(protocolNetwork: $protocolNetwork) {
+      id
+      indexer
+      protocolNetwork
+      allocatedTokens
+      createdAtEpoch
+      closedAtEpoch
+      subgraphDeployment
+      signalledTokens
+      stakedTokens
+      ageInEpochs
+    }
+  }
+`;
+
 export const APPROVE_ACTIONS_MUTATION = gql`
   mutation approveActions($actionIDs: [Int!]!) {
     approveActions(actionIDs: $actionIDs) {
@@ -112,6 +267,13 @@ export const GRAPH_NETWORK_INFO_QUERY = gql`
   }
 `;
 
+export const INDEXER_OPERATORS_QUERY = gql`
+  query getIndexerOperators($indexer: String) {
+    graphAccounts(where: { operatorOf_: {indexer: $indexer}}) {
+      id
+    }
+}`;
+
 export const AGENT_INDEXER_REGISTRATION_QUERY = gql`
   query getIndexerRegistration($protocolNetwork: String!) {
     indexerRegistration(protocolNetwork: $protocolNetwork) {
@@ -123,18 +285,57 @@ export const AGENT_INDEXER_REGISTRATION_QUERY = gql`
         longitude
       }
     }
+    indexerEndpoints(protocolNetwork: $protocolNetwork) {
+      service {
+        url
+        healthy
+        protocolNetwork
+        tests {
+          test
+          error
+          possibleActions
+        }
+      }
+      status {
+        url
+        healthy
+        protocolNetwork
+        tests {
+          test
+          error
+          possibleActions
+        }
+      }
+    }
   }
 `;
 
 export const INDEXER_INFO_BY_ID_QUERY = gql`
   query indexerByIdQuery($id: String) {
-    indexer(id: $id) {
-      defaultDisplayName
+    indexer(id:$id){
+      stakedTokens
+      allocatedTokens
+      lockedTokens
+      delegatedTokens
+      tokenCapacity
+      delegatedCapacity
+      availableStake
+      indexingRewardCut
+      queryFeeCut
       account {
         id
       }
+      indexingRewardEffectiveCut
+      queryFeeEffectiveCut
+      delegatorParameterCooldown
+      lastDelegationParameterUpdate
+      defaultDisplayName
     }
-  }
+    
+    graphAccounts(where: { operatorOf_: {indexer:$id}}) {
+      id
+    }
+}
 `;
 
 export const ALLOCATIONS_BY_INDEXER_QUERY = gql`

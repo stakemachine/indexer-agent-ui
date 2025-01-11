@@ -11,9 +11,21 @@ import {
 } from "@/components/ui/select";
 import { useNetworkStore } from "@/lib/store";
 import { ThemeToggle } from "./theme-toggle";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
+
+const menuItems = [
+	{ href: "/allocations", label: "Allocations" },
+	{ href: "/actions", label: "Actions" },
+	{ href: "/subgraphs", label: "Subgraphs" },
+	{ href: "/rules", label: "Rules" },
+	{ href: "/cost-models", label: "Cost Models" },
+	{ href: "/disputes", label: "Disputes" },
+];
 
 export function Header() {
 	const { currentNetwork, setCurrentNetwork } = useNetworkStore();
+	const pathname = usePathname();
 	const NetworksList = ["arbitrum-one", "mainnet", "goerli", "arbitrum-goerli"];
 	return (
 		<header className="border-b">
@@ -36,42 +48,20 @@ export function Header() {
 					</Select>
 				</div>
 				<nav className="flex-1 flex items-center justify-center space-x-4">
-					<Link
-						href="/allocations"
-						className="text-sm text-muted-foreground hover:text-foreground"
-					>
-						Allocations
-					</Link>
-					<Link
-						href="/subgraphs"
-						className="text-sm text-muted-foreground hover:text-foreground"
-					>
-						Subgraphs
-					</Link>
-					<Link
-						href="/actions"
-						className="text-sm text-muted-foreground hover:text-foreground"
-					>
-						Actions
-					</Link>
-					<Link
-						href="/rules"
-						className="text-sm text-muted-foreground hover:text-foreground"
-					>
-						Rules
-					</Link>
-					<Link
-						href="/cost-models"
-						className="text-sm text-muted-foreground hover:text-foreground"
-					>
-						Cost Models
-					</Link>
-					<Link
-						href="/disputes"
-						className="text-sm text-muted-foreground hover:text-foreground"
-					>
-						Disputes
-					</Link>
+					{menuItems.map((item) => (
+						<Link
+							key={item.href}
+							href={item.href}
+							className={cn(
+								"text-sm hover:text-foreground",
+								pathname === item.href
+									? "text-foreground"
+									: "text-muted-foreground",
+							)}
+						>
+							{item.label}
+						</Link>
+					))}
 				</nav>
 				<div className="flex items-center space-x-4">
 					<ThemeToggle />

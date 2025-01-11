@@ -18,6 +18,7 @@
     "@radix-ui/react-select": "^2.1.4",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-switch": "^1.1.2",
+    "@radix-ui/react-toast": "^1.2.4",
     "@tanstack/react-table": "^8.20.6",
     "autoprefixer": "^10.4.20",
     "bignumber.js": "^9.1.2",
@@ -29,6 +30,7 @@
     "ethers": "^6.13.5",
     "geist": "^1.3.1",
     "graphql-request": "^6.1.0",
+    "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.469.0",
     "next": "^15.1.4",
     "next-auth": "^4.24.11",
@@ -49,6 +51,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@types/lodash": "^4.17.14",
     "@types/node": "22.10.5",
     "@types/react": "19.0.3",
     "@types/react-dom": "19.0.2",

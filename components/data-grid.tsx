@@ -21,6 +21,7 @@ import {
 	getPaginationRowModel,
 	getFilteredRowModel,
 	getSortedRowModel,
+	RowSelectionState,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +47,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import debounce from "lodash/debounce";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface DataGridProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
@@ -65,6 +68,10 @@ interface DataGridProps<TData, TValue> {
 	};
 	autoRefreshEnabled?: boolean;
 	onAutoRefreshChange?: (enabled: boolean) => void;
+	batchActions?: {
+		label: string;
+		onClick: (selectedRows: TData[]) => void;
+	}[];
 }
 
 function ColumnFilter({ column }: { column: any }) {
@@ -102,6 +109,7 @@ export function DataGrid<TData, TValue>({
 	initialState,
 	autoRefreshEnabled,
 	onAutoRefreshChange,
+	batchActions,
 }: DataGridProps<TData, TValue>) {
 	const [sorting, setSorting] = React.useState<SortingState>(
 		initialState?.sorting || [],
@@ -110,7 +118,7 @@ export function DataGrid<TData, TValue>({
 		initialState?.columnFilters || [],
 	);
 	const [globalFilter, setGlobalFilter] = React.useState("");
-	const [rowSelection, setRowSelection] = React.useState({});
+	const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 	const [internalAutoRefresh, setInternalAutoRefresh] = React.useState(false);
 	const autoRefresh =
 		autoRefreshEnabled !== undefined ? autoRefreshEnabled : internalAutoRefresh;
@@ -346,6 +354,20 @@ export function DataGrid<TData, TValue>({
 					{table.getFilteredRowModel().rows.length} row(s) selected.
 				</div>
 				<div className="flex items-center space-x-2">
+					{batchActions &&
+						batchActions.map((action, index) => (
+							<Button
+								key={index}
+								onClick={() =>
+									action.onClick(
+										table.getSelectedRowModel().rows.map((row) => row.original),
+									)
+								}
+								disabled={table.getSelectedRowModel().rows.length === 0}
+							>
+								{action.label}
+							</Button>
+						))}
 					<Button
 						variant="outline"
 						size="sm"

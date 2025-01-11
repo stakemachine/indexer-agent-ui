@@ -5,6 +5,7 @@ import "../styles/globals.css";
 import { Header } from "@/components/header";
 import { ThemeProvider } from "next-themes";
 import { IndexerRegistrationLoader } from "@/components/indexer-registration-loader";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
 	title: "The Graph Indexer Agent UI",
@@ -24,6 +25,7 @@ export default function RootLayout({
 					<Header />
 					<main className="container mx-auto p-4 space-y-6">{children}</main>
 				</ThemeProvider>
+				<Toaster />
 			</body>
 		</html>
 	);

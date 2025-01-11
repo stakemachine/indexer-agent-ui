@@ -5,11 +5,16 @@ import useSWR from "swr";
 import { GraphQLClient } from "graphql-request";
 import type { ColumnDef } from "@tanstack/react-table";
 import { DataGrid } from "@/components/data-grid";
-import { AGENT_ALLOCATIONS_QUERY } from "@/lib/graphql/queries";
+import {
+	AGENT_ALLOCATIONS_QUERY,
+	CREATE_ACTION_MUTATION,
+} from "@/lib/graphql/queries";
 import { useNetworkStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { ethers } from "ethers";
 import { GeistMono } from "geist/font/mono";
+import { Checkbox } from "../ui/checkbox";
+import { toast } from "@/hooks/use-toast";
 
 type Allocation = {
 	id: string;
@@ -20,44 +25,21 @@ type Allocation = {
 	createdAt: string;
 };
 
-const CustomCheckbox = React.forwardRef<
-	HTMLDivElement,
-	{ checked: boolean; onCheckedChange: (checked: boolean) => void }
->(({ checked, onCheckedChange }, ref) => (
-	<div
-		ref={ref}
-		tabIndex={0}
-		className={cn(
-			"h-4 w-4 rounded-sm border border-primary",
-			checked && "bg-primary",
-		)}
-		role="checkbox"
-		aria-checked={checked}
-		onClick={() => onCheckedChange(!checked)}
-		onKeyDown={(e) => {
-			if (e.key === "Enter" || e.key === " ") {
-				e.preventDefault();
-				onCheckedChange(!checked);
-			}
-		}}
-	/>
-));
-
-CustomCheckbox.displayName = "CustomCheckbox";
-
 const columns: ColumnDef<Allocation>[] = [
 	{
 		id: "select",
 		header: ({ table }) => (
-			<CustomCheckbox
+			<Checkbox
 				checked={table.getIsAllPageRowsSelected()}
 				onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+				aria-label="Select all"
 			/>
 		),
 		cell: ({ row }) => (
-			<CustomCheckbox
+			<Checkbox
 				checked={row.getIsSelected()}
 				onCheckedChange={(value) => row.toggleSelected(!!value)}
+				aria-label="Select row"
 			/>
 		),
 		enableSorting: false,
@@ -153,6 +135,35 @@ export function ActiveAllocations() {
 		return (data as { indexerAllocations: Allocation[] }).indexerAllocations;
 	}, [data]);
 
+	const handleUnallocate = async (selectedRows: Allocation[]) => {
+		const actions = selectedRows.map((row) => ({
+			type: "unallocate",
+			deploymentID: row.subgraphDeployment,
+			source: "Agent UI",
+			reason: "manual",
+			status: "queued",
+			priority: 0,
+			allocationID: row.id,
+			protocolNetwork: currentNetwork,
+		}));
+
+		try {
+			const result = await client.request(CREATE_ACTION_MUTATION, { actions });
+			toast({
+				title: "Unallocation queued",
+				description: `Successfully queued ${actions.length} unallocation(s)`,
+			});
+			mutate(); // Refresh the data
+		} catch (error) {
+			toast({
+				title: "Error",
+				description: "Failed to queue unallocation(s)",
+				variant: "destructive",
+			});
+			console.error("Failed to queue unallocation(s):", error);
+		}
+	};
+
 	return (
 		<div className="space-y-4">
 			<h2 className="text-lg font-semibold">Active Allocations</h2>
@@ -167,6 +178,12 @@ export function ActiveAllocations() {
 				initialState={{
 					sorting: [{ id: "allocatedTokens", desc: true }],
 				}}
+				batchActions={[
+					{
+						label: "Unallocate",
+						onClick: handleUnallocate,
+					},
+				]}
 			/>
 		</div>
 	);

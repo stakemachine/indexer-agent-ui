@@ -5,7 +5,11 @@ import { EthereumIcon } from "@/components/icons";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
 import { GraphQLClient } from "graphql-request";
 import useSWR from "swr";
-import { INDEXER_INFO_BY_ID_QUERY } from "@/lib/graphql/queries";
+import {
+	INDEXER_INFO_BY_ID_QUERY,
+	INDEXER_OPERATORS_QUERY,
+} from "@/lib/graphql/queries";
+import { RefreshCw } from "lucide-react";
 
 export function IndexerInfo() {
 	const { indexerRegistration } = useIndexerRegistrationStore();
@@ -16,9 +20,24 @@ export function IndexerInfo() {
 	const fetcher = (query: string, variables: any) =>
 		client.request(query, variables);
 	const { data, error, isLoading, mutate } = useSWR(
+		indexerRegistration?.address
+			? [
+					INDEXER_INFO_BY_ID_QUERY,
+					{ id: indexerRegistration?.address.toLowerCase() },
+				]
+			: null,
+		([query, variables]) => fetcher(query, variables),
+	);
+
+	const {
+		data: operatorsData,
+		error: operatorsError,
+		isLoading: operatorsIsLoading,
+		isValidating: operatorsIsValidating,
+	} = useSWR(
 		[
-			INDEXER_INFO_BY_ID_QUERY,
-			{ id: indexerRegistration?.address.toLowerCase() },
+			INDEXER_OPERATORS_QUERY,
+			{ indexer: indexerRegistration?.address.toLowerCase() },
 		],
 		([query, variables]) => fetcher(query, variables),
 	);
@@ -72,11 +91,18 @@ export function IndexerInfo() {
 										0xTODO
 									</Badge>
 								</div>
-								{data.graphAccounts?.map((account: any) => (
-									<div key={account.id} className="text-sm font-mono">
-										{account.id}
+								{operatorsIsLoading || operatorsIsValidating ? (
+									<div className="inline-flex items-center text-sm font-mono">
+										<RefreshCw className="h-3 w-3 mr-2 animate-spin" />
+										<div className="animate-pulse">Loading operators...</div>
 									</div>
-								))}
+								) : (
+									operatorsData.graphAccounts?.map((account: any) => (
+										<div key={account.id} className="text-sm font-mono">
+											{account.id}
+										</div>
+									))
+								)}
 							</div>
 							<div className="grid grid-cols-2 gap-4">
 								<div>

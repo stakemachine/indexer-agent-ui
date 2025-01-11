@@ -267,13 +267,6 @@ export const GRAPH_NETWORK_INFO_QUERY = gql`
   }
 `;
 
-export const INDEXER_OPERATORS_QUERY = gql`
-  query getIndexerOperators($indexer: String) {
-    graphAccounts(where: { operatorOf_: {indexer: $indexer}}) {
-      id
-    }
-}`;
-
 export const AGENT_INDEXER_REGISTRATION_QUERY = gql`
   query getIndexerRegistration($protocolNetwork: String!) {
     indexerRegistration(protocolNetwork: $protocolNetwork) {
@@ -331,12 +324,15 @@ export const INDEXER_INFO_BY_ID_QUERY = gql`
       lastDelegationParameterUpdate
       defaultDisplayName
     }
-    
-    graphAccounts(where: { operatorOf_: {indexer:$id}}) {
-      id
-    }
 }
 `;
+
+export const INDEXER_OPERATORS_QUERY = gql`
+  query getIndexerOperators($indexer: String) {
+    graphAccounts(where: { operatorOf_: {indexer: $indexer}}) {
+      id
+    }
+}`;
 
 export const ALLOCATIONS_BY_INDEXER_QUERY = gql`
   query allocationByIndexerQuery($indexer: String) {

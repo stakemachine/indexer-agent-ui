@@ -15,13 +15,15 @@ import {
 	type ColumnDef,
 	type ColumnFiltersState,
 	type SortingState,
+	VisibilityState,
 	flexRender,
 	getCoreRowModel,
 	useReactTable,
 	getPaginationRowModel,
 	getFilteredRowModel,
 	getSortedRowModel,
-	RowSelectionState,
+	type RowSelectionState,
+	getExpandedRowModel,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,6 +74,7 @@ interface DataGridProps<TData, TValue> {
 		label: string;
 		onClick: (selectedRows: TData[]) => void;
 	}[];
+	renderSubComponent?: (row: TData) => React.ReactNode;
 }
 
 function ColumnFilter({ column }: { column: any }) {
@@ -110,6 +113,7 @@ export function DataGrid<TData, TValue>({
 	autoRefreshEnabled,
 	onAutoRefreshChange,
 	batchActions,
+	renderSubComponent,
 }: DataGridProps<TData, TValue>) {
 	const [sorting, setSorting] = React.useState<SortingState>(
 		initialState?.sorting || [],
@@ -117,8 +121,11 @@ export function DataGrid<TData, TValue>({
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
 		initialState?.columnFilters || [],
 	);
+	const [columnVisibility, setColumnVisibility] =
+		React.useState<VisibilityState>({});
 	const [globalFilter, setGlobalFilter] = React.useState("");
 	const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+	const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
 	const [internalAutoRefresh, setInternalAutoRefresh] = React.useState(false);
 	const autoRefresh =
 		autoRefreshEnabled !== undefined ? autoRefreshEnabled : internalAutoRefresh;
@@ -138,18 +145,26 @@ export function DataGrid<TData, TValue>({
 		state: {
 			sorting,
 			columnFilters,
+			columnVisibility,
+			expanded,
 			globalFilter,
 			rowSelection,
 		},
 		enableRowSelection: true,
+		enableExpanding: true,
+		getRowCanExpand: () => true,
 		onRowSelectionChange: setRowSelection,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
+		onColumnVisibilityChange: setColumnVisibility,
 		onGlobalFilterChange: setGlobalFilter,
+		onExpandedChange: setExpanded,
+		getSubRows: (row: any) => row.subRows,
 		getCoreRowModel: getCoreRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),
+		getExpandedRowModel: getExpandedRowModel(),
 		globalFilterFn: (row, columnId, filterValue) => {
 			const searchableValues = Object.entries(row.original).flatMap(
 				([key, value]) => {
@@ -321,19 +336,25 @@ export function DataGrid<TData, TValue>({
 							</TableRow>
 						) : table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
-								<TableRow
-									key={row.id}
-									data-state={row.getIsSelected() && "selected"}
-								>
-									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id}>
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext(),
-											)}
-										</TableCell>
-									))}
-								</TableRow>
+								<React.Fragment key={row.id}>
+									<TableRow data-state={row.getIsSelected() && "selected"}>
+										{row.getVisibleCells().map((cell) => (
+											<TableCell key={cell.id}>
+												{flexRender(
+													cell.column.columnDef.cell,
+													cell.getContext(),
+												)}
+											</TableCell>
+										))}
+									</TableRow>
+									{row.getIsExpanded() && renderSubComponent && (
+										<TableRow>
+											<TableCell colSpan={columns.length}>
+												{renderSubComponent(row.original)}
+											</TableCell>
+										</TableRow>
+									)}
+								</React.Fragment>
 							))
 						) : (
 							<TableRow>

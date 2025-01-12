@@ -28,6 +28,7 @@ type Subgraph = {
 	stakedTokens: string;
 	createdAt: string;
 	indexingRewardAmount: string;
+	queryFeesAmount: string;
 	allocatedTokens: string;
 	apr: number;
 	proportion: number;
@@ -85,6 +86,15 @@ const columns: ColumnDef<Subgraph>[] = [
 		),
 	},
 	{
+		accessorKey: "queryFeesAmount",
+		header: "Query fees",
+		cell: ({ row }) => (
+			<div>
+				{(parseFloat(row.getValue("queryFeesAmount")) / 1e18).toFixed(2)}
+			</div>
+		),
+	},
+	{
 		accessorKey: "allocatedTokens",
 		header: "Allocated Tokens",
 		cell: ({ row }) => (
@@ -106,7 +116,7 @@ const columns: ColumnDef<Subgraph>[] = [
 	{
 		accessorKey: "capacity",
 		header: "Available Capacity",
-		cell: ({ row }) => <div>{row.getValue("capacity").toFixed(2)} GRT</div>,
+		cell: ({ row }) => <div>{row.getValue("capacity").toFixed(2)}</div>,
 	},
 ];
 
@@ -176,6 +186,8 @@ export function Subgraphs() {
 				createdAt: subgraph.currentVersion.subgraphDeployment.createdAt,
 				indexingRewardAmount:
 					subgraph.currentVersion.subgraphDeployment.indexingRewardAmount,
+				queryFeesAmount:
+					subgraph.currentVersion.subgraphDeployment.queryFeesAmount,
 				allocatedTokens:
 					subgraph.currentVersion.subgraphDeployment.indexerAllocations[0]
 						?.allocatedTokens || "0",
@@ -221,15 +233,31 @@ export function Subgraphs() {
 									</p>
 								</div>
 								<div>
-									<p className="text-sm font-medium">Signal Amount</p>
+									<p className="text-sm font-medium">Staked tokens</p>
 									<p className="text-sm text-muted-foreground">
-										{parseFloat(subgraph.signalAmount).toLocaleString()} GRT
+										{(parseFloat(subgraph.stakedTokens) / 1e18).toFixed(2)} GRT
 									</p>
 								</div>
 								<div>
 									<p className="text-sm font-medium">Signalled Tokens</p>
 									<p className="text-sm text-muted-foreground">
 										{(parseFloat(subgraph.signalledTokens) / 1e18).toFixed(2)}{" "}
+										GRT
+									</p>
+								</div>
+								<div>
+									<p className="text-sm font-medium">Indexing rewards</p>
+									<p className="text-sm text-muted-foreground">
+										{(parseFloat(subgraph.indexingRewardAmount) / 1e18).toFixed(
+											2,
+										)}{" "}
+										GRT
+									</p>
+								</div>
+								<div>
+									<p className="text-sm font-medium">Query fees</p>
+									<p className="text-sm text-muted-foreground">
+										{(parseFloat(subgraph.queryFeesAmount) / 1e18).toFixed(2)}{" "}
 										GRT
 									</p>
 								</div>

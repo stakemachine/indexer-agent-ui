@@ -399,7 +399,7 @@ export const SUBGRAPHS_BY_STATUS_QUERY = gql`
           signalAmount
           pricePerShare
           indexingRewardAmount
-
+          queryFeesAmount
           indexerAllocations(
             first: 1
             where: { indexer: $indexer, status: "Active" }

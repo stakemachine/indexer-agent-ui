@@ -13,7 +13,6 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { SUBGRAPHS_BY_STATUS_QUERY } from "@/lib/graphql/queries";
-import { isValid } from "date-fns";
 
 type Subgraph = {
 	id: string;
@@ -30,6 +29,9 @@ type Subgraph = {
 	createdAt: string;
 	indexingRewardAmount: string;
 	allocatedTokens: string;
+	apr: number;
+	proportion: number;
+	capacity: number;
 };
 
 const columns: ColumnDef<Subgraph>[] = [
@@ -62,8 +64,7 @@ const columns: ColumnDef<Subgraph>[] = [
 		header: "Signalled Tokens",
 		cell: ({ row }) => (
 			<div>
-				{parseFloat(row.getValue("currentSignalledTokens")).toLocaleString()}{" "}
-				GRT
+				{(parseFloat(row.getValue("currentSignalledTokens")) / 1e18).toFixed(2)}
 			</div>
 		),
 	},
@@ -71,7 +72,7 @@ const columns: ColumnDef<Subgraph>[] = [
 		accessorKey: "stakedTokens",
 		header: "Staked Tokens",
 		cell: ({ row }) => (
-			<div>{parseFloat(row.getValue("stakedTokens")).toLocaleString()} GRT</div>
+			<div>{(parseFloat(row.getValue("stakedTokens")) / 1e18).toFixed(2)}</div>
 		),
 	},
 	{
@@ -79,7 +80,7 @@ const columns: ColumnDef<Subgraph>[] = [
 		header: "Indexing Reward",
 		cell: ({ row }) => (
 			<div>
-				{parseFloat(row.getValue("indexingRewardAmount")).toLocaleString()} GRT
+				{(parseFloat(row.getValue("indexingRewardAmount")) / 1e18).toFixed(2)}
 			</div>
 		),
 	},
@@ -88,12 +89,29 @@ const columns: ColumnDef<Subgraph>[] = [
 		header: "Allocated Tokens",
 		cell: ({ row }) => (
 			<div>
-				{parseFloat(row.getValue("allocatedTokens") || "0").toLocaleString()}{" "}
-				GRT
+				{(parseFloat(row.getValue("allocatedTokens") || "0") / 1e18).toFixed(2)}
 			</div>
 		),
 	},
+	{
+		accessorKey: "apr",
+		header: "APR",
+		cell: ({ row }) => <div>{row.getValue("apr").toFixed(2)}%</div>,
+	},
+	{
+		accessorKey: "proportion",
+		header: "Prop",
+		cell: ({ row }) => <div>{row.getValue("proportion").toFixed(3)}</div>,
+	},
+	{
+		accessorKey: "capacity",
+		header: "Available Capacity",
+		cell: ({ row }) => <div>{row.getValue("capacity").toFixed(2)} GRT</div>,
+	},
 ];
+
+// Calculate blocks per year
+const BLOCKS_PER_YEAR = (365 * 60 * 60 * 24) / 13; // 2425846.15
 
 export function Subgraphs() {
 	const { indexerRegistration } = useIndexerRegistrationStore();
@@ -103,7 +121,9 @@ export function Subgraphs() {
 	const [autoRefreshEnabled, setAutoRefreshEnabled] = React.useState(false);
 
 	const fetcher = (query: string) =>
-		client.request(query, { indexer: indexerRegistration?.address });
+		client.request(query, {
+			indexer: indexerRegistration?.address.toLowerCase(),
+		});
 	const { data, error, isLoading, isValidating, mutate } = useSWR(
 		indexerRegistration?.address ? SUBGRAPHS_BY_STATUS_QUERY : null,
 		fetcher,
@@ -111,25 +131,59 @@ export function Subgraphs() {
 
 	const subgraphs: Subgraph[] = React.useMemo(() => {
 		if (!data) return [];
-		return data.subgraphs.map((subgraph: any) => ({
-			id: subgraph.metadata.id,
-			displayName: subgraph.metadata.displayName,
-			image: subgraph.metadata.image,
-			description: subgraph.metadata.description,
-			signalAmount: subgraph.signalAmount,
-			signalledTokens: subgraph.signalledTokens,
-			active: subgraph.active,
-			currentSignalledTokens: subgraph.currentSignalledTokens,
-			network: subgraph.currentVersion.subgraphDeployment.manifest.network,
-			ipfsHash: subgraph.currentVersion.subgraphDeployment.ipfsHash,
-			stakedTokens: subgraph.currentVersion.subgraphDeployment.stakedTokens,
-			createdAt: subgraph.currentVersion.subgraphDeployment.createdAt,
-			indexingRewardAmount:
-				subgraph.currentVersion.subgraphDeployment.indexingRewardAmount,
-			allocatedTokens:
-				subgraph.currentVersion.subgraphDeployment.indexerAllocations[0]
-					?.allocatedTokens || "0",
-		}));
+		const {
+			totalTokensSignalled,
+			networkGRTIssuancePerBlock,
+			totalTokensAllocated,
+		} = data.graphNetwork;
+
+		const annualIssuance =
+			parseFloat(networkGRTIssuancePerBlock) * BLOCKS_PER_YEAR;
+		return data.subgraphs.map((subgraph: any) => {
+			const signalledTokens = parseFloat(
+				subgraph.currentVersion.subgraphDeployment.signalledTokens,
+			);
+			const stakedTokens = parseFloat(
+				subgraph.currentVersion.subgraphDeployment.stakedTokens,
+			);
+			const apr =
+				(((signalledTokens / parseFloat(totalTokensSignalled)) *
+					annualIssuance) /
+					stakedTokens) *
+				100;
+			const proportion =
+				signalledTokens /
+				parseFloat(totalTokensSignalled) /
+				(stakedTokens / parseFloat(totalTokensAllocated));
+			const capacity =
+				(parseFloat(totalTokensAllocated) *
+					(signalledTokens / parseFloat(totalTokensSignalled)) -
+					stakedTokens) /
+				1e18;
+
+			return {
+				id: subgraph.metadata.id,
+				displayName: subgraph.metadata.displayName,
+				image: subgraph.metadata.image,
+				description: subgraph.metadata.description,
+				signalAmount: subgraph.signalAmount,
+				signalledTokens: subgraph.signalledTokens,
+				active: subgraph.active,
+				currentSignalledTokens: subgraph.currentSignalledTokens,
+				network: subgraph.currentVersion.subgraphDeployment.manifest.network,
+				ipfsHash: subgraph.currentVersion.subgraphDeployment.ipfsHash,
+				stakedTokens: subgraph.currentVersion.subgraphDeployment.stakedTokens,
+				createdAt: subgraph.currentVersion.subgraphDeployment.createdAt,
+				indexingRewardAmount:
+					subgraph.currentVersion.subgraphDeployment.indexingRewardAmount,
+				allocatedTokens:
+					subgraph.currentVersion.subgraphDeployment.indexerAllocations[0]
+						?.allocatedTokens || "0",
+				apr: apr,
+				proportion: proportion,
+				capacity: capacity,
+			};
+		});
 	}, [data]);
 
 	const renderSubgraphDetails = React.useCallback((subgraph: Subgraph) => {
@@ -175,7 +229,26 @@ export function Subgraphs() {
 								<div>
 									<p className="text-sm font-medium">Signalled Tokens</p>
 									<p className="text-sm text-muted-foreground">
-										{parseFloat(subgraph.signalledTokens).toLocaleString()} GRT
+										{(parseFloat(subgraph.signalledTokens) / 1e18).toFixed(2)}{" "}
+										GRT
+									</p>
+								</div>
+								<div>
+									<p className="text-sm font-medium">APR</p>
+									<p className="text-sm text-muted-foreground">
+										{subgraph.apr.toFixed(2)}%
+									</p>
+								</div>
+								<div>
+									<p className="text-sm font-medium">Proportion</p>
+									<p className="text-sm text-muted-foreground">
+										{subgraph.proportion.toFixed(3)}
+									</p>
+								</div>
+								<div>
+									<p className="text-sm font-medium">Available Capacity</p>
+									<p className="text-sm text-muted-foreground">
+										{subgraph.capacity.toFixed(2)} GRT
 									</p>
 								</div>
 							</div>

@@ -410,6 +410,11 @@ export const SUBGRAPHS_BY_STATUS_QUERY = gql`
         }
       }
     }
+    graphNetwork(id: 1) {
+      totalTokensSignalled
+      networkGRTIssuancePerBlock
+      totalTokensAllocated
+    }
   }
 `;
 

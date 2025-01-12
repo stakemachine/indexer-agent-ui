@@ -184,7 +184,7 @@ const columns: ColumnDef<Action>[] = [
 	{
 		accessorKey: "protocolNetwork",
 		header: "Network",
-		cell: (row) => resolveChainAlias(row.getValue()),
+		cell: (row) => resolveChainAlias(row.getValue() as string),
 	},
 ];
 

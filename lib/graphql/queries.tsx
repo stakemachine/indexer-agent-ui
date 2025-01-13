@@ -380,7 +380,7 @@ export const SUBGRAPHS_BY_STATUS_QUERY = gql`
         displayName
         image
         description
-      }
+      }    
       signalAmount
       signalledTokens
       active
@@ -389,6 +389,7 @@ export const SUBGRAPHS_BY_STATUS_QUERY = gql`
         subgraphDeployment {
           manifest {
             network
+            poweredBySubstreams
           }
           originalName
           ipfsHash

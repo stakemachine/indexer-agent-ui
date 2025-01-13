@@ -27,6 +27,8 @@ type Subgraph = {
 	ipfsHash: string;
 	stakedTokens: string;
 	createdAt: string;
+	deniedAt: number;
+	poweredBySubstreams: boolean;
 	indexingRewardAmount: string;
 	queryFeesAmount: string;
 	allocatedTokens: string;
@@ -55,6 +57,31 @@ const columns: ColumnDef<Subgraph>[] = [
 	{
 		accessorKey: "displayName",
 		header: "Name",
+		cell: ({ row }) => (
+			<div className="flex items-center space-x-2 overflow-hidden">
+				<Image
+					src={row.original.image || "/placeholder.svg"}
+					alt={row.original.displayName}
+					width={32}
+					height={32}
+					className="rounded-lg"
+				/>
+				<div className="flex flex-col">
+					<span className="font-medium">{row.getValue("displayName")}</span>
+					<span className="text-xs text-muted-foreground">
+						{row.original.ipfsHash}
+					</span>
+					<div>
+						{row.original.deniedAt !== 0 && (
+							<Badge variant="destructive">DENIED</Badge>
+						)}
+						{row.original.poweredBySubstreams && (
+							<Badge variant="secondary">Substreams</Badge>
+						)}
+					</div>
+				</div>
+			</div>
+		),
 	},
 	{
 		accessorKey: "network",
@@ -184,6 +211,10 @@ export function Subgraphs() {
 				ipfsHash: subgraph.currentVersion.subgraphDeployment.ipfsHash,
 				stakedTokens: subgraph.currentVersion.subgraphDeployment.stakedTokens,
 				createdAt: subgraph.currentVersion.subgraphDeployment.createdAt,
+				deniedAt: subgraph.currentVersion.subgraphDeployment.deniedAt,
+				poweredBySubstreams:
+					subgraph.currentVersion.subgraphDeployment.manifest
+						.poweredBySubstreams,
 				indexingRewardAmount:
 					subgraph.currentVersion.subgraphDeployment.indexingRewardAmount,
 				queryFeesAmount:

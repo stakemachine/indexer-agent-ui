@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Checkbox } from "../ui/checkbox";
+import { resolveChainAlias } from "@/lib/utils";
 
 const INDEXING_RULES_LIST_QUERY = gql`
   {
@@ -96,6 +97,15 @@ const columns: ColumnDef<IndexingRule>[] = [
 		),
 	},
 	{
+		accessorKey: "decisionBasis",
+		header: "Decision Basis",
+	},
+	{
+		accessorKey: "protocolNetwork",
+		header: "Protocol Network",
+		cell: (row) => resolveChainAlias(row.getValue() as string),
+	},
+	{
 		accessorKey: "allocationLifetime",
 		header: "Allocation Lifetime",
 	},
@@ -131,10 +141,7 @@ const columns: ColumnDef<IndexingRule>[] = [
 		accessorKey: "minAverageQueryFees",
 		header: "Min Avg Query Fees",
 	},
-	{
-		accessorKey: "decisionBasis",
-		header: "Decision Basis",
-	},
+
 	{
 		accessorKey: "requireSupported",
 		header: "Require Supported",
@@ -146,10 +153,6 @@ const columns: ColumnDef<IndexingRule>[] = [
 		accessorKey: "safety",
 		header: "Safety",
 		cell: ({ row }) => <Switch checked={row.getValue("safety")} disabled />,
-	},
-	{
-		accessorKey: "protocolNetwork",
-		header: "Protocol Network",
 	},
 ];
 

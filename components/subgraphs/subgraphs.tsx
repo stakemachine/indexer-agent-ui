@@ -148,7 +148,7 @@ const columns: ColumnDef<Subgraph>[] = [
 ];
 
 // Calculate blocks per year
-const BLOCKS_PER_YEAR = (365 * 60 * 60 * 24) / 13; // 2425846.15
+const BLOCKS_PER_YEAR = (365 * 60 * 60 * 24) / 12; // 12 seconds per block
 
 export function Subgraphs() {
 	const { indexerRegistration } = useIndexerRegistrationStore();

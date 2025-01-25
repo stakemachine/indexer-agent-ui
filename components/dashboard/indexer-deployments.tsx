@@ -116,11 +116,11 @@ export function IndexerDeployments() {
 			node: deployment.node,
 			network: deployment.chains[0]?.network || "Unknown",
 			earliest: deployment.chains[0]?.earliestBlock.number || 0,
-			latest: deployment.chains[0]?.latestBlock.number || 0,
+			latest: deployment.chains[0]?.latestBlock?.number || 0,
 			chainhead: deployment.chains[0]?.chainHeadBlock.number || 0,
 			behind:
 				(deployment.chains[0]?.chainHeadBlock.number || 0) -
-				(deployment.chains[0]?.latestBlock.number || 0),
+				(deployment.chains[0]?.latestBlock?.number || 0),
 		}));
 	}, [data]);
 

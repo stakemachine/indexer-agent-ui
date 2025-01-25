@@ -166,11 +166,13 @@ const columns: ColumnDef<Action>[] = [
 				className={
 					row.getValue("status") === "approved"
 						? "bg-emerald-500/10 text-orange-500 border-0"
-						: row.getValue("status") === "canceled"
+						: row.getValue("status") === "queued"
 							? "bg-yellow-500/10 text-yellow-500 border-0"
-							: row.getValue("status") === "success"
-								? "bg-emerald-500/10 text-emerald-500 border-0"
-								: "bg-red-500/10 text-red-500 border-0"
+							: row.getValue("status") === "canceled"
+								? "bg-gray-500/10 text-gray-500 border-0"
+								: row.getValue("status") === "success"
+									? "bg-emerald-500/10 text-emerald-500 border-0"
+									: "bg-red-500/10 text-red-500 border-0"
 				}
 			>
 				{row.getValue("status")}

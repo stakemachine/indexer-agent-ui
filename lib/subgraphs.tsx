@@ -1,5 +1,5 @@
-import { ethers } from "ethers";
 import base58 from "bs58";
+import { ethers } from "ethers";
 
 export class SubgraphName {
   kind: "name" = "name";
@@ -25,7 +25,7 @@ export class SubgraphDeploymentID {
   value: string;
 
   constructor(id: string) {
-    let value;
+    let value: string | undefined;
     // Security: Input validation
     if (multiHashCheck.test(id)) {
       value = ethers.hexlify(base58.decode(id).slice(2));

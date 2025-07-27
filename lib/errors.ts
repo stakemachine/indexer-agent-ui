@@ -136,8 +136,7 @@ export const INDEXER_ERROR_MESSAGES: Record<IndexerErrorCode, string> = {
   IE061: "Failed to allocate: Invalid allocation amount provided",
   IE062: "Did not receive tx receipt, not authorized or network paused",
   IE063: "No active allocation with provided id found",
-  IE064:
-    "Failed to unallocate: Allocation cannot be closed in the same epoch it was created",
+  IE064: "Failed to unallocate: Allocation cannot be closed in the same epoch it was created",
   IE065: "Failed to unallocate: Allocation has already been closed",
   IE066: "Failed to allocate: allocation ID already exists on chain",
   IE067: "Failed to query POI for current epoch start block",

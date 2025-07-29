@@ -5,13 +5,14 @@ import { useEffect } from "react";
 import { AGENT_INDEXER_REGISTRATION_QUERY } from "@/lib/graphql/queries";
 import { type IndexerRegistration, useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
 
-const client = new GraphQLClient("/api/agent");
-
 export function IndexerRegistrationLoader() {
   const { currentNetwork } = useNetworkStore();
   const { setIndexerRegistration } = useIndexerRegistrationStore();
 
   useEffect(() => {
+    const endpoint = `${window.location.origin}/api/agent`;
+    const client = new GraphQLClient(endpoint);
+
     console.log("Current network:", currentNetwork);
     const fetchIndexerRegistration = async () => {
       try {
@@ -25,12 +26,11 @@ export function IndexerRegistrationLoader() {
         }
       } catch (error) {
         console.error("Failed to fetch indexer registration:", error);
-        // Optionally, you can set an error state here if you want to display it in the UI
       }
     };
 
     fetchIndexerRegistration();
   }, [currentNetwork, setIndexerRegistration]);
 
-  return null; // This component doesn't render anything
+  return null;
 }

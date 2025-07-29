@@ -10,9 +10,11 @@ import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
 
 export function IndexerInfo() {
   const { indexerRegistration } = useIndexerRegistrationStore();
-
   const { currentNetwork } = useNetworkStore();
-  const client = new GraphQLClient(`/api/subgraph/${currentNetwork}`);
+
+  // Ensure absolute URL for GraphQLClient
+  const endpoint = typeof window !== "undefined" ? `${window.location.origin}/api/subgraph/${currentNetwork}` : "";
+  const client = new GraphQLClient(endpoint);
 
   const fetcher = (query: string, variables: any) => client.request(query, variables);
   const { data, error, isLoading, mutate } = useSWR(
@@ -27,12 +29,21 @@ export function IndexerInfo() {
     error: operatorsError,
     isLoading: operatorsIsLoading,
     isValidating: operatorsIsValidating,
-  } = useSWR([INDEXER_OPERATORS_QUERY, { indexer: indexerRegistration?.address.toLowerCase() }], ([query, variables]) =>
-    fetcher(query, variables),
+  } = useSWR(
+    indexerRegistration?.address
+      ? [INDEXER_OPERATORS_QUERY, { indexer: indexerRegistration?.address.toLowerCase() }]
+      : null,
+    ([query, variables]) => fetcher(query, variables),
   );
-  if (operatorsError) {
+
+  if (error) {
     console.error("Error fetching indexer info:", error);
     return <div>Error fetching indexer info</div>;
+  }
+
+  if (operatorsError) {
+    console.error("Error fetching operator info:", operatorsError);
+    return <div>Error fetching operator info</div>;
   }
   if (isLoading) {
     return <div>Loading indexer info...</div>;

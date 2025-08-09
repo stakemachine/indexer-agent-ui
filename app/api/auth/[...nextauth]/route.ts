@@ -1,8 +1,9 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { env } from "@/lib/env";
 
-const isCorrectCredentials = (credentials) =>
-  credentials.username === process.env.UI_LOGIN && credentials.password === process.env.UI_PASS;
+const isCorrectCredentials = (credentials: { username?: string; password?: string }) =>
+  credentials?.username === env.UI_LOGIN && credentials?.password === env.UI_PASS;
 
 const options = {
   // Configure one or more authentication providers
@@ -17,8 +18,8 @@ const options = {
         username: { label: "Username", type: "text", placeholder: "agent007" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials) => {
-        if (isCorrectCredentials(credentials)) {
+      authorize: async (credentials: { username?: string; password?: string } | undefined) => {
+        if (credentials && isCorrectCredentials(credentials)) {
           const user = { id: "1", name: "Admin" };
           // Any object returned will be saved in `user` property of the JWT
           return Promise.resolve(user);

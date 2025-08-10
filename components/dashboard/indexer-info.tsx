@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { EthereumIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { MapPreview } from "@/components/ui/map-preview";
 import { subgraphClient } from "@/lib/graphql/client";
 import { INDEXER_INFO_BY_ID_QUERY, INDEXER_OPERATORS_QUERY } from "@/lib/graphql/queries";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
@@ -152,7 +153,21 @@ export function IndexerInfo() {
               </div>
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Indexer Location</div>
-                <div className="bg-sky-100 aspect-video rounded-lg" />
+                {indexerRegistration?.location ? (
+                  <div className="aspect-video">
+                    <MapPreview
+                      latitude={indexerRegistration.location.latitude}
+                      longitude={indexerRegistration.location.longitude}
+                      label="Indexer geographic location"
+                      zoom={4}
+                      className="h-full"
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-video rounded-lg border bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                    Location unavailable
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>

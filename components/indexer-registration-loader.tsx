@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { agentClient } from "@/lib/graphql/client";
 import { AGENT_INDEXER_REGISTRATION_QUERY } from "@/lib/graphql/queries";
@@ -8,8 +10,12 @@ import { type IndexerRegistration, useIndexerRegistrationStore, useNetworkStore 
 export function IndexerRegistrationLoader() {
   const { currentNetwork } = useNetworkStore();
   const { setIndexerRegistration } = useIndexerRegistrationStore();
+  const { status } = useSession();
+  const pathname = usePathname();
 
   useEffect(() => {
+    // Skip on sign-in page or until authenticated
+    if (pathname === "/signin" || status !== "authenticated") return;
     const client = agentClient();
 
     console.log("Current network:", currentNetwork);
@@ -32,7 +38,7 @@ export function IndexerRegistrationLoader() {
     };
 
     fetchIndexerRegistration();
-  }, [currentNetwork, setIndexerRegistration]);
+  }, [currentNetwork, setIndexerRegistration, pathname, status]);
 
   return null;
 }

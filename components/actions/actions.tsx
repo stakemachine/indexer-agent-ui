@@ -10,12 +10,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
+import { createSchemaFetcher } from "@/lib/fetchers";
 import { agentClient } from "@/lib/graphql/client";
+import { type ActionsResponse, ActionsResponseSchema } from "@/lib/graphql/schemas";
 
 import { resolveChainAlias } from "@/lib/utils";
 
 const ACTIONS_LIST_QUERY = gql`
-  {
+  query ActionsList {
     actions(filter: {}) {
       id
       type
@@ -95,9 +97,9 @@ const DELETE_ACTIONS_MUTATION = gql`
 type Action = {
   id: number;
   type: string;
-  deploymentID: string;
-  allocationID: string;
-  amount: string;
+  deploymentID: string | null | undefined;
+  allocationID: string | null | undefined;
+  amount: string | null | undefined;
   poi: string;
   force: boolean;
   source: string;
@@ -140,17 +142,29 @@ const columns: ColumnDef<Action>[] = [
   {
     accessorKey: "deploymentID",
     header: "Deployment ID",
-    cell: ({ row }) => <div className="w-[180px] truncate">{row.getValue("deploymentID")}</div>,
+    cell: ({ row }) => {
+      const v = row.getValue("deploymentID") as string | null | undefined;
+      return <div className="w-[180px] truncate">{v || <span className="text-muted-foreground">—</span>}</div>;
+    },
   },
   {
     accessorKey: "allocationID",
     header: "Allocation ID",
-    cell: ({ row }) => <div className="w-[180px] truncate">{row.getValue("allocationID")}</div>,
+    cell: ({ row }) => {
+      const v = row.getValue("allocationID") as string | null | undefined;
+      return <div className="w-[180px] truncate">{v || <span className="text-muted-foreground">—</span>}</div>;
+    },
   },
   {
     accessorKey: "amount",
     header: "Amount",
-    cell: ({ row }) => <div>{parseFloat(row.getValue("amount")).toLocaleString()} GRT</div>,
+    cell: ({ row }) => {
+      const val = row.getValue("amount") as string | null | undefined;
+      if (!val) return <div className="text-muted-foreground">—</div>;
+      const num = Number.parseFloat(val);
+      if (Number.isNaN(num)) return <div className="text-muted-foreground">—</div>;
+      return <div>{num.toLocaleString()} GRT</div>;
+    },
   },
   {
     accessorKey: "status",
@@ -191,14 +205,36 @@ export function Actions() {
   // const { currentNetwork } = useNetworkStore();
   const [autoRefreshEnabled, setAutoRefreshEnabled] = React.useState(false);
 
-  const fetcher = (query: string) => client.request<{ actions: Action[] }>(query);
-  const { data, error, isLoading, mutate } = useSWR(ACTIONS_LIST_QUERY, fetcher);
+  const schemaFetcher = React.useMemo(
+    () =>
+      createSchemaFetcher({
+        endpoint: "/api/agent",
+        schema: ActionsResponseSchema,
+      }),
+    [],
+  );
+  // Use structured key to avoid logging the entire GraphQL query as the key (reduces noisy error echoes)
+  const { data, error, isLoading, mutate } = useSWR<ActionsResponse>(["actions", "list"], () =>
+    schemaFetcher(ACTIONS_LIST_QUERY),
+  );
 
   const actions: Action[] = React.useMemo(() => {
     if (!data?.actions) return [];
     return data.actions.map((action) => ({
-      ...action,
       id: typeof action.id === "string" ? parseInt(action.id, 10) : action.id,
+      type: action.type,
+      deploymentID: action.deploymentID,
+      allocationID: action.allocationID ?? null,
+      amount: action.amount,
+      poi: action.poi || "",
+      force: action.force ?? false,
+      source: action.source,
+      reason: action.reason,
+      priority: typeof action.priority === "string" ? parseInt(action.priority, 10) : action.priority,
+      status: action.status,
+      failureReason: action.failureReason || null,
+      transaction: action.transaction || null,
+      protocolNetwork: action.protocolNetwork,
     }));
   }, [data]);
 

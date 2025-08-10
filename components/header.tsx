@@ -58,7 +58,7 @@ export function Header() {
         <div className="flex items-center space-x-4">
           <ThemeToggle />
           <Avatar>
-            <AvatarImage src="/placeholder.svg" />
+            <AvatarImage src="/placeholder.svg" alt="User avatar" />
             <AvatarFallback>UI</AvatarFallback>
           </Avatar>
         </div>

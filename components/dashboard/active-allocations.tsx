@@ -7,8 +7,10 @@ import React from "react";
 import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
 import { toast } from "@/hooks/use-toast";
+import { createSchemaFetcher } from "@/lib/fetchers";
 import { agentClient } from "@/lib/graphql/client";
 import { AGENT_ALLOCATIONS_QUERY, CREATE_ACTION_MUTATION } from "@/lib/graphql/queries";
+import { type AgentAllocationsResponse, AgentAllocationsResponseSchema } from "@/lib/graphql/schemas";
 import { useNetworkStore } from "@/lib/store";
 
 import { Checkbox } from "../ui/checkbox";
@@ -93,24 +95,29 @@ const client = agentClient();
 export function ActiveAllocations() {
   const { currentNetwork } = useNetworkStore();
 
-  const fetcher = (query: string) => {
-    try {
-      const result = client.request(query, {
-        protocolNetwork: currentNetwork,
-      });
-      console.log("GraphQL response:", result);
-      return result;
-    } catch (error) {
-      console.error("GraphQL error:", error);
-      console.error("Full GraphQL error:", JSON.stringify(error, null, 2));
-      throw error;
-    }
-  };
-  const { data, error, isLoading, isValidating, mutate } = useSWR(AGENT_ALLOCATIONS_QUERY, fetcher);
+  const schemaFetcher = React.useMemo(
+    () =>
+      createSchemaFetcher({
+        endpoint: "/api/agent",
+        schema: AgentAllocationsResponseSchema,
+      }),
+    [],
+  );
+  const { data, error, isLoading, isValidating, mutate } = useSWR<AgentAllocationsResponse>(
+    AGENT_ALLOCATIONS_QUERY,
+    (query) => schemaFetcher(query, { protocolNetwork: currentNetwork }),
+  );
 
   const allocations: Allocation[] = React.useMemo(() => {
     if (!data) return [];
-    return (data as { indexerAllocations: Allocation[] }).indexerAllocations;
+    return data.indexerAllocations.map((a) => ({
+      id: a.id,
+      subgraphDeployment: a.subgraphDeployment,
+      allocatedTokens: a.allocatedTokens,
+      signalledTokens: a.signalledTokens || "0",
+      stakedTokens: a.stakedTokens || "0",
+      createdAt: String(a.createdAtEpoch ?? "0"),
+    }));
   }, [data]);
 
   const handleUnallocate = async (selectedRows: Allocation[]) => {
@@ -126,7 +133,7 @@ export function ActiveAllocations() {
     }));
 
     try {
-      const result = await client.request(CREATE_ACTION_MUTATION, { actions });
+      await client.request(CREATE_ACTION_MUTATION, { actions });
       toast({
         title: "Unallocation queued",
         description: `Successfully queued ${actions.length} unallocation(s)`,

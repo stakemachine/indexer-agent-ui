@@ -5,8 +5,9 @@ import React from "react";
 import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
 import { Badge } from "@/components/ui/badge";
-import { agentClient } from "@/lib/graphql/client";
+import { createSchemaFetcher } from "@/lib/fetchers";
 import { AGENT_INDEXER_DEPLOYMENTS_QUERY } from "@/lib/graphql/queries";
+import { type IndexerDeploymentsResponse, IndexerDeploymentsResponseSchema } from "@/lib/graphql/schemas";
 import { useNetworkStore } from "@/lib/store";
 
 type Deployment = {
@@ -20,23 +21,6 @@ type Deployment = {
   chainhead: number;
   behind: number;
 };
-
-interface RawDeployment {
-  subgraphDeployment: string;
-  synced: boolean;
-  health: boolean;
-  node: string;
-  chains: Array<{
-    network: string;
-    earliestBlock: { number: number };
-    latestBlock?: { number: number };
-    chainHeadBlock: { number: number };
-  }>;
-}
-
-interface DeploymentsResponse {
-  indexerDeployments: RawDeployment[];
-}
 
 const columns: ColumnDef<Deployment>[] = [
   {
@@ -105,30 +89,38 @@ const columns: ColumnDef<Deployment>[] = [
   },
 ];
 
-const client = agentClient();
+// client not needed; schemaFetcher constructs its own GraphQLClient
 
 export function IndexerDeployments() {
   const { currentNetwork } = useNetworkStore();
 
-  const fetcher = (query: string, variables: Record<string, unknown>) => client.request(query, variables);
-  const { data, error, isLoading, isValidating, mutate } = useSWR(
+  const schemaFetcher = React.useMemo(
+    () =>
+      createSchemaFetcher({
+        endpoint: "/api/agent",
+        schema: IndexerDeploymentsResponseSchema,
+      }),
+    [],
+  );
+  const { data, error, isLoading, isValidating, mutate } = useSWR<IndexerDeploymentsResponse>(
     [AGENT_INDEXER_DEPLOYMENTS_QUERY, { protocolNetwork: currentNetwork }],
-    ([query, variables]) => fetcher(query, variables),
+    ([query, variables]) => schemaFetcher(query as string, variables as Record<string, unknown>),
   );
 
   const deployments: Deployment[] = React.useMemo(() => {
-    const resp = data as DeploymentsResponse | undefined;
-    if (!resp?.indexerDeployments) return [];
-    return resp.indexerDeployments.map((deployment) => ({
+    if (!data?.indexerDeployments) return [];
+    return data.indexerDeployments.map((deployment) => ({
       subgraphDeployment: deployment.subgraphDeployment,
       synced: deployment.synced,
       health: deployment.health ? "healthy" : "unhealthy",
       node: deployment.node,
       network: deployment.chains[0]?.network || "Unknown",
-      earliest: deployment.chains[0]?.earliestBlock.number || 0,
-      latest: deployment.chains[0]?.latestBlock?.number || 0,
-      chainhead: deployment.chains[0]?.chainHeadBlock.number || 0,
-      behind: (deployment.chains[0]?.chainHeadBlock.number || 0) - (deployment.chains[0]?.latestBlock?.number || 0),
+      earliest: Number(deployment.chains[0]?.earliestBlock.number) || 0,
+      latest: Number(deployment.chains[0]?.latestBlock?.number) || 0,
+      chainhead: Number(deployment.chains[0]?.chainHeadBlock.number) || 0,
+      behind:
+        (Number(deployment.chains[0]?.chainHeadBlock.number) || 0) -
+        (Number(deployment.chains[0]?.latestBlock?.number) || 0),
     }));
   }, [data]);
 

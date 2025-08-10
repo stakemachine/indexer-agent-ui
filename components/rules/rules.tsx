@@ -8,6 +8,8 @@ import { DataGrid } from "@/components/data-grid";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
+import { createSchemaFetcher } from "@/lib/fetchers";
+import { type IndexingRulesResponse, IndexingRulesResponseSchema } from "@/lib/graphql/schemas";
 import { resolveChainAlias } from "@/lib/utils";
 import { Checkbox } from "../ui/checkbox";
 
@@ -42,20 +44,20 @@ const DELETE_INDEXING_RULES_MUTATION = gql`
 
 type IndexingRule = {
   identifier: string;
-  identifierType: string;
-  allocationAmount: string;
-  allocationLifetime: number;
-  autoRenewal: boolean;
-  parallelAllocations: number;
-  maxAllocationPercentage: number;
-  minSignal: string;
-  maxSignal: string;
-  minStake: string;
-  minAverageQueryFees: string;
-  custom: string;
-  decisionBasis: string;
-  requireSupported: boolean;
-  safety: boolean;
+  identifierType?: string | null;
+  allocationAmount?: string | null;
+  allocationLifetime: number | null;
+  autoRenewal?: boolean | null;
+  parallelAllocations: number | null;
+  maxAllocationPercentage: number | string | null;
+  minSignal?: string | null;
+  maxSignal?: string | null;
+  minStake?: string | null;
+  minAverageQueryFees?: string | null;
+  custom?: string | null;
+  decisionBasis?: string | null;
+  requireSupported?: boolean | null;
+  safety?: boolean | null;
   protocolNetwork: string;
 };
 
@@ -90,7 +92,13 @@ const columns: ColumnDef<IndexingRule>[] = [
   {
     accessorKey: "allocationAmount",
     header: "Allocation Amount",
-    cell: ({ row }) => <div>{(parseFloat(row.getValue("allocationAmount")) / 1e18).toFixed(2)}</div>,
+    cell: ({ row }) => {
+      const val = row.getValue("allocationAmount") as string | null | undefined;
+      if (!val) return <div className="text-muted-foreground">—</div>;
+      const num = Number.parseFloat(val);
+      if (Number.isNaN(num)) return <div className="text-muted-foreground">—</div>;
+      return <div>{(num / 1e18).toFixed(2)}</div>;
+    },
   },
   {
     accessorKey: "decisionBasis",
@@ -108,7 +116,7 @@ const columns: ColumnDef<IndexingRule>[] = [
   {
     accessorKey: "autoRenewal",
     header: "Auto Renewal",
-    cell: ({ row }) => <Switch checked={row.getValue("autoRenewal")} disabled />,
+    cell: ({ row }) => <Switch checked={!!row.getValue("autoRenewal")} disabled />,
   },
   {
     accessorKey: "parallelAllocations",
@@ -117,7 +125,11 @@ const columns: ColumnDef<IndexingRule>[] = [
   {
     accessorKey: "maxAllocationPercentage",
     header: "Max Allocation %",
-    cell: ({ row }) => `${row.getValue("maxAllocationPercentage")}%`,
+    cell: ({ row }) => {
+      const v = row.getValue("maxAllocationPercentage") as string | number | null | undefined;
+      if (v == null || v === "") return <span className="text-muted-foreground">—</span>;
+      return <>{v}%</>;
+    },
   },
   {
     accessorKey: "minSignal",
@@ -139,12 +151,12 @@ const columns: ColumnDef<IndexingRule>[] = [
   {
     accessorKey: "requireSupported",
     header: "Require Supported",
-    cell: ({ row }) => <Switch checked={row.getValue("requireSupported")} disabled />,
+    cell: ({ row }) => <Switch checked={!!row.getValue("requireSupported")} disabled />,
   },
   {
     accessorKey: "safety",
     header: "Safety",
-    cell: ({ row }) => <Switch checked={row.getValue("safety")} disabled />,
+    cell: ({ row }) => <Switch checked={!!row.getValue("safety")} disabled />,
   },
 ];
 
@@ -153,12 +165,27 @@ const client = new GraphQLClient("/api/agent");
 export function Rules() {
   const [autoRefreshEnabled, setAutoRefreshEnabled] = React.useState(false);
 
-  const fetcher = (query: string) => client.request(query);
-  const { data, error, isLoading, isValidating, mutate } = useSWR(INDEXING_RULES_LIST_QUERY, fetcher);
+  const schemaFetcher = React.useMemo(
+    () =>
+      createSchemaFetcher({
+        endpoint: "/api/agent",
+        schema: IndexingRulesResponseSchema,
+      }),
+    [],
+  );
+  const { data, error, isLoading, isValidating, mutate } = useSWR<IndexingRulesResponse>(
+    INDEXING_RULES_LIST_QUERY,
+    (q) => schemaFetcher(q),
+  );
 
   const rules: IndexingRule[] = React.useMemo(() => {
-    if (!data) return [];
-    return data.indexingRules;
+    if (!data?.indexingRules) return [];
+    return data.indexingRules.map((r) => ({
+      ...r,
+      allocationLifetime: Number(r.allocationLifetime),
+      parallelAllocations: Number(r.parallelAllocations),
+      maxAllocationPercentage: Number(r.maxAllocationPercentage),
+    }));
   }, [data]);
 
   const handleDelete = async (selectedRules: IndexingRule[]) => {

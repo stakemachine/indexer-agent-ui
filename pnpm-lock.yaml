@@ -125,6 +125,9 @@ importers:
       web3:
         specifier: ^4.16.0
         version: 4.16.0(typescript@5.8.3)(zod@3.24.1)
+      zod:
+        specifier: ^3.23.8
+        version: 3.24.1
       zustand:
         specifier: ^5.0.6
         version: 5.0.6(@types/react@19.1.8)(react@19.1.1)(use-sync-external-store@1.5.0(react@19.1.1))

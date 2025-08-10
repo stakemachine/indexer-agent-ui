@@ -42,14 +42,24 @@ async function forward(network: string, body: GraphQLRequest) {
   }
 }
 
-export async function POST(req: Request, { params }: { params: { network: string } }) {
+// Next.js may require params to be awaited in dynamic API routes; accept a promise-like params container.
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ network: string }> } | { params: { network: string } },
+) {
+  // params can be a direct object or a promise (Next.js dynamic API behavior)
+  const resolved = params instanceof Promise ? await params : params;
+  const network = resolved?.network;
   let body: GraphQLRequest = {};
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
-  return forward(params.network, body);
+  if (!network || typeof network !== "string") {
+    return Response.json({ error: "Missing network param" }, { status: 400 });
+  }
+  return forward(network, body);
 }
 
 export function GET() {

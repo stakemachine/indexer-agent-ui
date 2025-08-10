@@ -3,6 +3,7 @@ import { CurrentEpoch } from "@/components/current-epoch";
 import { ActiveAllocations } from "@/components/dashboard/active-allocations";
 import { IndexerDeployments } from "@/components/dashboard/indexer-deployments";
 import { IndexerInfo } from "@/components/dashboard/indexer-info";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function CardSkeleton({ lines = 4 }: { lines?: number }) {
@@ -48,18 +49,26 @@ export default function DashboardPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold">Dashboard</h1>
-      <Suspense fallback={<CardSkeleton lines={6} />}>
-        <IndexerInfo />
-      </Suspense>
-      <Suspense fallback={<CardSkeleton lines={2} />}>
-        <CurrentEpoch />
-      </Suspense>
-      <Suspense fallback={<TableSkeleton rows={6} cols={6} />}>
-        <IndexerDeployments />
-      </Suspense>
-      <Suspense fallback={<TableSkeleton rows={6} cols={6} />}>
-        <ActiveAllocations />
-      </Suspense>
+      <ErrorBoundary fallbackTitle="Indexer info failed">
+        <Suspense fallback={<CardSkeleton lines={6} />}>
+          <IndexerInfo />
+        </Suspense>
+      </ErrorBoundary>
+      <ErrorBoundary fallbackTitle="Epoch widget failed" compact>
+        <Suspense fallback={<CardSkeleton lines={2} />}>
+          <CurrentEpoch />
+        </Suspense>
+      </ErrorBoundary>
+      <ErrorBoundary fallbackTitle="Deployments failed">
+        <Suspense fallback={<TableSkeleton rows={6} cols={6} />}>
+          <IndexerDeployments />
+        </Suspense>
+      </ErrorBoundary>
+      <ErrorBoundary fallbackTitle="Allocations failed">
+        <Suspense fallback={<TableSkeleton rows={6} cols={6} />}>
+          <ActiveAllocations />
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }

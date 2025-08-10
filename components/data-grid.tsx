@@ -60,7 +60,11 @@ interface DataGridProps<TData, TValue> {
   renderSubComponent?: (row: TData) => React.ReactNode;
 }
 
-function ColumnFilter({ column }: { column: any }) {
+import type { Column } from "@tanstack/react-table";
+
+type RowWithSubRows<TData> = TData & { subRows?: RowWithSubRows<TData>[] };
+
+function ColumnFilter<TData, TValue>({ column }: { column: Column<TData, TValue> }) {
   const columnFilterValue = column.getFilterValue();
 
   return (
@@ -136,14 +140,15 @@ export function DataGrid<TData, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setGlobalFilter,
     onExpandedChange: setExpanded,
-    getSubRows: (row: any) => row.subRows,
+    getSubRows: (row: RowWithSubRows<TData>) => row.subRows ?? [],
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    globalFilterFn: (row, columnId, filterValue) => {
-      const searchableValues = Object.entries(row.original).flatMap(([key, value]) => {
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const original = row.original as Record<string, unknown>;
+      const searchableValues = Object.entries(original).flatMap(([_key, value]) => {
         if (typeof value === "object" && value !== null) {
           return Object.values(value);
         }
@@ -241,24 +246,27 @@ export function DataGrid<TData, TValue>({
                   <TableHead key={header.id}>
                     {header.isPlaceholder ? null : (
                       <div className="flex items-center space-x-2">
-                        <button
-                          type="button"
-                          className={cn(
-                            "flex items-center space-x-2 cursor-pointer",
-                            header.column.getCanSort() && "hover:bg-muted/50 p-2 rounded-md",
-                          )}
-                          onClick={() => header.column.toggleSorting(header.column.getIsSorted() === "asc")}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              header.column.toggleSorting(header.column.getIsSorted() === "asc");
-                            }
-                          }}
-                          aria-label={header.column.getCanSort() ? `Sort by ${header.column.id}` : undefined}
-                          tabIndex={header.column.getCanSort() ? 0 : -1}
-                          disabled={!header.column.getCanSort()}
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                        </button>
+                        {header.column.getCanSort() ? (
+                          <button
+                            type="button"
+                            className={cn(
+                              "flex items-center space-x-2 cursor-pointer hover:bg-muted/50 p-2 rounded-md",
+                            )}
+                            onClick={() => header.column.toggleSorting(header.column.getIsSorted() === "asc")}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                header.column.toggleSorting(header.column.getIsSorted() === "asc");
+                              }
+                            }}
+                            aria-label={`Sort by ${header.column.id}`}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </button>
+                        ) : (
+                          <span className="flex items-center space-x-2">
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </span>
+                        )}
                         {!header.isPlaceholder && header.column.getCanFilter() && (
                           <ColumnFilter column={header.column} />
                         )}
@@ -292,7 +300,7 @@ export function DataGrid<TData, TValue>({
                   </TableRow>
                   {row.getIsExpanded() && renderSubComponent && (
                     <TableRow>
-                      <TableCell colSpan={columns.length}>{renderSubComponent(row.original)}</TableCell>
+                      <TableCell colSpan={columns.length}>{renderSubComponent(row.original as TData)}</TableCell>
                     </TableRow>
                   )}
                 </React.Fragment>
@@ -316,7 +324,7 @@ export function DataGrid<TData, TValue>({
           {batchActions?.map((action) => (
             <Button
               key={action.label}
-              onClick={() => action.onClick(table.getSelectedRowModel?.().rows.map((row) => row.original))}
+              onClick={() => action.onClick(table.getSelectedRowModel?.().rows.map((row) => row.original as TData))}
               disabled={table.getSelectedRowModel?.().rows.length === 0}
             >
               {action.label}

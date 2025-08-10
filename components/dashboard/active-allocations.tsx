@@ -3,11 +3,11 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { ethers } from "ethers";
 import { GeistMono } from "geist/font/mono";
-import { GraphQLClient } from "graphql-request";
 import React from "react";
 import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
 import { toast } from "@/hooks/use-toast";
+import { agentClient } from "@/lib/graphql/client";
 import { AGENT_ALLOCATIONS_QUERY, CREATE_ACTION_MUTATION } from "@/lib/graphql/queries";
 import { useNetworkStore } from "@/lib/store";
 
@@ -88,7 +88,7 @@ const columns: ColumnDef<Allocation>[] = [
   },
 ];
 
-const client = new GraphQLClient("/api/agent");
+const client = agentClient();
 
 export function ActiveAllocations() {
   const { currentNetwork } = useNetworkStore();

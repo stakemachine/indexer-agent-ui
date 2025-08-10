@@ -1,7 +1,7 @@
 "use client";
 
-import { GraphQLClient } from "graphql-request";
 import { useEffect } from "react";
+import { agentClient } from "@/lib/graphql/client";
 import { AGENT_INDEXER_REGISTRATION_QUERY } from "@/lib/graphql/queries";
 import { type IndexerRegistration, useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
 
@@ -10,17 +10,19 @@ export function IndexerRegistrationLoader() {
   const { setIndexerRegistration } = useIndexerRegistrationStore();
 
   useEffect(() => {
-    const endpoint = `${window.location.origin}/api/agent`;
-    const client = new GraphQLClient(endpoint);
+    const client = agentClient();
 
     console.log("Current network:", currentNetwork);
+    interface RegistrationResponse {
+      indexerRegistration?: IndexerRegistration;
+    }
     const fetchIndexerRegistration = async () => {
       try {
-        const data = await client.request(AGENT_INDEXER_REGISTRATION_QUERY, {
+        const data: RegistrationResponse = await client.request(AGENT_INDEXER_REGISTRATION_QUERY, {
           protocolNetwork: currentNetwork,
         });
-        if (data && data.indexerRegistration) {
-          setIndexerRegistration((data as { indexerRegistration: IndexerRegistration }).indexerRegistration);
+        if (data?.indexerRegistration) {
+          setIndexerRegistration(data.indexerRegistration);
         } else {
           console.error("Indexer registration data is undefined or null");
         }

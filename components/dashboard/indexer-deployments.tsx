@@ -1,11 +1,11 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { GraphQLClient } from "graphql-request";
 import React from "react";
 import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
 import { Badge } from "@/components/ui/badge";
+import { agentClient } from "@/lib/graphql/client";
 import { AGENT_INDEXER_DEPLOYMENTS_QUERY } from "@/lib/graphql/queries";
 import { useNetworkStore } from "@/lib/store";
 
@@ -20,6 +20,23 @@ type Deployment = {
   chainhead: number;
   behind: number;
 };
+
+interface RawDeployment {
+  subgraphDeployment: string;
+  synced: boolean;
+  health: boolean;
+  node: string;
+  chains: Array<{
+    network: string;
+    earliestBlock: { number: number };
+    latestBlock?: { number: number };
+    chainHeadBlock: { number: number };
+  }>;
+}
+
+interface DeploymentsResponse {
+  indexerDeployments: RawDeployment[];
+}
 
 const columns: ColumnDef<Deployment>[] = [
   {
@@ -88,20 +105,21 @@ const columns: ColumnDef<Deployment>[] = [
   },
 ];
 
-const client = new GraphQLClient("/api/agent");
+const client = agentClient();
 
 export function IndexerDeployments() {
   const { currentNetwork } = useNetworkStore();
 
-  const fetcher = (query: string, variables: any) => client.request(query, variables);
+  const fetcher = (query: string, variables: Record<string, unknown>) => client.request(query, variables);
   const { data, error, isLoading, isValidating, mutate } = useSWR(
     [AGENT_INDEXER_DEPLOYMENTS_QUERY, { protocolNetwork: currentNetwork }],
     ([query, variables]) => fetcher(query, variables),
   );
 
   const deployments: Deployment[] = React.useMemo(() => {
-    if (!data) return [];
-    return data.indexerDeployments.map((deployment: any) => ({
+    const resp = data as DeploymentsResponse | undefined;
+    if (!resp?.indexerDeployments) return [];
+    return resp.indexerDeployments.map((deployment) => ({
       subgraphDeployment: deployment.subgraphDeployment,
       synced: deployment.synced,
       health: deployment.health ? "healthy" : "unhealthy",

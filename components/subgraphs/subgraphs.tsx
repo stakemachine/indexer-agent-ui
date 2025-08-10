@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { GraphQLClient } from "graphql-request";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import React from "react";
@@ -11,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { subgraphClient } from "@/lib/graphql/client";
 import { SUBGRAPHS_BY_STATUS_QUERY } from "@/lib/graphql/queries";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
 
@@ -122,7 +122,7 @@ const BLOCKS_PER_YEAR = (365 * 60 * 60 * 24) / 12; // 12 seconds per block
 export function Subgraphs() {
   const { indexerRegistration } = useIndexerRegistrationStore();
   const { currentNetwork } = useNetworkStore();
-  const client = new GraphQLClient(`/api/subgraph/${currentNetwork}`);
+  const client = subgraphClient(currentNetwork);
 
   const [autoRefreshEnabled, setAutoRefreshEnabled] = React.useState(false);
 

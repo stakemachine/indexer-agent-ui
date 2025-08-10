@@ -1,9 +1,15 @@
 "use client";
 
-import { GraphQLClient, gql } from "graphql-request";
+import { gql } from "graphql-request";
 import useSWR from "swr";
 import { Progress } from "@/components/ui/progress";
+import { subgraphClient } from "@/lib/graphql/client";
 import { useNetworkStore } from "@/lib/store";
+
+interface EpochData {
+  graphNetwork: { currentL1BlockNumber: string };
+  epoches: Array<{ id: string; startBlock: string; endBlock: string }>;
+}
 
 const CURRENT_EPOCH_QUERY = gql`
   query CurrentEpochQuery {
@@ -27,8 +33,8 @@ function formatTimeRemaining(blocksRemaining: number): string {
 
 export function CurrentEpoch() {
   const { currentNetwork } = useNetworkStore();
-  const client = new GraphQLClient(`/api/subgraph/${currentNetwork}`);
-  const { data, error } = useSWR(CURRENT_EPOCH_QUERY, (query) => client.request(query), {
+  const client = subgraphClient(currentNetwork);
+  const { data, error } = useSWR<EpochData>(CURRENT_EPOCH_QUERY, (query) => client.request(query), {
     refreshInterval: 60000, // Refresh every minute
   });
 
@@ -36,7 +42,7 @@ export function CurrentEpoch() {
   if (!data) return <div>Loading epoch data...</div>;
 
   const epoch = data.epoches[0];
-  const currentBlock = parseInt(data.graphNetwork.currentL1BlockNumber);
+  const currentBlock = parseInt(data.graphNetwork.currentL1BlockNumber, 10);
   const startBlock = parseInt(epoch.startBlock);
   const endBlock = parseInt(epoch.endBlock);
 

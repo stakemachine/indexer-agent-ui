@@ -1,27 +1,48 @@
 "use client";
-import { GraphQLClient } from "graphql-request";
 import { RefreshCw } from "lucide-react";
+import React from "react";
 import useSWR from "swr";
 import { EthereumIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { subgraphClient } from "@/lib/graphql/client";
 import { INDEXER_INFO_BY_ID_QUERY, INDEXER_OPERATORS_QUERY } from "@/lib/graphql/queries";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
+
+interface GraphAccount {
+  id: string;
+}
+interface OperatorsResponse {
+  graphAccounts?: GraphAccount[];
+}
+interface IndexerResponse {
+  indexer: {
+    indexingRewardCut: number;
+    queryFeeCut: number;
+    stakedTokens: number;
+    lockedTokens: number;
+    allocatedTokens: number;
+    availableStake: number;
+    delegatedCapacity: number;
+  };
+}
 
 export function IndexerInfo() {
   const { indexerRegistration } = useIndexerRegistrationStore();
   const { currentNetwork } = useNetworkStore();
 
-  // Ensure absolute URL for GraphQLClient
-  const endpoint = typeof window !== "undefined" ? `${window.location.origin}/api/subgraph/${currentNetwork}` : "";
-  const client = new GraphQLClient(endpoint);
+  type KeyTuple = [string, Record<string, unknown>];
+  function makeFetcher<T>() {
+    return (key: KeyTuple) => subgraphClient(currentNetwork).request<T>(key[0], key[1]);
+  }
+  const subgraphFetcherIndexer = React.useCallback(makeFetcher<IndexerResponse>(), []);
+  const subgraphFetcherOperators = React.useCallback(makeFetcher<OperatorsResponse>(), []);
 
-  const fetcher = (query: string, variables: any) => client.request(query, variables);
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading } = useSWR<IndexerResponse>(
     indexerRegistration?.address
       ? [INDEXER_INFO_BY_ID_QUERY, { id: indexerRegistration?.address.toLowerCase() }]
       : null,
-    ([query, variables]) => fetcher(query, variables),
+    subgraphFetcherIndexer,
   );
 
   const {
@@ -29,11 +50,11 @@ export function IndexerInfo() {
     error: operatorsError,
     isLoading: operatorsIsLoading,
     isValidating: operatorsIsValidating,
-  } = useSWR(
+  } = useSWR<OperatorsResponse>(
     indexerRegistration?.address
       ? [INDEXER_OPERATORS_QUERY, { indexer: indexerRegistration?.address.toLowerCase() }]
       : null,
-    ([query, variables]) => fetcher(query, variables),
+    subgraphFetcherOperators,
   );
 
   if (error) {
@@ -51,6 +72,11 @@ export function IndexerInfo() {
   if (!data) {
     return <div>No data</div>;
   }
+  if (!data.indexer) {
+    console.error("Indexer field missing in GraphQL response", data);
+    return <div>No indexer data</div>;
+  }
+  const idx = data.indexer;
   return (
     <div className="space-y-4">
       <div className="grid md:grid-cols-2 gap-4">
@@ -83,7 +109,7 @@ export function IndexerInfo() {
                     <div className="animate-pulse">Loading operators...</div>
                   </div>
                 ) : (
-                  operatorsData.graphAccounts?.map((account: any) => (
+                  operatorsData?.graphAccounts?.map((account: GraphAccount) => (
                     <div key={account.id} className="text-sm font-mono">
                       {account.id}
                     </div>
@@ -93,11 +119,11 @@ export function IndexerInfo() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <div className="text-sm text-muted-foreground">Indexing Reward Cut</div>
-                  <div>{data.indexer.indexingRewardCut / 10000}%</div>
+                  <div>{(idx.indexingRewardCut / 10000).toFixed(2)}%</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Query Fee Cut</div>
-                  <div>{data.indexer.queryFeeCut / 10000}%</div>
+                  <div>{(idx.queryFeeCut / 10000).toFixed(2)}%</div>
                 </div>
               </div>
             </div>
@@ -135,14 +161,11 @@ export function IndexerInfo() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Self stake"
-          value={`${((data.indexer.stakedTokens - data.indexer.lockedTokens) / 1000000000000000000).toFixed(0)}`}
+          value={`${((idx.stakedTokens - idx.lockedTokens) / 1000000000000000000).toFixed(0)}`}
         />
-        <StatCard title="Allocated" value={`${(data.indexer.allocatedTokens / 1000000000000000000).toFixed(0)}`} />
-        <StatCard title="Unallocated" value={`${(data.indexer.availableStake / 1000000000000000000).toFixed(0)}`} />
-        <StatCard
-          title="Delegated capacity"
-          value={`${(data.indexer.delegatedCapacity / 1000000000000000000).toFixed(0)}`}
-        />
+        <StatCard title="Allocated" value={`${(idx.allocatedTokens / 1000000000000000000).toFixed(0)}`} />
+        <StatCard title="Unallocated" value={`${(idx.availableStake / 1000000000000000000).toFixed(0)}`} />
+        <StatCard title="Delegated capacity" value={`${(idx.delegatedCapacity / 1000000000000000000).toFixed(0)}`} />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { GraphQLClient, gql } from "graphql-request";
+import { gql } from "graphql-request";
 import React from "react";
 import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
+import { agentClient } from "@/lib/graphql/client";
 
 import { resolveChainAlias } from "@/lib/utils";
 
@@ -184,27 +185,27 @@ const columns: ColumnDef<Action>[] = [
   },
 ];
 
-const client = new GraphQLClient("/api/agent");
+const client = agentClient();
 
 export function Actions() {
   // const { currentNetwork } = useNetworkStore();
   const [autoRefreshEnabled, setAutoRefreshEnabled] = React.useState(false);
 
-  const fetcher = (query: string) => client.request(query);
+  const fetcher = (query: string) => client.request<{ actions: Action[] }>(query);
   const { data, error, isLoading, mutate } = useSWR(ACTIONS_LIST_QUERY, fetcher);
 
   const actions: Action[] = React.useMemo(() => {
-    if (!data) return [];
-    return data.actions.map((action: Action) => ({
+    if (!data?.actions) return [];
+    return data.actions.map((action) => ({
       ...action,
-      id: parseInt(action.id),
+      id: typeof action.id === "string" ? parseInt(action.id, 10) : action.id,
     }));
   }, [data]);
 
   const handleApprove = async (selectedRows: Action[]) => {
     const actionIDs = selectedRows.map((row) => row.id);
     try {
-      const result = await client.request(APPROVE_ACTIONS_MUTATION, {
+      await client.request(APPROVE_ACTIONS_MUTATION, {
         actionIDs,
       });
       toast({
@@ -225,7 +226,7 @@ export function Actions() {
   const handleCancel = async (selectedRows: Action[]) => {
     const actionIDs = selectedRows.map((row) => row.id);
     try {
-      const result = await client.request(CANCEL_ACTIONS_MUTATION, {
+      await client.request(CANCEL_ACTIONS_MUTATION, {
         actionIDs,
       });
       toast({
@@ -246,7 +247,7 @@ export function Actions() {
   const handleDelete = async (selectedRows: Action[]) => {
     const actionIDs = selectedRows.map((row) => row.id);
     try {
-      const result = await client.request(DELETE_ACTIONS_MUTATION, {
+      await client.request(DELETE_ACTIONS_MUTATION, {
         actionIDs,
       });
       toast({

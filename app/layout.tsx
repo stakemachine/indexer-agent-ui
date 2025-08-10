@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import { ThemeProvider } from "next-themes";
 import { Header } from "@/components/header";
 import { IndexerRegistrationLoader } from "@/components/indexer-registration-loader";
+import { SwrProvider } from "@/components/swr-provider";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
@@ -16,9 +17,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={GeistSans.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <IndexerRegistrationLoader />
-          <Header />
-          <main className="container mx-auto p-4 space-y-6">{children}</main>
+          <SwrProvider>
+            <IndexerRegistrationLoader />
+            <Header />
+            <main className="container mx-auto p-4 space-y-6">{children}</main>
+          </SwrProvider>
         </ThemeProvider>
         <Toaster />
       </body>

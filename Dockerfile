@@ -1,5 +1,5 @@
 # Install dependencies only when needed
-FROM node:19-alpine AS deps
+FROM node:24-alpine AS deps
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
@@ -15,7 +15,7 @@ RUN \
 
 
 # Rebuild the source code only when needed
-FROM node:19-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -23,21 +23,22 @@ COPY . .
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 #ARG BUILD_AGENT_ENDPOINT
 #ENV AGENT_ENDPOINT=$BUILD_AGENT_ENDPOINT
 # RUN yarn build
+RUN apk add --no-cache pnpm
 
 # If using npm comment out above and use below instead
-RUN npm run build
+RUN pnpm run build
 
 # Production image, copy all the files and run next
-FROM node:19-alpine AS runner
+FROM node:24-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 # Uncomment the following line in case you want to disable telemetry during runtime.
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -53,6 +54,6 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
+ENV PORT=3000
 
 CMD ["node", "server.js"]

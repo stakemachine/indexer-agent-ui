@@ -1,11 +1,11 @@
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "@/lib/env";
 
 const isCorrectCredentials = (credentials: { username?: string; password?: string }) =>
   credentials?.username === env.UI_LOGIN && credentials?.password === env.UI_PASS;
 
-const options = {
+const options: NextAuthOptions = {
   // Configure one or more authentication providers
   providers: [
     CredentialsProvider({

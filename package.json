@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+  "biome:check": "biome check --no-errors-on-unmatched .",
+  "biome:fix": "biome check --write --no-errors-on-unmatched .",
+  "lint": "pnpm biome:check"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -57,11 +59,7 @@
     "@types/node": "24.1.0",
     "@types/react": "19.1.8",
     "@types/react-dom": "19.1.6",
-    "eslint": "9.32.0",
-    "eslint-config-next": "^15.4.4",
     "lefthook": "^1.12.2",
-    "prettier": "^3.6.2",
-    "prettier-plugin-tailwindcss": "^0.6.14",
     "typescript": "5.8.3"
   }
 }

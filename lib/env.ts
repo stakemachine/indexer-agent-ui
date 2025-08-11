@@ -1,8 +1,9 @@
-/* Centralized environment variable validation and typed exports */
+/* Centralized environment variable validation and typed exports
+ * NOTE: Use lazy getters so Next.js build doesn't require runtime envs.
+ */
 
 // List required server-only environment variables
 const REQUIRED = ["AGENT_ENDPOINT", "AGENT_NETWORK_ENDPOINT", "UI_LOGIN", "UI_PASS"] as const;
-
 type RequiredEnvKey = (typeof REQUIRED)[number];
 
 function read(name: RequiredEnvKey): string {
@@ -14,10 +15,18 @@ function read(name: RequiredEnvKey): string {
 }
 
 export const env = Object.freeze({
-  AGENT_ENDPOINT: read("AGENT_ENDPOINT"),
-  AGENT_NETWORK_ENDPOINT: read("AGENT_NETWORK_ENDPOINT"),
-  UI_LOGIN: read("UI_LOGIN"),
-  UI_PASS: read("UI_PASS"),
+  get AGENT_ENDPOINT(): string {
+    return read("AGENT_ENDPOINT");
+  },
+  get AGENT_NETWORK_ENDPOINT(): string {
+    return read("AGENT_NETWORK_ENDPOINT");
+  },
+  get UI_LOGIN(): string {
+    return read("UI_LOGIN");
+  },
+  get UI_PASS(): string {
+    return read("UI_PASS");
+  },
 });
 
 // Helper for network-specific subgraph endpoint creation

@@ -1,35 +1,31 @@
-# Install dependencies only when needed
+# Base: use Alpine for small images
 FROM node:24-alpine AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
+RUN apk add --no-cache libc6-compat
+COPY package.json pnpm-lock.yaml ./
+# Enable and pin pnpm via Corepack (bundled with Node 24)
+RUN corepack enable && corepack prepare pnpm@9 --activate
+# Install dependencies (no source yet) to leverage layer cache
+RUN pnpm install --frozen-lockfile
 
-# Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
-RUN \
-    if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-    elif [ -f package-lock.json ]; then npm i; \
-    elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i; \
-    else echo "Lockfile not found." && exit 1; \
-    fi
-
-
-# Rebuild the source code only when needed
+# Build stage
 FROM node:24-alpine AS builder
 WORKDIR /app
+RUN apk add --no-cache libc6-compat
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
+COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/pnpm-lock.yaml ./pnpm-lock.yaml
+# Copy only source files to avoid node_modules collisions
+COPY app ./app
+COPY components ./components
+COPY hooks ./hooks
+COPY lib ./lib
+COPY public ./public
+COPY styles ./styles
+COPY types ./types
+COPY next.config.js tsconfig.json postcss.config.js ./
 ENV NEXT_TELEMETRY_DISABLED=1
-#ARG BUILD_AGENT_ENDPOINT
-#ENV AGENT_ENDPOINT=$BUILD_AGENT_ENDPOINT
-# RUN yarn build
-RUN apk add --no-cache pnpm
-
-# If using npm comment out above and use below instead
+RUN corepack enable && corepack prepare pnpm@9 --activate
 RUN pnpm run build
 
 # Production image, copy all the files and run next

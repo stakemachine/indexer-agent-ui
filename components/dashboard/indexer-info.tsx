@@ -1,6 +1,5 @@
 "use client";
 import { RefreshCw } from "lucide-react";
-import React from "react";
 import useSWR from "swr";
 import { EthereumIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
@@ -33,11 +32,10 @@ export function IndexerInfo() {
   const { currentNetwork } = useNetworkStore();
 
   type KeyTuple = [string, Record<string, unknown>];
-  function makeFetcher<T>() {
-    return (key: KeyTuple) => subgraphClient(currentNetwork).request<T>(key[0], key[1]);
-  }
-  const subgraphFetcherIndexer = React.useCallback(makeFetcher<IndexerResponse>(), []);
-  const subgraphFetcherOperators = React.useCallback(makeFetcher<OperatorsResponse>(), []);
+  const subgraphFetcherIndexer = (key: KeyTuple) =>
+    subgraphClient(currentNetwork).request<IndexerResponse>(key[0], key[1]);
+  const subgraphFetcherOperators = (key: KeyTuple) =>
+    subgraphClient(currentNetwork).request<OperatorsResponse>(key[0], key[1]);
 
   const { data, error, isLoading } = useSWR<IndexerResponse>(
     indexerRegistration?.address

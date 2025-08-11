@@ -53,9 +53,38 @@ const ALLOCATIONS_BY_INDEXER_QUERY = gql`
   }
 `;
 
+interface RawAllocation {
+  id: string;
+  allocatedTokens: string; // raw wei string
+  createdAtEpoch: string;
+  closedAtEpoch?: string | null;
+  createdAt: string; // unix seconds string
+  closedAt?: string | null;
+  status: string;
+  indexingRewards: string;
+  indexingIndexerRewards: string;
+  indexingDelegatorRewards: string;
+  queryFeesCollected: string;
+  poi: string;
+  subgraphDeployment: {
+    manifest: { network: string };
+    ipfsHash: string;
+    originalName?: string | null;
+    stakedTokens: string;
+    signalledTokens: string;
+    versions?: Array<{
+      subgraph?: { metadata?: { displayName?: string | null; description?: string | null } };
+    }>;
+  };
+}
+
+type AllocationsQueryResponse = {
+  allocations: RawAllocation[];
+};
+
 type Allocation = {
   id: string;
-  allocatedTokens: bigint;
+  allocatedTokens: string; // keep as string; convert only for display
   createdAt: number;
   closedAt: number | null;
   status: string;
@@ -147,27 +176,30 @@ export function Allocations() {
   const { currentNetwork } = useNetworkStore();
   const client = new GraphQLClient(`/api/subgraph/${currentNetwork}`);
   const fetcher = (query: string) =>
-    client.request(query, {
+    client.request<AllocationsQueryResponse>(query, {
       indexer: indexerRegistration?.address.toLowerCase(),
     });
-  const { data, error, isLoading, isValidating, mutate } = useSWR(
+  const { data, error, isLoading, isValidating, mutate } = useSWR<AllocationsQueryResponse>(
     indexerRegistration?.address ? ALLOCATIONS_BY_INDEXER_QUERY : null,
     fetcher,
   );
 
   const allocations: Allocation[] = React.useMemo(() => {
-    if (!data) return [];
-    return data.allocations.map((allocation: any) => ({
-      id: allocation.id,
-      allocatedTokens: allocation.allocatedTokens,
-      createdAt: Number.parseInt(allocation.createdAt),
-      closedAt: allocation.closedAt ? Number.parseInt(allocation.closedAt) : null,
-      status: allocation.status,
-      indexingRewards: allocation.indexingRewards,
-      queryFeesCollected: allocation.queryFeesCollected,
-      network: allocation.subgraphDeployment.manifest.network,
-      subgraphName: allocation.subgraphDeployment.originalName || "Unknown",
-      subgraphDeployment: allocation.subgraphDeployment,
+    if (!data || !data.allocations) return [];
+    return data.allocations.map((a) => ({
+      id: a.id,
+      allocatedTokens: a.allocatedTokens,
+      createdAt: Number.parseInt(a.createdAt, 10),
+      closedAt: a.closedAt ? Number.parseInt(a.closedAt, 10) : null,
+      status: a.status,
+      indexingRewards: a.indexingRewards,
+      queryFeesCollected: a.queryFeesCollected,
+      network: a.subgraphDeployment.manifest.network,
+      subgraphName: a.subgraphDeployment.originalName || "Unknown",
+      subgraphDeployment: {
+        ipfsHash: a.subgraphDeployment.ipfsHash,
+        originalName: a.subgraphDeployment.originalName || "Unknown",
+      },
     }));
   }, [data]);
 

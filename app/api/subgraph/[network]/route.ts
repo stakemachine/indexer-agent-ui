@@ -42,14 +42,12 @@ async function forward(network: string, body: GraphQLRequest) {
   }
 }
 
-// Next.js may require params to be awaited in dynamic API routes; accept a promise-like params container.
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ network: string }> } | { params: { network: string } },
-) {
-  // params can be a direct object or a promise (Next.js dynamic API behavior)
-  const resolved = params instanceof Promise ? await params : params;
-  const network = resolved?.network;
+// Use single-argument handler and derive dynamic segment to avoid type issues in build.
+export async function POST(req: Request) {
+  // Extract network from the request URL path (works regardless of base path)
+  const pathname = new URL(req.url).pathname;
+  const match = pathname.match(/\/api\/subgraph\/([^/]+)/);
+  const network = match?.[1];
   let body: GraphQLRequest = {};
   try {
     body = await req.json();

@@ -37,6 +37,35 @@ type Subgraph = {
   capacity: number;
 };
 
+// Shape of the GraphQL response we rely on (subset of fields)
+interface SubgraphsQueryResponse {
+  graphNetwork: {
+    totalTokensSignalled: string;
+    networkGRTIssuancePerBlock: string;
+    totalTokensAllocated: string;
+  };
+  subgraphs: Array<{
+    metadata: { id: string; displayName: string; image?: string; description?: string };
+    signalAmount: string;
+    signalledTokens: string;
+    active: boolean;
+    currentSignalledTokens: string;
+    currentVersion: {
+      subgraphDeployment: {
+        manifest: { network: string; poweredBySubstreams?: boolean };
+        ipfsHash: string;
+        stakedTokens: string;
+        createdAt: string;
+        deniedAt: number;
+        indexingRewardAmount: string;
+        queryFeesAmount: string;
+        signalledTokens: string;
+        indexerAllocations: Array<{ allocatedTokens: string }>;
+      };
+    };
+  }>;
+}
+
 const columns: ColumnDef<Subgraph>[] = [
   {
     id: "expander",
@@ -102,17 +131,29 @@ const columns: ColumnDef<Subgraph>[] = [
   {
     accessorKey: "apr",
     header: "APR",
-    cell: ({ row }) => <div>{row.getValue("apr").toFixed(2)}%</div>,
+    cell: ({ row }) => {
+      const v = row.getValue("apr");
+      const num = typeof v === "number" ? v : Number(v ?? 0);
+      return <div>{num.toFixed(2)}%</div>;
+    },
   },
   {
     accessorKey: "proportion",
     header: "Prop",
-    cell: ({ row }) => <div>{row.getValue("proportion").toFixed(3)}</div>,
+    cell: ({ row }) => {
+      const v = row.getValue("proportion");
+      const num = typeof v === "number" ? v : Number(v ?? 0);
+      return <div>{num.toFixed(3)}</div>;
+    },
   },
   {
     accessorKey: "capacity",
     header: "Available Capacity",
-    cell: ({ row }) => <div>{row.getValue("capacity").toFixed(2)}</div>,
+    cell: ({ row }) => {
+      const v = row.getValue("capacity");
+      const num = typeof v === "number" ? v : Number(v ?? 0);
+      return <div>{num.toFixed(2)}</div>;
+    },
   },
 ];
 
@@ -126,50 +167,48 @@ export function Subgraphs() {
 
   const [autoRefreshEnabled, setAutoRefreshEnabled] = React.useState(false);
 
-  const fetcher = (query: string) =>
-    client.request(query, {
+  type Key = [string];
+  const fetcher = ([query]: Key) =>
+    client.request<SubgraphsQueryResponse>(query, {
       indexer: indexerRegistration?.address.toLowerCase(),
     });
-  const { data, error, isLoading, isValidating, mutate } = useSWR(
-    indexerRegistration?.address ? SUBGRAPHS_BY_STATUS_QUERY : null,
-    fetcher,
-  );
+  const key: Key | null = indexerRegistration?.address ? [SUBGRAPHS_BY_STATUS_QUERY] : null;
+  const { data, error, isLoading, isValidating, mutate } = useSWR<SubgraphsQueryResponse>(key, fetcher);
 
   const subgraphs: Subgraph[] = React.useMemo(() => {
     if (!data) return [];
     const { totalTokensSignalled, networkGRTIssuancePerBlock, totalTokensAllocated } = data.graphNetwork;
-
+    const totalSignalledFloat = parseFloat(totalTokensSignalled) || 1; // avoid division by zero
+    const totalAllocatedFloat = parseFloat(totalTokensAllocated) || 1;
     const annualIssuance = parseFloat(networkGRTIssuancePerBlock) * BLOCKS_PER_YEAR;
-    return data.subgraphs.map((subgraph: any) => {
-      const signalledTokens = parseFloat(subgraph.currentVersion.subgraphDeployment.signalledTokens);
-      const stakedTokens = parseFloat(subgraph.currentVersion.subgraphDeployment.stakedTokens);
-      const apr = (((signalledTokens / parseFloat(totalTokensSignalled)) * annualIssuance) / stakedTokens) * 100;
-      const proportion =
-        signalledTokens / parseFloat(totalTokensSignalled) / (stakedTokens / parseFloat(totalTokensAllocated));
-      const capacity =
-        (parseFloat(totalTokensAllocated) * (signalledTokens / parseFloat(totalTokensSignalled)) - stakedTokens) / 1e18;
-
+    return data.subgraphs.map((sg) => {
+      const deploy = sg.currentVersion.subgraphDeployment;
+      const signalledTokens = parseFloat(deploy.signalledTokens) || 0;
+      const stakedTokens = parseFloat(deploy.stakedTokens) || 0.0000001; // tiny epsilon to guard zero
+      const apr = (((signalledTokens / totalSignalledFloat) * annualIssuance) / stakedTokens) * 100;
+      const proportion = signalledTokens / totalSignalledFloat / (stakedTokens / totalAllocatedFloat);
+      const capacity = (totalAllocatedFloat * (signalledTokens / totalSignalledFloat) - stakedTokens) / 1e18;
       return {
-        id: subgraph.metadata.id,
-        displayName: subgraph.metadata.displayName,
-        image: subgraph.metadata.image,
-        description: subgraph.metadata.description,
-        signalAmount: subgraph.signalAmount,
-        signalledTokens: subgraph.signalledTokens,
-        active: subgraph.active,
-        currentSignalledTokens: subgraph.currentSignalledTokens,
-        network: subgraph.currentVersion.subgraphDeployment.manifest.network,
-        ipfsHash: subgraph.currentVersion.subgraphDeployment.ipfsHash,
-        stakedTokens: subgraph.currentVersion.subgraphDeployment.stakedTokens,
-        createdAt: subgraph.currentVersion.subgraphDeployment.createdAt,
-        deniedAt: subgraph.currentVersion.subgraphDeployment.deniedAt,
-        poweredBySubstreams: subgraph.currentVersion.subgraphDeployment.manifest.poweredBySubstreams,
-        indexingRewardAmount: subgraph.currentVersion.subgraphDeployment.indexingRewardAmount,
-        queryFeesAmount: subgraph.currentVersion.subgraphDeployment.queryFeesAmount,
-        allocatedTokens: subgraph.currentVersion.subgraphDeployment.indexerAllocations[0]?.allocatedTokens || "0",
-        apr: apr,
-        proportion: proportion,
-        capacity: capacity,
+        id: sg.metadata.id,
+        displayName: sg.metadata.displayName,
+        image: sg.metadata.image || "/placeholder.svg",
+        description: sg.metadata.description || "",
+        signalAmount: sg.signalAmount,
+        signalledTokens: sg.signalledTokens,
+        active: sg.active,
+        currentSignalledTokens: sg.currentSignalledTokens,
+        network: deploy.manifest.network,
+        ipfsHash: deploy.ipfsHash,
+        stakedTokens: deploy.stakedTokens,
+        createdAt: deploy.createdAt,
+        deniedAt: deploy.deniedAt,
+        poweredBySubstreams: deploy.manifest.poweredBySubstreams || false,
+        indexingRewardAmount: deploy.indexingRewardAmount,
+        queryFeesAmount: deploy.queryFeesAmount,
+        allocatedTokens: deploy.indexerAllocations[0]?.allocatedTokens || "0",
+        apr,
+        proportion,
+        capacity,
       };
     });
   }, [data]);

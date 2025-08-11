@@ -1,8 +1,10 @@
 "use client";
 
+import { LogIn, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { signIn, signOut, useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useNetworkStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -20,6 +22,9 @@ const menuItems = [
 export function Header() {
   const { currentNetwork, setCurrentNetwork } = useNetworkStore();
   const pathname = usePathname();
+  const { status } = useSession();
+  const authenticated = status === "authenticated";
+  const loadingSession = status === "loading";
   const NetworksList = ["arbitrum-one", "mainnet", "goerli", "arbitrum-goerli"];
   return (
     <header className="border-b">
@@ -57,10 +62,33 @@ export function Header() {
         </nav>
         <div className="flex items-center space-x-4">
           <ThemeToggle />
-          <Avatar>
-            <AvatarImage src="/placeholder.svg" alt="User avatar" />
-            <AvatarFallback>UI</AvatarFallback>
-          </Avatar>
+          {loadingSession ? (
+            <Button variant="outline" size="icon" disabled aria-label="Loading session">
+              <span className="h-4 w-4 animate-pulse rounded-sm bg-muted" />
+            </Button>
+          ) : authenticated ? (
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Logout"
+              title="Logout"
+              onClick={async () => {
+                await signOut({ callbackUrl: "/signin" });
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label="Login"
+              title="Login"
+              onClick={() => signIn(undefined, { callbackUrl: pathname || "/" })}
+            >
+              <LogIn className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
     </header>

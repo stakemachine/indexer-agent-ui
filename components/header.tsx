@@ -1,6 +1,6 @@
 "use client";
 
-import { LogIn, LogOut } from "lucide-react";
+import { Github, LogIn, LogOut } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -61,6 +61,11 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center space-x-4">
+          <Button asChild variant="outline" size="icon" aria-label="Open GitHub repository" title="GitHub">
+            <a href="https://github.com/stakemachine/indexer-agent-ui" target="_blank" rel="noopener noreferrer">
+              <Github className="h-4 w-4" />
+            </a>
+          </Button>
           <ThemeToggle />
           {loadingSession ? (
             <Button variant="outline" size="icon" disabled aria-label="Loading session">

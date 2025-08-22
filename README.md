@@ -36,14 +36,20 @@ There is no default credentials, you always need to provide `UI_LOGIN` and `UI_P
 First, run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
+pnpm install
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+This project uses the Next.js App Router (`app/` directory). Edit files under `app/` and components under `components/`.
+
+Formatting & linting are handled by Biome. To check/fix locally:
+
+```bash
+pnpm biome:check
+pnpm biome:fix
+```
 
 ## Support
 

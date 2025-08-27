@@ -54,6 +54,9 @@ importers:
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      base-x:
+        specifier: ^5.0.1
+        version: 5.0.1
       bignumber.js:
         specifier: ^9.3.1
         version: 9.3.1
@@ -1046,8 +1049,8 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  base-x@5.0.0:
-    resolution: {integrity: sha512-sMW3VGSX1QWVFA6l8U62MLKz29rRfpTlYdCqLdpLo1/Yd4zZwSbnUaDfciIAowAqvq7YFnWq9hrhdg1KYgc1lQ==}
+  base-x@5.0.1:
+    resolution: {integrity: sha512-M7uio8Zt++eg3jPj+rHMfCC+IuygQHHCOU+IYsVtik6FWjuYpVt/+MRKcgsAMHh8mMFAwnB+Bs+mTrFiXjMzKg==}
 
   bignumber.js@9.3.1:
     resolution: {integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==}
@@ -2790,7 +2793,7 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.0.0
 
-  base-x@5.0.0: {}
+  base-x@5.0.1: {}
 
   bignumber.js@9.3.1: {}
 
@@ -2802,7 +2805,7 @@ snapshots:
 
   bs58@6.0.0:
     dependencies:
-      base-x: 5.0.0
+      base-x: 5.0.1
 
   call-bind-apply-helpers@1.0.1:
     dependencies:

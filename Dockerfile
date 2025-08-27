@@ -4,7 +4,7 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat
 COPY package.json pnpm-lock.yaml ./
 # Enable and pin pnpm via Corepack (bundled with Node 24)
-RUN corepack enable && corepack prepare pnpm@9 --activate
+RUN corepack enable && corepack prepare pnpm@10 --activate
 # Install dependencies (no source yet) to leverage layer cache
 RUN pnpm install --frozen-lockfile
 
@@ -25,7 +25,7 @@ COPY styles ./styles
 COPY types ./types
 COPY next.config.js tsconfig.json postcss.config.js ./
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN corepack enable && corepack prepare pnpm@9 --activate
+RUN corepack enable && corepack prepare pnpm@10 --activate
 RUN pnpm run build
 
 # Production image, copy all the files and run next

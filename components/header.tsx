@@ -62,9 +62,9 @@ export function Header() {
         </nav>
         <div className="flex items-center space-x-4">
           <Button asChild variant="outline" size="icon" aria-label="Open GitHub repository" title="GitHub">
-            <a href="https://github.com/stakemachine/indexer-agent-ui" target="_blank" rel="noopener noreferrer">
+            <Link href="https://github.com/stakemachine/indexer-agent-ui" target="_blank" rel="noopener noreferrer">
               <Github className="h-4 w-4" />
-            </a>
+            </Link>
           </Button>
           <ThemeToggle />
           {loadingSession ? (

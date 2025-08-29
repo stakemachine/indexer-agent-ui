@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NETWORKS } from "@/lib/networks";
 import { useNetworkStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
@@ -25,7 +26,6 @@ export function Header() {
   const { status } = useSession();
   const authenticated = status === "authenticated";
   const loadingSession = status === "loading";
-  const NetworksList = ["arbitrum-one", "mainnet", "goerli", "arbitrum-goerli"];
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -38,9 +38,9 @@ export function Header() {
               <SelectValue placeholder="Select network" />
             </SelectTrigger>
             <SelectContent>
-              {NetworksList.map((network) => (
-                <SelectItem key={network} value={network}>
-                  {network}
+              {NETWORKS.map((net) => (
+                <SelectItem key={net.id} value={net.id}>
+                  {net.label}
                 </SelectItem>
               ))}
             </SelectContent>

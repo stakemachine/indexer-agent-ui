@@ -18,7 +18,6 @@ export function IndexerRegistrationLoader() {
     if (pathname === "/signin" || status !== "authenticated") return;
     const client = agentClient();
 
-    console.log("Current network:", currentNetwork);
     interface RegistrationResponse {
       indexerRegistration?: IndexerRegistration;
     }

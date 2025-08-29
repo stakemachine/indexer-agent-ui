@@ -21,11 +21,22 @@ The Indexer Agent UI allows you to manage your indexer operations simply via web
 ## How to run
 
 ```bash
-docker run -p 3000:3000 -d --network=<indexer-network> -e NEXTAUTH_SECRET=$(openssl rand -base64 32) -e UI_LOGIN=<username> -e UI_PASS=<SecurePassword> -e AGENT_ENDPOINT=http://indexer-agent:8000 -e SUBGRAPH_ENDPOINT=https://api.thegraph.com/subgraphs/name/graphprotocol/graph-network-goerli ghcr.io/stakemachine/indexer-agent-ui
+docker run -p 3000:3000 -d --network=<indexer-network> \
+  -e NEXTAUTH_SECRET=$(openssl rand -base64 32) \
+  -e UI_LOGIN=<username> \
+  -e UI_PASS=<SecurePassword> \
+  -e AGENT_ENDPOINT=http://indexer-agent:8000 \
+  -e AGENT_NETWORK_ENDPOINT=https://gateway.thegraph.com/network \
+  ghcr.io/stakemachine/indexer-agent-ui:latest
 ```
 
 Not providing `NEXTAUTH_SECRET` will throw an error.  
-If you use different public port, you also need to set `NEXTAUTH_URL` to the public URL that will be used to access the interface (example `http://<your-url>:9000`)
+If you use different public port, you also need to set `NEXTAUTH_URL` to the public URL that will be used to access the interface (example `http://<your-url>:9000`).
+
+`AGENT_NETWORK_ENDPOINT` should point to the Graph Network gateway base URL (not a specific subgraph), for example:
+
+- Mainnet: `https://gateway.thegraph.com/network`
+- Testnet: `https://gateway.testnet.thegraph.com/network`
 
 ### Access Credentials
 

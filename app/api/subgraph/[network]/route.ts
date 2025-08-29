@@ -43,17 +43,14 @@ async function forward(network: string, body: GraphQLRequest) {
 }
 
 // Use single-argument handler and derive dynamic segment to avoid type issues in build.
-export async function POST(req: Request) {
-  // Extract network from the request URL path (works regardless of base path)
-  const pathname = new URL(req.url).pathname;
-  const match = pathname.match(/\/api\/subgraph\/([^/]+)/);
-  const network = match?.[1];
+export async function POST(req: Request, { params }: { params: Promise<{ network: string }> }) {
   let body: GraphQLRequest = {};
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
+  const { network } = await params;
   if (!network || typeof network !== "string") {
     return Response.json({ error: "Missing network param" }, { status: 400 });
   }

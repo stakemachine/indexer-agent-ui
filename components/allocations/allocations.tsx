@@ -2,7 +2,6 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow, fromUnixTime } from "date-fns";
-import { ethers } from "ethers";
 import { GraphQLClient } from "graphql-request";
 import React from "react";
 import useSWR from "swr";

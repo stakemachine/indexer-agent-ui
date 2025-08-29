@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { ethers } from "ethers";
 import { GeistMono } from "geist/font/mono";
 import React from "react";
 import useSWR from "swr";

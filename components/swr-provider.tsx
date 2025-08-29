@@ -114,7 +114,7 @@ function summarizeKey(key: string | unknown): string {
     const network = networkMatch ? networkMatch[1] : undefined;
     return network ? `${name}:${network}` : name;
   }
-  return key.length > 50 ? key.slice(0, 47) + "…" : key;
+  return key.length > 50 ? `${key.slice(0, 47)}…` : key;
 }
 
 function extractGraphQLErrMessage(err: unknown): string | null {

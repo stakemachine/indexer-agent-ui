@@ -5,9 +5,14 @@ import { EthereumIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPreview } from "@/components/ui/map-preview";
-import { subgraphClient } from "@/lib/graphql/client";
-import { INDEXER_INFO_BY_ID_QUERY, INDEXER_OPERATORS_QUERY } from "@/lib/graphql/queries";
+import { agentClient, subgraphClient } from "@/lib/graphql/client";
+import {
+  AGENT_INDEXER_REGISTRATION_QUERY,
+  INDEXER_INFO_BY_ID_QUERY,
+  INDEXER_OPERATORS_QUERY,
+} from "@/lib/graphql/queries";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
+import { Caip2ByChainAlias } from "@/lib/utils";
 
 interface GraphAccount {
   id: string;
@@ -36,6 +41,17 @@ export function IndexerInfo() {
     subgraphClient(currentNetwork).request<IndexerResponse>(key[0], key[1]);
   const subgraphFetcherOperators = (key: KeyTuple) =>
     subgraphClient(currentNetwork).request<OperatorsResponse>(key[0], key[1]);
+  const agent = agentClient();
+  type EndpointsResponse = {
+    indexerEndpoints?: Array<{
+      service?: { url?: string; healthy?: boolean; protocolNetwork?: string };
+      status?: { url?: string; healthy?: boolean; protocolNetwork?: string };
+    }>;
+  };
+  const { data: endpointsData } = useSWR<EndpointsResponse>(
+    [AGENT_INDEXER_REGISTRATION_QUERY, { protocolNetwork: currentNetwork }],
+    ([q, vars]) => agent.request(q as string, vars as Record<string, unknown>),
+  );
 
   const { data, error, isLoading } = useSWR<IndexerResponse>(
     indexerRegistration?.address
@@ -76,6 +92,28 @@ export function IndexerInfo() {
     return <div>No indexer data</div>;
   }
   const idx = data.indexer;
+  const expectedCaip2 = Caip2ByChainAlias[currentNetwork];
+  const endpointsList = endpointsData?.indexerEndpoints || [];
+  const matched =
+    endpointsList.find(
+      (e) => e.service?.protocolNetwork === expectedCaip2 || e.status?.protocolNetwork === expectedCaip2,
+    ) || endpointsList[0];
+  const service = matched?.service;
+  const statusEp = matched?.status;
+
+  const StatusBadge = ({ healthy }: { healthy?: boolean }) => {
+    const cls =
+      healthy == null
+        ? "bg-gray-500/10 text-gray-500 border-0"
+        : healthy
+          ? "bg-emerald-500/10 text-emerald-500 border-0"
+          : "bg-red-500/10 text-red-500 border-0";
+    return (
+      <Badge variant="outline" className={cls}>
+        {healthy == null ? "Unknown" : healthy ? "Online" : "Offline"}
+      </Badge>
+    );
+  };
   return (
     <div className="space-y-4">
       <div className="grid md:grid-cols-2 gap-4">
@@ -134,19 +172,15 @@ export function IndexerInfo() {
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Status URL</div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">{indexerRegistration?.url || "N/A"}</span>
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-0">
-                    Online
-                  </Badge>
+                  <span className="text-sm">{statusEp?.url || indexerRegistration?.url || "N/A"}</span>
+                  <StatusBadge healthy={statusEp?.healthy} />
                 </div>
               </div>
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Service URL</div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm">{indexerRegistration?.url || "N/A"}</span>
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-0">
-                    Online
-                  </Badge>
+                  <span className="text-sm">{service?.url || indexerRegistration?.url || "N/A"}</span>
+                  <StatusBadge healthy={service?.healthy} />
                 </div>
               </div>
               <div>

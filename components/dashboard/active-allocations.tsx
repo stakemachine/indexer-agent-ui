@@ -12,7 +12,7 @@ import { agentClient } from "@/lib/graphql/client";
 import { AGENT_ALLOCATIONS_QUERY, CREATE_ACTION_MUTATION } from "@/lib/graphql/queries";
 import { type AgentAllocationsResponse, AgentAllocationsResponseSchema } from "@/lib/graphql/schemas";
 import { useNetworkStore } from "@/lib/store";
-
+import { formatGRT } from "@/lib/utils";
 import { Checkbox } from "../ui/checkbox";
 
 type Allocation = {
@@ -58,27 +58,21 @@ const columns: ColumnDef<Allocation>[] = [
     accessorKey: "allocatedTokens",
     header: "Allocated Tokens",
     cell: ({ row }) => (
-      <div className={`${GeistMono.className}`}>
-        {Number(Number(ethers.formatEther(row.getValue("allocatedTokens")).toString()).toFixed(0))}
-      </div>
+      <div className={`${GeistMono.className}`}>{formatGRT(row.getValue("allocatedTokens"), { decimals: 0 })}</div>
     ),
   },
   {
     accessorKey: "signalledTokens",
     header: "Signalled Tokens",
     cell: ({ row }) => (
-      <div className={`${GeistMono.className}`}>
-        {Number(Number(ethers.formatEther(row.getValue("signalledTokens")).toString()).toFixed(0))}
-      </div>
+      <div className={`${GeistMono.className}`}>{formatGRT(row.getValue("signalledTokens"), { decimals: 0 })}</div>
     ),
   },
   {
     accessorKey: "stakedTokens",
     header: "Staked Tokens",
     cell: ({ row }) => (
-      <div className={` ${GeistMono.className}`}>
-        {Number(Number(ethers.formatEther(row.getValue("stakedTokens")).toString()).toFixed(0))}
-      </div>
+      <div className={` ${GeistMono.className}`}>{formatGRT(row.getValue("stakedTokens"), { decimals: 0 })}</div>
     ),
   },
   {

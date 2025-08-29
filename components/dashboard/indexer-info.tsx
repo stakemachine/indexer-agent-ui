@@ -12,7 +12,7 @@ import {
   INDEXER_OPERATORS_QUERY,
 } from "@/lib/graphql/queries";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
-import { Caip2ByChainAlias } from "@/lib/utils";
+import { Caip2ByChainAlias, formatGRT } from "@/lib/utils";
 
 interface GraphAccount {
   id: string;
@@ -206,13 +206,10 @@ export function IndexerInfo() {
         </Card>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Self stake"
-          value={`${((idx.stakedTokens - idx.lockedTokens) / 1000000000000000000).toFixed(0)}`}
-        />
-        <StatCard title="Allocated" value={`${(idx.allocatedTokens / 1000000000000000000).toFixed(0)}`} />
-        <StatCard title="Unallocated" value={`${(idx.availableStake / 1000000000000000000).toFixed(0)}`} />
-        <StatCard title="Delegated capacity" value={`${(idx.delegatedCapacity / 1000000000000000000).toFixed(0)}`} />
+        <StatCard title="Self stake" value={formatGRT(idx.stakedTokens - idx.lockedTokens, { decimals: 0 })} />
+        <StatCard title="Allocated" value={formatGRT(idx.allocatedTokens, { decimals: 0 })} />
+        <StatCard title="Unallocated" value={formatGRT(idx.availableStake, { decimals: 0 })} />
+        <StatCard title="Delegated capacity" value={formatGRT(idx.delegatedCapacity, { decimals: 0 })} />
       </div>
     </div>
   );

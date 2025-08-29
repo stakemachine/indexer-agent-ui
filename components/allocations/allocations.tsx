@@ -10,6 +10,7 @@ import { DataGrid } from "@/components/data-grid";
 import { Badge } from "@/components/ui/badge";
 import { ALLOCATIONS_BY_INDEXER_QUERY } from "@/lib/graphql/queries";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
+import { formatGRT } from "@/lib/utils";
 
 interface RawAllocation {
   id: string;
@@ -77,7 +78,7 @@ const columns: ColumnDef<Allocation>[] = [
   {
     accessorKey: "allocatedTokens",
     header: "Allocated Tokens",
-    cell: ({ row }) => <div>{(+ethers.formatEther(row.getValue("allocatedTokens"))).toFixed(2)} GRT</div>,
+    cell: ({ row }) => <div>{formatGRT(row.getValue("allocatedTokens"), { decimals: 2, withSymbol: true })}</div>,
   },
   {
     accessorKey: "createdAt",
@@ -116,12 +117,12 @@ const columns: ColumnDef<Allocation>[] = [
   {
     accessorKey: "indexingRewards",
     header: "Indexing Rewards",
-    cell: ({ row }) => <div>{(+ethers.formatEther(row.getValue("indexingRewards"))).toFixed(2)} GRT</div>,
+    cell: ({ row }) => <div>{formatGRT(row.getValue("indexingRewards"), { decimals: 2, withSymbol: true })}</div>,
   },
   {
     accessorKey: "queryFeesCollected",
     header: "Query Fees",
-    cell: ({ row }) => <div>{(+ethers.formatEther(row.getValue("queryFeesCollected"))).toFixed(2)} GRT</div>,
+    cell: ({ row }) => <div>{formatGRT(row.getValue("queryFeesCollected"), { decimals: 2, withSymbol: true })}</div>,
   },
   {
     accessorKey: "network",

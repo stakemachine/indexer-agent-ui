@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { subgraphClient } from "@/lib/graphql/client";
 import { SUBGRAPHS_BY_STATUS_QUERY } from "@/lib/graphql/queries";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
+import { formatGRT } from "@/lib/utils";
 
 type Subgraph = {
   id: string;
@@ -106,27 +107,27 @@ const columns: ColumnDef<Subgraph>[] = [
   {
     accessorKey: "currentSignalledTokens",
     header: "Signalled Tokens",
-    cell: ({ row }) => <div>{(parseFloat(row.getValue("currentSignalledTokens")) / 1e18).toFixed(2)}</div>,
+    cell: ({ row }) => <div>{formatGRT(row.getValue("currentSignalledTokens"), { decimals: 2 })}</div>,
   },
   {
     accessorKey: "stakedTokens",
     header: "Staked Tokens",
-    cell: ({ row }) => <div>{(parseFloat(row.getValue("stakedTokens")) / 1e18).toFixed(2)}</div>,
+    cell: ({ row }) => <div>{formatGRT(row.getValue("stakedTokens"), { decimals: 2 })}</div>,
   },
   {
     accessorKey: "indexingRewardAmount",
     header: "Indexing Reward",
-    cell: ({ row }) => <div>{(parseFloat(row.getValue("indexingRewardAmount")) / 1e18).toFixed(2)}</div>,
+    cell: ({ row }) => <div>{formatGRT(row.getValue("indexingRewardAmount"), { decimals: 2 })}</div>,
   },
   {
     accessorKey: "queryFeesAmount",
     header: "Query fees",
-    cell: ({ row }) => <div>{(parseFloat(row.getValue("queryFeesAmount")) / 1e18).toFixed(2)}</div>,
+    cell: ({ row }) => <div>{formatGRT(row.getValue("queryFeesAmount"), { decimals: 2 })}</div>,
   },
   {
     accessorKey: "allocatedTokens",
     header: "Allocated Tokens",
-    cell: ({ row }) => <div>{(parseFloat(row.getValue("allocatedTokens") || "0") / 1e18).toFixed(2)}</div>,
+    cell: ({ row }) => <div>{formatGRT(row.getValue("allocatedTokens") || "0", { decimals: 2 })}</div>,
   },
   {
     accessorKey: "apr",
@@ -244,25 +245,25 @@ export function Subgraphs() {
                 <div>
                   <p className="text-sm font-medium">Staked tokens</p>
                   <p className="text-sm text-muted-foreground">
-                    {(parseFloat(subgraph.stakedTokens) / 1e18).toFixed(2)} GRT
+                    {formatGRT(subgraph.stakedTokens, { decimals: 2, withSymbol: true })}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Signalled Tokens</p>
                   <p className="text-sm text-muted-foreground">
-                    {(parseFloat(subgraph.signalledTokens) / 1e18).toFixed(2)} GRT
+                    {formatGRT(subgraph.signalledTokens, { decimals: 2, withSymbol: true })}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Indexing rewards</p>
                   <p className="text-sm text-muted-foreground">
-                    {(parseFloat(subgraph.indexingRewardAmount) / 1e18).toFixed(2)} GRT
+                    {formatGRT(subgraph.indexingRewardAmount, { decimals: 2, withSymbol: true })}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Query fees</p>
                   <p className="text-sm text-muted-foreground">
-                    {(parseFloat(subgraph.queryFeesAmount) / 1e18).toFixed(2)} GRT
+                    {formatGRT(subgraph.queryFeesAmount, { decimals: 2, withSymbol: true })}
                   </p>
                 </div>
                 <div>

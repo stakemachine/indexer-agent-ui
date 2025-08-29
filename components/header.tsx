@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UpdateIndicator } from "@/components/update-indicator";
+import { useLatestRelease } from "@/hooks/use-latest-release";
 import { NETWORKS } from "@/lib/networks";
 import { useNetworkStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -26,6 +28,9 @@ export function Header() {
   const { status } = useSession();
   const authenticated = status === "authenticated";
   const loadingSession = status === "loading";
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION;
+  const repo = process.env.NEXT_PUBLIC_GITHUB_REPO || "stakemachine/indexer-agent-ui";
+  const { latestTag, updateAvailable } = useLatestRelease(repo, appVersion);
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -33,6 +38,11 @@ export function Header() {
           <Link href="/" className="font-semibold text-lg">
             Agent UI
           </Link>
+          {appVersion && (
+            <span className="text-xs text-muted-foreground" title={`Version ${appVersion}`}>
+              v{appVersion}
+            </span>
+          )}
           <Select value={currentNetwork} onValueChange={setCurrentNetwork}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Select network" />
@@ -61,11 +71,23 @@ export function Header() {
           ))}
         </nav>
         <div className="flex items-center space-x-4">
-          <Button asChild variant="outline" size="icon" aria-label="Open GitHub repository" title="GitHub">
-            <Link href="https://github.com/stakemachine/indexer-agent-ui" target="_blank" rel="noopener noreferrer">
-              <Github className="h-4 w-4" />
-            </Link>
-          </Button>
+          <div className="relative">
+            <Button
+              asChild
+              variant="outline"
+              size="icon"
+              aria-label="Open GitHub repository"
+              title={updateAvailable && latestTag ? `New version ${latestTag} available` : "GitHub"}
+            >
+              <Link href={`https://github.com/${repo}`} target="_blank" rel="noopener noreferrer">
+                <Github className="h-4 w-4" />
+              </Link>
+            </Button>
+            <UpdateIndicator
+              show={updateAvailable}
+              title={latestTag ? `New version ${latestTag} available` : undefined}
+            />
+          </div>
           <ThemeToggle />
           {loadingSession ? (
             <Button variant="outline" size="icon" disabled aria-label="Loading session">

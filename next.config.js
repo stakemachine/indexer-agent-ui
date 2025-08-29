@@ -1,8 +1,12 @@
 /** @type {import('next').NextConfig} */
+const { version } = require("./package.json");
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ["geist"],
   output: "standalone",
+  env: {
+    NEXT_PUBLIC_APP_VERSION: version,
+  },
   images: {
     remotePatterns: [
       {

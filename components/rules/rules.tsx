@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { GraphQLClient, gql } from "graphql-request";
+import { GraphQLClient } from "graphql-request";
 import React from "react";
 import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
@@ -9,38 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { createSchemaFetcher } from "@/lib/fetchers";
+import { DELETE_INDEXING_RULES_MUTATION, INDEXING_RULES_LIST_QUERY } from "@/lib/graphql/queries";
 import { type IndexingRulesResponse, IndexingRulesResponseSchema } from "@/lib/graphql/schemas";
 import { resolveChainAlias } from "@/lib/utils";
 import { Checkbox } from "../ui/checkbox";
-
-const INDEXING_RULES_LIST_QUERY = gql`
-  {
-    indexingRules(merged: true) {
-      identifier
-      identifierType
-      allocationAmount
-      allocationLifetime
-      autoRenewal
-      parallelAllocations
-      maxAllocationPercentage
-      minSignal
-      maxSignal
-      minStake
-      minAverageQueryFees
-      custom
-      decisionBasis
-      requireSupported
-      safety
-      protocolNetwork
-    }
-  }
-`;
-
-const DELETE_INDEXING_RULES_MUTATION = gql`
-  mutation deleteIndexingRules($identifiers: [IndexingRuleIdentifier!]!) {
-    deleteIndexingRules(identifiers: $identifiers)
-  }
-`;
 
 type IndexingRule = {
   identifier: string;

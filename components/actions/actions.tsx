@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { gql } from "graphql-request";
 import React from "react";
 import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
@@ -12,87 +11,15 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { createSchemaFetcher } from "@/lib/fetchers";
 import { agentClient } from "@/lib/graphql/client";
+import {
+  ACTIONS_LIST_QUERY,
+  APPROVE_ACTIONS_MUTATION,
+  CANCEL_ACTIONS_MUTATION,
+  DELETE_ACTIONS_MUTATION,
+} from "@/lib/graphql/queries";
 import { type ActionsResponse, ActionsResponseSchema } from "@/lib/graphql/schemas";
 
 import { resolveChainAlias } from "@/lib/utils";
-
-const ACTIONS_LIST_QUERY = gql`
-  query ActionsList {
-    actions(filter: {}) {
-      id
-      type
-      deploymentID
-      allocationID
-      amount
-      poi
-      force
-      source
-      reason
-      priority
-      status
-      failureReason
-      transaction
-      protocolNetwork
-    }
-  }
-`;
-
-const APPROVE_ACTIONS_MUTATION = gql`
-  mutation approveActions($actionIDs: [Int!]!) {
-    approveActions(actionIDs: $actionIDs) {
-      id
-      type
-      allocationID
-      deploymentID
-      amount
-      poi
-      force
-      source
-      reason
-      priority
-      transaction
-      status
-    }
-  }
-`;
-
-const CANCEL_ACTIONS_MUTATION = gql`
-  mutation cancelActions($actionIDs: [Int!]!) {
-    cancelActions(actionIDs: $actionIDs) {
-      id
-      type
-      allocationID
-      deploymentID
-      amount
-      poi
-      force
-      source
-      reason
-      priority
-      transaction
-      status
-    }
-  }
-`;
-
-const DELETE_ACTIONS_MUTATION = gql`
-  mutation deleteActions($actionIDs: [Int!]!) {
-    deleteActions(actionIDs: $actionIDs) {
-      id
-      type
-      allocationID
-      deploymentID
-      amount
-      poi
-      force
-      source
-      reason
-      priority
-      transaction
-      status
-    }
-  }
-`;
 
 type Action = {
   id: number;

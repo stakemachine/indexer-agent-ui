@@ -3,55 +3,13 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow, fromUnixTime } from "date-fns";
 import { ethers } from "ethers";
-import { GraphQLClient, gql } from "graphql-request";
+import { GraphQLClient } from "graphql-request";
 import React from "react";
 import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
 import { Badge } from "@/components/ui/badge";
+import { ALLOCATIONS_BY_INDEXER_QUERY } from "@/lib/graphql/queries";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
-
-const ALLOCATIONS_BY_INDEXER_QUERY = gql`
-  query allocationByIndexerQuery($indexer: String) {
-    allocations(
-      first: 1000
-      orderBy: createdAt
-      orderDirection: desc
-      where: { indexer: $indexer }
-    ) {
-      id
-      allocatedTokens
-      createdAtEpoch
-      closedAtEpoch
-      createdAt
-      closedAt
-      status
-      indexingRewards
-      indexingIndexerRewards
-      indexingDelegatorRewards
-      queryFeesCollected
-      poi
-      subgraphDeployment {
-        manifest {
-          network
-        }
-        ipfsHash
-        originalName
-        stakedTokens
-        signalledTokens
-        versions{
-      subgraph{
-        metadata
-        {
-          displayName
-          description
-        }
-      }
-     
-    }
-      }
-    }
-  }
-`;
 
 interface RawAllocation {
   id: string;

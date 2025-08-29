@@ -1,28 +1,15 @@
 "use client";
 
-import { gql } from "graphql-request";
 import useSWR from "swr";
 import { Progress } from "@/components/ui/progress";
 import { subgraphClient } from "@/lib/graphql/client";
+import { CURRENT_EPOCH_QUERY } from "@/lib/graphql/queries";
 import { useNetworkStore } from "@/lib/store";
 
 interface EpochData {
   graphNetwork: { currentL1BlockNumber: string };
   epoches: Array<{ id: string; startBlock: string; endBlock: string }>;
 }
-
-const CURRENT_EPOCH_QUERY = gql`
-  query CurrentEpochQuery {
-    graphNetwork(id: 1) {
-      currentL1BlockNumber
-    }
-    epoches(first: 1, orderDirection: desc, orderBy: startBlock) {
-      id
-      startBlock
-      endBlock
-    }
-  }
-`;
 
 function formatTimeRemaining(blocksRemaining: number): string {
   const secondsRemaining = blocksRemaining * 12;

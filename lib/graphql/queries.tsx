@@ -520,3 +520,17 @@ export const DELETE_COST_MODELS_MUTATION = gql`
     }
   }
 `;
+
+// UI: Current epoch widget
+export const CURRENT_EPOCH_QUERY = gql`
+  query CurrentEpochQuery {
+    graphNetwork(id: 1) {
+      currentL1BlockNumber
+    }
+    epoches(first: 1, orderDirection: desc, orderBy: startBlock) {
+      id
+      startBlock
+      endBlock
+    }
+  }
+`;

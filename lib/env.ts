@@ -35,6 +35,6 @@ export function buildNetworkSubgraphEndpoint(network: string): string {
   if (!/^[a-z0-9-]+$/i.test(network)) {
     throw new Error(`Invalid network name: ${network}`);
   }
-  const base = env.AGENT_NETWORK_ENDPOINT.endsWith("/") ? env.AGENT_NETWORK_ENDPOINT : env.AGENT_NETWORK_ENDPOINT + "/";
+  const base = env.AGENT_NETWORK_ENDPOINT.endsWith("/") ? env.AGENT_NETWORK_ENDPOINT : `${env.AGENT_NETWORK_ENDPOINT}/`;
   return base + network;
 }

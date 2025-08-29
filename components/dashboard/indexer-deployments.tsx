@@ -112,7 +112,13 @@ export function IndexerDeployments() {
     return data.indexerDeployments.map((deployment) => ({
       subgraphDeployment: deployment.subgraphDeployment,
       synced: deployment.synced,
-      health: deployment.health ? "healthy" : "unhealthy",
+      // Normalize health to a lowercase string; only literal "healthy" is treated as healthy
+      health:
+        typeof deployment.health === "string"
+          ? deployment.health.toLowerCase()
+          : deployment.health
+            ? "healthy"
+            : "unhealthy",
       node: deployment.node,
       network: deployment.chains[0]?.network || "Unknown",
       earliest: Number(deployment.chains[0]?.earliestBlock.number) || 0,

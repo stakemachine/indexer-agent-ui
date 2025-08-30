@@ -7,16 +7,16 @@ This project now uses Vitest for testing. Vitest is a fast unit test framework p
 ### Command Line
 ```bash
 # Run all tests once
-npm test
+pnpm test
 
 # Run tests in watch mode
-npm run test:ui
+pnpm run test:ui
 ```
 
 ### UI Mode
 ```bash
 # Open Vitest UI in browser
-npm run test:ui
+pnpm run test:ui
 ```
 
 This will start a web interface at `http://localhost:51204/__vitest__/` where you can:

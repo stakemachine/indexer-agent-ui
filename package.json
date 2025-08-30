@@ -6,6 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
     "biome:check": "biome check --no-errors-on-unmatched .",
     "biome:fix": "biome check --write --no-errors-on-unmatched .",
     "lint": "pnpm biome:check"
@@ -57,12 +59,17 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
     "@types/lodash": "^4.17.20",
     "@types/node": "24.1.0",
     "@types/react": "19.1.10",
     "@types/react-dom": "19.1.7",
+    "@vitest/ui": "^3.2.4",
+    "jsdom": "^26.1.0",
     "lefthook": "^1.12.3",
-    "typescript": "5.8.3"
+    "typescript": "5.8.3",
+    "vitest": "^3.2.4"
   },
   "pnpm": {
     "overrides": {

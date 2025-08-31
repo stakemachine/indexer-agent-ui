@@ -131,6 +131,8 @@ export function DataGrid<TData, TValue>({
       globalFilter,
       rowSelection,
     },
+    // Prevent pagination from resetting to page 0 when data changes (e.g., SWR revalidation)
+    autoResetPageIndex: false,
     enableRowSelection: true,
     enableExpanding: true,
     getRowCanExpand: () => true,

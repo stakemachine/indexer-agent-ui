@@ -168,13 +168,17 @@ export function Subgraphs() {
 
   const [autoRefreshEnabled, setAutoRefreshEnabled] = React.useState(false);
 
-  type Key = [string];
+  type Key = [string, string, string];
+  const key: Key | null = indexerRegistration?.address
+    ? [SUBGRAPHS_BY_STATUS_QUERY, currentNetwork, indexerRegistration.address.toLowerCase()]
+    : null;
   const fetcher = ([query]: Key) =>
     client.request<SubgraphsQueryResponse>(query, {
       indexer: indexerRegistration?.address.toLowerCase(),
     });
-  const key: Key | null = indexerRegistration?.address ? [SUBGRAPHS_BY_STATUS_QUERY] : null;
-  const { data, error, isLoading, isValidating, mutate } = useSWR<SubgraphsQueryResponse>(key, fetcher);
+  const { data, error, isLoading, isValidating, mutate } = useSWR<SubgraphsQueryResponse>(key, fetcher, {
+    revalidateOnFocus: false, // avoid reloading when window refocuses during pagination clicks
+  });
 
   const subgraphs: Subgraph[] = React.useMemo(() => {
     if (!data) return [];

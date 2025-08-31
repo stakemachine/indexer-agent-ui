@@ -75,11 +75,9 @@ const columns: ColumnDef<Allocation>[] = [
     ),
   },
   {
-    accessorKey: "createdAtEpoch",
+    accessorKey: "createdAt",
     header: "Created At Epoch",
-    cell: ({ row }) => (
-      <div className={`w-[40px] truncate ${GeistMono.className}`}>{row.getValue("createdAtEpoch")}</div>
-    ),
+    cell: ({ row }) => <div className={`w-[40px] truncate ${GeistMono.className}`}>{row.getValue("createdAt")}</div>,
   },
 ];
 

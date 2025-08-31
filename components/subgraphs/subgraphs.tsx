@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDownIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import useSWR from "swr";
@@ -73,7 +73,7 @@ const columns: ColumnDef<Subgraph>[] = [
     header: () => null,
     cell: ({ row }) => (
       <button type="button" onClick={row.getToggleExpandedHandler()} className="cursor-pointer">
-        {row.getIsExpanded() ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        {row.getIsExpanded() ? <ChevronDownIcon className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
       </button>
     ),
   },

@@ -16,7 +16,7 @@ import {
 } from "@tanstack/react-table";
 import { GeistMono } from "geist/font/mono";
 
-import { ChevronDown, Filter, RefreshCw } from "lucide-react";
+import { ChevronDownIcon, FilterIcon, RefreshCwIcon } from "lucide-react";
 import React, { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,7 +73,7 @@ function ColumnFilter<TData, TValue>({ column }: { column: Column<TData, TValue>
       <PopoverTrigger asChild>
         <Button variant="ghost" className="h-8 w-8 p-0">
           <span className="sr-only">Filter {column.id}</span>
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDownIcon className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0" align="end">
@@ -196,7 +196,7 @@ export function DataGrid<TData, TValue>({
           />
           {isFiltered && (
             <Badge variant="secondary" className="h-8 px-3 flex items-center space-x-1">
-              <Filter className="h-4 w-4" />
+              <FilterIcon className="h-4 w-4" />
               <span>Filtered</span>
             </Badge>
           )}
@@ -205,7 +205,7 @@ export function DataGrid<TData, TValue>({
           {onRefresh && (
             <>
               <Button variant="outline" onClick={onRefresh} disabled={isLoading || isValidating}>
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading || isValidating ? "animate-spin" : ""}`} />
+                <RefreshCwIcon className={`h-4 w-4 mr-2 ${isLoading || isValidating ? "animate-spin" : ""}`} />
                 Refresh
               </Button>
               <div className="flex items-center space-x-2">

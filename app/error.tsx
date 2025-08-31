@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
+import { TriangleAlertIcon } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +20,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
         <div className="min-h-screen flex items-center justify-center p-4">
           <Card className="max-w-md w-full">
             <CardHeader className="flex flex-row items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <TriangleAlertIcon className="h-5 w-5 text-red-500" />
               <CardTitle>Something went wrong</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

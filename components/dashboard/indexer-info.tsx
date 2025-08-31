@@ -1,5 +1,5 @@
 "use client";
-import { RefreshCw } from "lucide-react";
+import { RefreshCwIcon } from "lucide-react";
 import useSWR from "swr";
 import { EthereumIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
@@ -142,7 +142,7 @@ export function IndexerInfo() {
                 </div>
                 {operatorsIsLoading || operatorsIsValidating ? (
                   <div className="inline-flex items-center text-sm font-mono">
-                    <RefreshCw className="h-3 w-3 mr-2 animate-spin" />
+                    <RefreshCwIcon className="h-3 w-3 mr-2 animate-spin" />
                     <div className="animate-pulse">Loading operators...</div>
                   </div>
                 ) : (

@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, LogIn, LogOut } from "lucide-react";
+import { GithubIcon, LogInIcon, LogOutIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -80,7 +80,7 @@ export function Header() {
               title={updateAvailable && latestTag ? `New version ${latestTag} available` : "GitHub"}
             >
               <Link href={`https://github.com/${repo}`} target="_blank" rel="noopener noreferrer">
-                <Github className="h-4 w-4" />
+                <GithubIcon className="h-4 w-4" />
               </Link>
             </Button>
             <UpdateIndicator
@@ -103,7 +103,7 @@ export function Header() {
                 await signOut({ callbackUrl: "/signin" });
               }}
             >
-              <LogOut className="h-4 w-4" />
+              <LogOutIcon className="h-4 w-4" />
             </Button>
           ) : (
             <Button
@@ -113,7 +113,7 @@ export function Header() {
               title="Login"
               onClick={() => signIn(undefined, { callbackUrl: pathname || "/" })}
             >
-              <LogIn className="h-4 w-4" />
+              <LogInIcon className="h-4 w-4" />
             </Button>
           )}
         </div>

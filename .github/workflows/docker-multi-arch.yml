@@ -82,5 +82,5 @@ jobs:
           ---
           **Docker Image**
 
-          \`${IMAGE_URL}\`
+          \`\$ docker pull ${IMAGE_URL}\`
           EOF

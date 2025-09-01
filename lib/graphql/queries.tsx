@@ -362,6 +362,14 @@ export const ALLOCATIONS_BY_INDEXER_QUERY = gql`
         originalName
         stakedTokens
         signalledTokens
+        versions(first: 1, orderBy: version, orderDirection: desc) {
+          subgraph {
+            metadata {
+              displayName
+              description
+            }
+          }
+        }
       }
     }
   }

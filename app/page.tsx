@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import { CurrentEpoch } from "@/components/current-epoch";
-import { ActiveAllocations } from "@/components/dashboard/active-allocations";
 import { IndexerDeployments } from "@/components/dashboard/indexer-deployments";
 import { IndexerInfo } from "@/components/dashboard/indexer-info";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -62,11 +61,6 @@ export default function DashboardPage() {
       <ErrorBoundary fallbackTitle="Deployments failed">
         <Suspense fallback={<TableSkeleton rows={6} cols={6} />}>
           <IndexerDeployments />
-        </Suspense>
-      </ErrorBoundary>
-      <ErrorBoundary fallbackTitle="Allocations failed">
-        <Suspense fallback={<TableSkeleton rows={6} cols={6} />}>
-          <ActiveAllocations />
         </Suspense>
       </ErrorBoundary>
     </div>

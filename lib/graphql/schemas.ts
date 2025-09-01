@@ -82,7 +82,18 @@ export const ActionsResponseSchema = z.object({
   actions: z.array(ActionSchema),
 });
 
+export const CostModelSchema = z.object({
+  deployment: z.string(),
+  model: z.string().nullable().optional(),
+  variables: z.string().nullable().optional(),
+});
+
+export const CostModelsResponseSchema = z.object({
+  costModels: z.array(CostModelSchema),
+});
+
 export type AgentAllocationsResponse = z.infer<typeof AgentAllocationsResponseSchema>;
 export type IndexerDeploymentsResponse = z.infer<typeof IndexerDeploymentsResponseSchema>;
 export type IndexingRulesResponse = z.infer<typeof IndexingRulesResponseSchema>;
 export type ActionsResponse = z.infer<typeof ActionsResponseSchema>;
+export type CostModelsResponse = z.infer<typeof CostModelsResponseSchema>;

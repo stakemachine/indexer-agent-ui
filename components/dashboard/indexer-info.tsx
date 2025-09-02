@@ -44,9 +44,11 @@ interface AllocationsQueryResponse {
 function PendingRewardsSection({
   allocations,
   grtPrice,
+  indexingRewardCut,
 }: {
   allocations: Array<{ id: string; status: string }>;
   grtPrice: number | null | undefined;
+  indexingRewardCut?: number;
 }) {
   const { currentNetwork } = useNetworkStore();
   const rewardsSupported = isRewardsSupported(currentNetwork);
@@ -55,16 +57,18 @@ function PendingRewardsSection({
     return null;
   }
 
-  return <PendingRewardsDisplay allocations={allocations} grtPrice={grtPrice} />;
+  return <PendingRewardsDisplay allocations={allocations} grtPrice={grtPrice} indexingRewardCut={indexingRewardCut} />;
 }
 
 // Inner component that uses rewards context
 function PendingRewardsDisplay({
   allocations,
   grtPrice,
+  indexingRewardCut,
 }: {
   allocations: Array<{ id: string; status: string }>;
   grtPrice: number | null | undefined;
+  indexingRewardCut?: number;
 }) {
   const { currentNetwork } = useNetworkStore();
   const [totalPendingRewards, setTotalPendingRewards] = useState("0");
@@ -110,18 +114,47 @@ function PendingRewardsDisplay({
 
   const hasRewards = totalPendingRewards !== "0";
 
-  // Calculate USD value
+  // Calculate USD value and breakdown
   let usdValue: string | null = null;
-  if (grtPrice && hasRewards) {
-    try {
-      const asEthStr = formatEther(totalPendingRewards);
-      const asNum = Number.parseFloat(asEthStr);
-      if (Number.isFinite(asNum)) {
-        const usdAmount = asNum * grtPrice;
-        usdValue = formatUSD(usdAmount);
+  let indexerRewards = "0";
+  let delegatorRewards = "0";
+
+  if (hasRewards) {
+    // Calculate breakdown based on indexing reward cut
+    if (indexingRewardCut !== undefined) {
+      try {
+        const total = BigInt(totalPendingRewards);
+        // Indexer gets: (indexingRewardCut / 1000000) * totalRewards
+        // Delegator gets: remainder
+        const indexerShare = (total * BigInt(indexingRewardCut)) / BigInt(1000000);
+        const delegatorShare = total - indexerShare;
+
+        indexerRewards = indexerShare.toString();
+        delegatorRewards = delegatorShare.toString();
+      } catch (error) {
+        console.error("Error calculating reward breakdown:", error);
+        // Fallback to showing total as indexer rewards
+        indexerRewards = totalPendingRewards;
+        delegatorRewards = "0";
       }
-    } catch (error) {
-      console.error("Error calculating USD value for pending rewards:", error);
+    } else {
+      // If no reward cut data, show all as indexer rewards
+      indexerRewards = totalPendingRewards;
+      delegatorRewards = "0";
+    }
+
+    // Calculate USD value
+    if (grtPrice) {
+      try {
+        const asEthStr = formatEther(totalPendingRewards);
+        const asNum = Number.parseFloat(asEthStr);
+        if (Number.isFinite(asNum)) {
+          const usdAmount = asNum * grtPrice;
+          usdValue = formatUSD(usdAmount);
+        }
+      } catch (error) {
+        console.error("Error calculating USD value for pending rewards:", error);
+      }
     }
   }
 
@@ -142,6 +175,60 @@ function PendingRewardsDisplay({
         {hasRewards ? formatGRT(totalPendingRewards, { decimals: 2, withSymbol: true }) : "—"}
       </div>
       {usdValue && <div className="text-sm text-muted-foreground mt-1">{usdValue}</div>}
+
+      {/* Breakdown when we have reward cut data - always show for UI consistency */}
+      {indexingRewardCut !== undefined && (
+        <div className="mt-3 pt-3 border-t border-border">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <div className="text-muted-foreground">Indexer Rewards</div>
+              <div className="font-medium">
+                {hasRewards ? formatGRT(indexerRewards, { decimals: 2, withSymbol: true }) : "—"}
+              </div>
+              {grtPrice && hasRewards && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {(() => {
+                    try {
+                      const asEthStr = formatEther(indexerRewards);
+                      const asNum = Number.parseFloat(asEthStr);
+                      if (Number.isFinite(asNum)) {
+                        const usdAmount = asNum * grtPrice;
+                        return formatUSD(usdAmount);
+                      }
+                    } catch (error) {
+                      console.error("Error calculating USD value for indexer rewards:", error);
+                    }
+                    return "—";
+                  })()}
+                </div>
+              )}
+            </div>
+            <div>
+              <div className="text-muted-foreground">Delegator Rewards</div>
+              <div className="font-medium">
+                {hasRewards ? formatGRT(delegatorRewards, { decimals: 2, withSymbol: true }) : "—"}
+              </div>
+              {grtPrice && hasRewards && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {(() => {
+                    try {
+                      const asEthStr = formatEther(delegatorRewards);
+                      const asNum = Number.parseFloat(asEthStr);
+                      if (Number.isFinite(asNum)) {
+                        const usdAmount = asNum * grtPrice;
+                        return formatUSD(usdAmount);
+                      }
+                    } catch (error) {
+                      console.error("Error calculating USD value for delegator rewards:", error);
+                    }
+                    return "—";
+                  })()}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -510,7 +597,11 @@ export function IndexerInfo() {
             </div>
 
             {/* Pending Rewards Section */}
-            <PendingRewardsSection allocations={allocations} grtPrice={grtPrice} />
+            <PendingRewardsSection
+              allocations={allocations}
+              grtPrice={grtPrice}
+              indexingRewardCut={idx.indexingRewardCut}
+            />
 
             {idx.tokensLockedUntil > 0 && (
               <div>

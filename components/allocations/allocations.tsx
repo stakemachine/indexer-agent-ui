@@ -3,16 +3,20 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow, fromUnixTime } from "date-fns";
 import { GraphQLClient } from "graphql-request";
+import { DatabaseIcon, Loader2Icon } from "lucide-react";
 import React from "react";
 import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
+import { isRewardsSupported } from "@/lib/contracts/rewards";
 import { agentClient } from "@/lib/graphql/client";
 import { ALLOCATIONS_BY_INDEXER_QUERY, CREATE_ACTION_MUTATION } from "@/lib/graphql/queries";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
 import { formatGRT } from "@/lib/utils";
+import { RewardsProvider, useRewardsContext } from "./rewards-context";
 
 interface RawAllocation {
   id: string;
@@ -179,9 +183,32 @@ const columns: ColumnDef<Allocation>[] = [
   },
 ];
 
-export function Allocations() {
+// Allocations table component that uses rewards context
+function AllocationsTable() {
   const { indexerRegistration } = useIndexerRegistrationStore();
   const { currentNetwork } = useNetworkStore();
+  const rewardsSupported = isRewardsSupported(currentNetwork);
+
+  // Define columns inside component to access rewards context
+  const columnsWithRewards: ColumnDef<Allocation>[] = React.useMemo(() => {
+    const baseColumns = [...columns];
+
+    // Add pending rewards column if supported
+    if (rewardsSupported) {
+      const pendingRewardsColumn: ColumnDef<Allocation> = {
+        id: "pendingRewards",
+        header: "Pending Rewards",
+        cell: ({ row }) => <PendingRewardsCell allocation={row.original} />,
+        enableSorting: false,
+      };
+
+      // Insert before network column (last column)
+      baseColumns.splice(-1, 0, pendingRewardsColumn);
+    }
+
+    return baseColumns;
+  }, [rewardsSupported]);
+
   const client = new GraphQLClient(`/api/subgraph/${currentNetwork}`);
   const fetcher = (query: string) =>
     client.request<AllocationsQueryResponse>(query, {
@@ -253,23 +280,140 @@ export function Allocations() {
     }
   };
 
+  // Prepare allocations data for rewards context
+  const allocationsForContext = React.useMemo(() => {
+    return allocations.map((a) => ({
+      id: a.id,
+      status: a.status,
+    }));
+  }, [allocations]);
+
   return (
-    <DataGrid
-      columns={columns}
-      data={allocations}
-      onRefresh={() => mutate()}
-      error={error ? "Failed to load allocations" : null}
-      isLoading={isLoading}
-      isValidating={isValidating}
-      initialState={{
-        sorting: [{ id: "createdAt", desc: true }],
-      }}
-      batchActions={[
-        {
-          label: "Unallocate",
-          onClick: handleUnallocate,
-        },
-      ]}
-    />
+    <div className="space-y-4">
+      {rewardsSupported && <BatchRewardsControls allocations={allocationsForContext} />}
+      <DataGrid
+        columns={columnsWithRewards}
+        data={allocations}
+        onRefresh={() => mutate()}
+        error={error ? "Failed to load allocations" : null}
+        isLoading={isLoading}
+        isValidating={isValidating}
+        initialState={{
+          sorting: [{ id: "createdAt", desc: true }],
+        }}
+        batchActions={[
+          {
+            label: "Unallocate",
+            onClick: handleUnallocate,
+          },
+        ]}
+      />
+    </div>
+  );
+}
+
+// Component for individual pending rewards cell
+function PendingRewardsCell({ allocation }: { allocation: Allocation }) {
+  const { pendingRewards, fetchReward, batchLoading } = useRewardsContext();
+  const isActive = allocation.status === "Active";
+  const rewardState = pendingRewards[allocation.id];
+
+  if (!isActive) {
+    return <div className="text-muted-foreground">—</div>;
+  }
+
+  const handleLoadReward = () => {
+    fetchReward(allocation.id);
+  };
+
+  return (
+    <div className="flex items-center space-x-2">
+      <div className="min-w-0 flex-1">
+        {rewardState?.loading ? (
+          <div className="flex items-center space-x-1">
+            <Loader2Icon className="h-3 w-3 animate-spin" />
+            <span className="text-xs">Loading...</span>
+          </div>
+        ) : rewardState?.error ? (
+          <div className="text-xs text-red-500">Error</div>
+        ) : rewardState?.amount && rewardState.amount !== "0" ? (
+          <div className="text-sm">{formatGRT(rewardState.amount, { decimals: 2, withSymbol: true })}</div>
+        ) : (
+          <div className="text-muted-foreground">—</div>
+        )}
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleLoadReward}
+        disabled={rewardState?.loading || batchLoading}
+        className="h-6 w-6 p-0"
+      >
+        {rewardState?.loading ? <Loader2Icon className="h-3 w-3 animate-spin" /> : <DatabaseIcon className="h-3 w-3" />}
+      </Button>
+    </div>
+  );
+}
+
+// Batch controls for loading all pending rewards
+function BatchRewardsControls({ allocations }: { allocations: Array<{ id: string; status: string }> }) {
+  const { fetchRewards, batchLoading } = useRewardsContext();
+
+  const handleLoadAllRewards = () => {
+    const activeAllocationIds = allocations
+      .filter((allocation) => allocation.status === "Active")
+      .map((allocation) => allocation.id);
+
+    if (activeAllocationIds.length > 0) {
+      fetchRewards(activeAllocationIds);
+    }
+  };
+
+  const activeCount = allocations.filter((a) => a.status === "Active").length;
+
+  if (activeCount === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex justify-end">
+      <Button variant="outline" size="sm" onClick={handleLoadAllRewards} disabled={batchLoading}>
+        {batchLoading ? (
+          <Loader2Icon className="h-4 w-4 animate-spin mr-2" />
+        ) : (
+          <DatabaseIcon className="h-4 w-4 mr-2" />
+        )}
+        Load All Pending Rewards ({activeCount})
+      </Button>
+    </div>
+  );
+}
+
+export function Allocations() {
+  const { indexerRegistration } = useIndexerRegistrationStore();
+  const { currentNetwork } = useNetworkStore();
+  const client = new GraphQLClient(`/api/subgraph/${currentNetwork}`);
+  const fetcher = (query: string) =>
+    client.request<AllocationsQueryResponse>(query, {
+      indexer: indexerRegistration?.address.toLowerCase(),
+    });
+  const { data } = useSWR<AllocationsQueryResponse>(
+    indexerRegistration?.address ? ALLOCATIONS_BY_INDEXER_QUERY : null,
+    fetcher,
+  );
+
+  // Prepare allocations for rewards context
+  const allocationsForContext = React.useMemo(() => {
+    if (!data?.allocations) return [];
+    return data.allocations.map((a) => ({
+      id: a.id,
+      status: a.status,
+    }));
+  }, [data]);
+
+  return (
+    <RewardsProvider allocations={allocationsForContext}>
+      <AllocationsTable />
+    </RewardsProvider>
   );
 }

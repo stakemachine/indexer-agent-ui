@@ -4,7 +4,9 @@
 
 // List required server-only environment variables
 const REQUIRED = ["AGENT_ENDPOINT", "AGENT_NETWORK_ENDPOINT", "UI_LOGIN", "UI_PASS"] as const;
+const OPTIONAL = ["ARBITRUM_RPC_URL"] as const;
 type RequiredEnvKey = (typeof REQUIRED)[number];
+type OptionalEnvKey = (typeof OPTIONAL)[number];
 
 function read(name: RequiredEnvKey): string {
   const value = process.env[name];
@@ -12,6 +14,11 @@ function read(name: RequiredEnvKey): string {
     throw new Error(`Missing environment variable: ${name}`);
   }
   return value.trim();
+}
+
+function readOptional(name: OptionalEnvKey): string | undefined {
+  const value = process.env[name];
+  return value?.trim();
 }
 
 export const env = Object.freeze({
@@ -26,6 +33,9 @@ export const env = Object.freeze({
   },
   get UI_PASS(): string {
     return read("UI_PASS");
+  },
+  get ARBITRUM_RPC_URL(): string | undefined {
+    return readOptional("ARBITRUM_RPC_URL");
   },
 });
 

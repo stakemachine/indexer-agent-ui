@@ -1,16 +1,21 @@
 "use client";
 import { formatDistanceToNow, fromUnixTime } from "date-fns";
 import { formatEther } from "ethers";
-import { RefreshCwIcon } from "lucide-react";
+import { DatabaseIcon, Loader2Icon, RefreshCwIcon } from "lucide-react";
+import { useMemo } from "react";
 import useSWR from "swr";
+import { RewardsProvider, useRewardsContext } from "@/components/allocations/rewards-context";
 import { EthereumIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPreview } from "@/components/ui/map-preview";
 import { useGRTPrice } from "@/hooks/use-grt-price";
+import { isRewardsSupported } from "@/lib/contracts/rewards";
 import { agentClient, subgraphClient } from "@/lib/graphql/client";
 import {
   AGENT_INDEXER_REGISTRATION_QUERY,
+  ALLOCATIONS_BY_INDEXER_QUERY,
   INDEXER_INFO_BY_ID_QUERY,
   INDEXER_OPERATORS_QUERY,
 } from "@/lib/graphql/queries";
@@ -22,6 +27,100 @@ interface GraphAccount {
 }
 interface OperatorsResponse {
   graphAccounts?: GraphAccount[];
+}
+
+interface RawAllocation {
+  id: string;
+  status: string;
+  subgraphDeployment: {
+    ipfsHash: string;
+  };
+}
+
+interface AllocationsQueryResponse {
+  allocations: RawAllocation[];
+}
+
+// Component for pending rewards section in allocation statistics
+function PendingRewardsSection({
+  allocations,
+  grtPrice,
+}: {
+  allocations: Array<{ id: string; status: string }>;
+  grtPrice: number | null | undefined;
+}) {
+  const { currentNetwork } = useNetworkStore();
+  const rewardsSupported = isRewardsSupported(currentNetwork);
+
+  if (!rewardsSupported) {
+    return null;
+  }
+
+  return (
+    <RewardsProvider allocations={allocations}>
+      <PendingRewardsDisplay allocations={allocations} grtPrice={grtPrice} />
+    </RewardsProvider>
+  );
+}
+
+// Inner component that uses rewards context
+function PendingRewardsDisplay({
+  allocations,
+  grtPrice,
+}: {
+  allocations: Array<{ id: string; status: string }>;
+  grtPrice: number | null | undefined;
+}) {
+  const { getTotalPendingRewards, fetchRewards, batchLoading } = useRewardsContext();
+
+  const handleLoadPendingRewards = () => {
+    // Get active allocation IDs
+    const activeAllocationIds = allocations
+      .filter((allocation) => allocation.status === "Active")
+      .map((allocation) => allocation.id);
+
+    if (activeAllocationIds.length > 0) {
+      fetchRewards(activeAllocationIds);
+    }
+  };
+
+  const totalPendingRewards = getTotalPendingRewards();
+  const hasRewards = totalPendingRewards !== "0";
+
+  // Calculate USD value
+  let usdValue: string | null = null;
+  if (grtPrice && hasRewards) {
+    try {
+      const asEthStr = formatEther(totalPendingRewards);
+      const asNum = Number.parseFloat(asEthStr);
+      if (Number.isFinite(asNum)) {
+        const usdAmount = asNum * grtPrice;
+        usdValue = formatUSD(usdAmount);
+      }
+    } catch (error) {
+      console.error("Error calculating USD value for pending rewards:", error);
+    }
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-sm text-muted-foreground">Pending Rewards</div>
+        <Button variant="outline" size="sm" onClick={handleLoadPendingRewards} disabled={batchLoading}>
+          {batchLoading ? (
+            <Loader2Icon className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <DatabaseIcon className="h-4 w-4 mr-2" />
+          )}
+          Load Rewards
+        </Button>
+      </div>
+      <div className="text-xl font-semibold">
+        {hasRewards ? formatGRT(totalPendingRewards, { decimals: 2, withSymbol: true }) : "—"}
+      </div>
+      {usdValue && <div className="text-sm text-muted-foreground mt-1">{usdValue}</div>}
+    </div>
+  );
 }
 interface IndexerResponse {
   indexer: {
@@ -116,6 +215,26 @@ export function IndexerInfo() {
       : null,
     subgraphFetcherOperators,
   );
+
+  // Fetch allocations for pending rewards
+  const subgraphFetcherAllocations = (key: KeyTuple) =>
+    subgraphClient(currentNetwork).request<AllocationsQueryResponse>(key[0], key[1]);
+
+  const { data: allocationsData } = useSWR<AllocationsQueryResponse>(
+    indexerRegistration?.address
+      ? [ALLOCATIONS_BY_INDEXER_QUERY, { indexer: indexerRegistration?.address.toLowerCase() }]
+      : null,
+    subgraphFetcherAllocations,
+  );
+
+  // Prepare allocations for rewards context
+  const allocations = useMemo(() => {
+    if (!allocationsData?.allocations) return [];
+    return allocationsData.allocations.map((a) => ({
+      id: a.id,
+      status: a.status,
+    }));
+  }, [allocationsData]);
 
   if (error) {
     console.error("Error fetching indexer info:", error);
@@ -366,6 +485,9 @@ export function IndexerInfo() {
                 <div className="text-2xl font-semibold">{idx.totalAllocationCount.toString()}</div>
               </div>
             </div>
+
+            {/* Pending Rewards Section */}
+            <PendingRewardsSection allocations={allocations} grtPrice={grtPrice} />
 
             {idx.tokensLockedUntil > 0 && (
               <div>

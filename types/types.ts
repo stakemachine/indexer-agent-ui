@@ -43,6 +43,14 @@ export interface Allocation {
     stakedTokens: bigint;
     signalledTokens: bigint;
   };
+  // Pending rewards state
+  pendingRewards?: {
+    amount: string; // Amount in wei as string
+    loading: boolean;
+    error: boolean;
+    notFound: boolean;
+    errorMessage?: string;
+  };
 }
 
 export interface IndexerRegistration {

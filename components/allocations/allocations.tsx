@@ -16,7 +16,6 @@ import { agentClient } from "@/lib/graphql/client";
 import { ALLOCATIONS_BY_INDEXER_QUERY, CREATE_ACTION_MUTATION } from "@/lib/graphql/queries";
 import { useIndexerRegistrationStore, useNetworkStore } from "@/lib/store";
 import { formatGRT } from "@/lib/utils";
-import { RewardsProvider, useRewardsContext } from "./rewards-context";
 
 interface RawAllocation {
   id: string;
@@ -189,6 +188,19 @@ function AllocationsTable() {
   const { currentNetwork } = useNetworkStore();
   const rewardsSupported = isRewardsSupported(currentNetwork);
 
+  // Shared rewards state for all allocation cells
+  const [rewardsData, setRewardsData] = React.useState<
+    Record<
+      string,
+      {
+        amount: string;
+        loading: boolean;
+        error: boolean;
+        errorMessage?: string;
+      }
+    >
+  >({});
+
   // Define columns inside component to access rewards context
   const columnsWithRewards: ColumnDef<Allocation>[] = React.useMemo(() => {
     const baseColumns = [...columns];
@@ -198,7 +210,15 @@ function AllocationsTable() {
       const pendingRewardsColumn: ColumnDef<Allocation> = {
         id: "pendingRewards",
         header: "Pending Rewards",
-        cell: ({ row }) => <PendingRewardsCell allocation={row.original} />,
+        cell: ({ row }) => (
+          <PendingRewardsCell
+            allocation={row.original}
+            rewardState={rewardsData[row.original.id]}
+            onUpdateReward={(allocationId, state) => {
+              setRewardsData((prev) => ({ ...prev, [allocationId]: state }));
+            }}
+          />
+        ),
         enableSorting: false,
       };
 
@@ -207,7 +227,7 @@ function AllocationsTable() {
     }
 
     return baseColumns;
-  }, [rewardsSupported]);
+  }, [rewardsSupported, rewardsData]);
 
   const client = new GraphQLClient(`/api/subgraph/${currentNetwork}`);
   const fetcher = (query: string) =>
@@ -280,8 +300,8 @@ function AllocationsTable() {
     }
   };
 
-  // Prepare allocations data for rewards context
-  const allocationsForContext = React.useMemo(() => {
+  // Prepare allocations data for batch rewards controls
+  const allocationsForBatch = React.useMemo(() => {
     return allocations.map((a) => ({
       id: a.id,
       status: a.status,
@@ -290,7 +310,14 @@ function AllocationsTable() {
 
   return (
     <div className="space-y-4">
-      {rewardsSupported && <BatchRewardsControls allocations={allocationsForContext} />}
+      {rewardsSupported && (
+        <BatchRewardsControls
+          allocations={allocationsForBatch}
+          onUpdateRewards={(updates) => {
+            setRewardsData((prev) => ({ ...prev, ...updates }));
+          }}
+        />
+      )}
       <DataGrid
         columns={columnsWithRewards}
         data={allocations}
@@ -313,59 +340,253 @@ function AllocationsTable() {
 }
 
 // Component for individual pending rewards cell
-function PendingRewardsCell({ allocation }: { allocation: Allocation }) {
-  const { pendingRewards, fetchReward, batchLoading } = useRewardsContext();
-  const isActive = allocation.status === "Active";
-  const rewardState = pendingRewards[allocation.id];
+function PendingRewardsCell({
+  allocation,
+  rewardState,
+  onUpdateReward,
+}: {
+  allocation: Allocation;
+  rewardState?: {
+    amount: string;
+    loading: boolean;
+    error: boolean;
+    errorMessage?: string;
+  };
+  onUpdateReward: (
+    allocationId: string,
+    state: {
+      amount: string;
+      loading: boolean;
+      error: boolean;
+      errorMessage?: string;
+    },
+  ) => void;
+}) {
+  const { currentNetwork } = useNetworkStore();
 
-  if (!isActive) {
+  const isActive = allocation.status === "Active";
+  const rewardsSupported = isRewardsSupported(currentNetwork);
+
+  if (!isActive || !rewardsSupported) {
     return <div className="text-muted-foreground">—</div>;
   }
 
-  const handleLoadReward = () => {
-    fetchReward(allocation.id);
+  const currentState = rewardState || {
+    amount: "0",
+    loading: false,
+    error: false,
+  };
+
+  // Determine if we have attempted to load (has state in rewardsData)
+  const hasAttemptedLoad = !!rewardState;
+
+  const handleLoadReward = async () => {
+    onUpdateReward(allocation.id, { ...currentState, loading: true, error: false });
+
+    try {
+      const { fetchPendingReward } = await import("@/lib/contracts/rewards");
+      const result = await fetchPendingReward(allocation.id, currentNetwork);
+
+      if (result.error) {
+        onUpdateReward(allocation.id, {
+          amount: "0",
+          loading: false,
+          error: true,
+          errorMessage: result.error,
+        });
+      } else {
+        onUpdateReward(allocation.id, {
+          amount: result.amount,
+          loading: false,
+          error: false,
+        });
+      }
+    } catch (error) {
+      console.error(`Error fetching reward for allocation ${allocation.id}:`, error);
+      onUpdateReward(allocation.id, {
+        amount: "0",
+        loading: false,
+        error: true,
+        errorMessage: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
   };
 
   return (
-    <div className="flex items-center space-x-2">
-      <div className="min-w-0 flex-1">
-        {rewardState?.loading ? (
-          <div className="flex items-center space-x-1">
-            <Loader2Icon className="h-3 w-3 animate-spin" />
-            <span className="text-xs">Loading...</span>
-          </div>
-        ) : rewardState?.error ? (
+    <div className="flex items-center justify-center min-w-[120px]">
+      {currentState.loading ? (
+        // Loading state: Show only spinner
+        <Loader2Icon className="h-3 w-3 animate-spin" />
+      ) : hasAttemptedLoad ? (
+        // After loading attempt: Show result only (no icon)
+        currentState.error ? (
           <div className="text-xs text-red-500">Error</div>
-        ) : rewardState?.amount && rewardState.amount !== "0" ? (
-          <div className="text-sm">{formatGRT(rewardState.amount, { decimals: 2, withSymbol: true })}</div>
+        ) : currentState.amount && currentState.amount !== "0" ? (
+          <div className="text-sm">{formatGRT(currentState.amount, { decimals: 2, withSymbol: true })}</div>
         ) : (
           <div className="text-muted-foreground">—</div>
-        )}
-      </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleLoadReward}
-        disabled={rewardState?.loading || batchLoading}
-        className="h-6 w-6 p-0"
-      >
-        {rewardState?.loading ? <Loader2Icon className="h-3 w-3 animate-spin" /> : <DatabaseIcon className="h-3 w-3" />}
-      </Button>
+        )
+      ) : (
+        // Initial state: Show only the database icon
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLoadReward}
+          className="h-6 w-6 p-0"
+          title="Load pending rewards"
+        >
+          <DatabaseIcon className="h-3 w-3" />
+        </Button>
+      )}
     </div>
   );
 }
 
 // Batch controls for loading all pending rewards
-function BatchRewardsControls({ allocations }: { allocations: Array<{ id: string; status: string }> }) {
-  const { fetchRewards, batchLoading } = useRewardsContext();
+function BatchRewardsControls({
+  allocations,
+  onUpdateRewards,
+}: {
+  allocations: Array<{ id: string; status: string }>;
+  onUpdateRewards: (
+    updates: Record<
+      string,
+      {
+        amount: string;
+        loading: boolean;
+        error: boolean;
+        errorMessage?: string;
+      }
+    >,
+  ) => void;
+}) {
+  const { currentNetwork } = useNetworkStore();
+  const [batchLoading, setBatchLoading] = React.useState(false);
 
-  const handleLoadAllRewards = () => {
+  const handleLoadAllRewards = async () => {
     const activeAllocationIds = allocations
       .filter((allocation) => allocation.status === "Active")
       .map((allocation) => allocation.id);
 
-    if (activeAllocationIds.length > 0) {
-      fetchRewards(activeAllocationIds);
+    if (activeAllocationIds.length === 0) return;
+
+    setBatchLoading(true);
+
+    // Set loading state for all allocations
+    const loadingUpdates: Record<
+      string,
+      {
+        amount: string;
+        loading: boolean;
+        error: boolean;
+        errorMessage?: string;
+      }
+    > = {};
+
+    activeAllocationIds.forEach((id) => {
+      loadingUpdates[id] = {
+        amount: "0",
+        loading: true,
+        error: false,
+      };
+    });
+    onUpdateRewards(loadingUpdates);
+
+    try {
+      const { fetchPendingRewardsBatch } = await import("@/lib/contracts/rewards");
+      const result = await fetchPendingRewardsBatch(activeAllocationIds, currentNetwork);
+
+      console.log("Batch rewards result:", result);
+
+      // Update all the individual cell states with the results
+      const rewardUpdates: Record<
+        string,
+        {
+          amount: string;
+          loading: boolean;
+          error: boolean;
+          errorMessage?: string;
+        }
+      > = {};
+
+      // Process successful results
+      result.results.forEach((rewardResult) => {
+        if (rewardResult.error) {
+          rewardUpdates[rewardResult.allocationId] = {
+            amount: "0",
+            loading: false,
+            error: true,
+            errorMessage: rewardResult.error,
+          };
+        } else {
+          rewardUpdates[rewardResult.allocationId] = {
+            amount: rewardResult.amount,
+            loading: false,
+            error: false,
+          };
+        }
+      });
+
+      // Set any missing allocations as error
+      activeAllocationIds.forEach((id) => {
+        if (!rewardUpdates[id]) {
+          rewardUpdates[id] = {
+            amount: "0",
+            loading: false,
+            error: true,
+            errorMessage: "No result returned",
+          };
+        }
+      });
+
+      onUpdateRewards(rewardUpdates);
+
+      // Show success/error toasts
+      if (result.results.length > 0) {
+        toast({
+          title: "Rewards loaded",
+          description: `Loaded rewards for ${result.results.length} allocations`,
+        });
+      }
+
+      if (result.errors.length > 0) {
+        toast({
+          title: "Some errors occurred",
+          description: `${result.errors.length} allocations had errors`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error in batch rewards fetch:", error);
+
+      // Set all to error state
+      const errorUpdates: Record<
+        string,
+        {
+          amount: string;
+          loading: boolean;
+          error: boolean;
+          errorMessage?: string;
+        }
+      > = {};
+
+      activeAllocationIds.forEach((id) => {
+        errorUpdates[id] = {
+          amount: "0",
+          loading: false,
+          error: true,
+          errorMessage: "Batch fetch failed",
+        };
+      });
+      onUpdateRewards(errorUpdates);
+
+      toast({
+        title: "Error",
+        description: "Failed to load batch rewards",
+        variant: "destructive",
+      });
+    } finally {
+      setBatchLoading(false);
     }
   };
 
@@ -390,30 +611,5 @@ function BatchRewardsControls({ allocations }: { allocations: Array<{ id: string
 }
 
 export function Allocations() {
-  const { indexerRegistration } = useIndexerRegistrationStore();
-  const { currentNetwork } = useNetworkStore();
-  const client = new GraphQLClient(`/api/subgraph/${currentNetwork}`);
-  const fetcher = (query: string) =>
-    client.request<AllocationsQueryResponse>(query, {
-      indexer: indexerRegistration?.address.toLowerCase(),
-    });
-  const { data } = useSWR<AllocationsQueryResponse>(
-    indexerRegistration?.address ? ALLOCATIONS_BY_INDEXER_QUERY : null,
-    fetcher,
-  );
-
-  // Prepare allocations for rewards context
-  const allocationsForContext = React.useMemo(() => {
-    if (!data?.allocations) return [];
-    return data.allocations.map((a) => ({
-      id: a.id,
-      status: a.status,
-    }));
-  }, [data]);
-
-  return (
-    <RewardsProvider allocations={allocationsForContext}>
-      <AllocationsTable />
-    </RewardsProvider>
-  );
+  return <AllocationsTable />;
 }

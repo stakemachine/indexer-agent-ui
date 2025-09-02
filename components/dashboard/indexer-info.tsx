@@ -2,9 +2,8 @@
 import { formatDistanceToNow, fromUnixTime } from "date-fns";
 import { formatEther } from "ethers";
 import { DatabaseIcon, Loader2Icon, RefreshCwIcon } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
-import { RewardsProvider, useRewardsContext } from "@/components/allocations/rewards-context";
 import { EthereumIcon } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,11 +55,7 @@ function PendingRewardsSection({
     return null;
   }
 
-  return (
-    <RewardsProvider allocations={allocations}>
-      <PendingRewardsDisplay allocations={allocations} grtPrice={grtPrice} />
-    </RewardsProvider>
-  );
+  return <PendingRewardsDisplay allocations={allocations} grtPrice={grtPrice} />;
 }
 
 // Inner component that uses rewards context
@@ -71,20 +66,48 @@ function PendingRewardsDisplay({
   allocations: Array<{ id: string; status: string }>;
   grtPrice: number | null | undefined;
 }) {
-  const { getTotalPendingRewards, fetchRewards, batchLoading } = useRewardsContext();
+  const { currentNetwork } = useNetworkStore();
+  const [totalPendingRewards, setTotalPendingRewards] = useState("0");
+  const [isBatchLoading, setIsBatchLoading] = useState(false);
 
-  const handleLoadPendingRewards = () => {
-    // Get active allocation IDs
+  const handleLoadPendingRewards = async () => {
     const activeAllocationIds = allocations
       .filter((allocation) => allocation.status === "Active")
       .map((allocation) => allocation.id);
 
-    if (activeAllocationIds.length > 0) {
-      fetchRewards(activeAllocationIds);
+    if (activeAllocationIds.length === 0) return;
+
+    setIsBatchLoading(true);
+
+    try {
+      const { fetchPendingRewardsBatch } = await import("@/lib/contracts/rewards");
+      const result = await fetchPendingRewardsBatch(activeAllocationIds, currentNetwork);
+
+      // Calculate total from the batch result
+      if (result?.results) {
+        let total = BigInt(0);
+        let hasValidData = false;
+
+        for (const rewardResult of result.results) {
+          if (rewardResult.amount && rewardResult.amount !== "0" && !rewardResult.error) {
+            try {
+              total += BigInt(rewardResult.amount);
+              hasValidData = true;
+            } catch (error) {
+              console.error(`Error parsing reward amount for ${rewardResult.allocationId}:`, error);
+            }
+          }
+        }
+
+        setTotalPendingRewards(hasValidData ? total.toString() : "0");
+      }
+    } catch (error) {
+      console.error("Error in batch rewards fetch:", error);
+    } finally {
+      setIsBatchLoading(false);
     }
   };
 
-  const totalPendingRewards = getTotalPendingRewards();
   const hasRewards = totalPendingRewards !== "0";
 
   // Calculate USD value
@@ -106,8 +129,8 @@ function PendingRewardsDisplay({
     <div>
       <div className="flex items-center justify-between mb-2">
         <div className="text-sm text-muted-foreground">Pending Rewards</div>
-        <Button variant="outline" size="sm" onClick={handleLoadPendingRewards} disabled={batchLoading}>
-          {batchLoading ? (
+        <Button variant="outline" size="sm" onClick={handleLoadPendingRewards} disabled={isBatchLoading}>
+          {isBatchLoading ? (
             <Loader2Icon className="h-4 w-4 animate-spin mr-2" />
           ) : (
             <DatabaseIcon className="h-4 w-4 mr-2" />

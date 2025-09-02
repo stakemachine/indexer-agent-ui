@@ -306,23 +306,54 @@ export const AGENT_INDEXER_REGISTRATION_QUERY = gql`
 export const INDEXER_INFO_BY_ID_QUERY = gql`
   query indexerByIdQuery($id: String) {
     indexer(id:$id){
+      id
+      createdAt
+      account {
+        id
+      }
+      url
+      geoHash
+      defaultDisplayName
       stakedTokens
       allocatedTokens
+      unstakedTokens
       lockedTokens
+      tokensLockedUntil
       delegatedTokens
       tokenCapacity
       delegatedCapacity
       availableStake
+      allocationCount
+      totalAllocationCount
+      queryFeesCollected
+      queryFeeRebates
+      rewardsEarned
+      indexerIndexingRewards
+      delegatorIndexingRewards
+      indexerRewardsOwnGenerationRatio
+      transferredToL2
+      firstTransferredToL2At
+      firstTransferredToL2AtBlockNumber
+      firstTransferredToL2AtTx
+      lastTransferredToL2At
+      lastTransferredToL2AtBlockNumber
+      lastTransferredToL2AtTx
+      stakedTokensTransferredToL2
+      idOnL2
+      idOnL1
+      ownStakeRatio
+      delegatedStakeRatio
+      delegatorShares
+      delegationExchangeRate
       indexingRewardCut
-      queryFeeCut
-      account {
-        id
-      }
       indexingRewardEffectiveCut
+      overDelegationDilution
+      delegatorQueryFees
+      queryFeeCut
       queryFeeEffectiveCut
       delegatorParameterCooldown
       lastDelegationParameterUpdate
-      defaultDisplayName
+      forcedClosures
     }
 }
 `;

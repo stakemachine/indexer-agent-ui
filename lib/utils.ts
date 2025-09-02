@@ -35,7 +35,7 @@ export type FormatGRTOptions = {
   locale?: string; // Intl locale; defaults to environment
 };
 
-function toWeiBigInt(input: string | number | bigint): bigint | null {
+export function toWeiBigInt(input: string | number | bigint): bigint | null {
   try {
     if (typeof input === "bigint") return input;
     if (typeof input === "number") return BigInt(Math.trunc(input));
@@ -70,4 +70,58 @@ export function formatPercent(value: number | string, decimals = 2, locale?: str
     maximumFractionDigits: Math.max(0, decimals),
   });
   return `${nf.format(num)}%`;
+}
+
+// CoinGecko API utilities
+export async function fetchGRTPrice(): Promise<number | null> {
+  try {
+    const response = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=the-graph&vs_currencies=usd", {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch GRT price:", response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    return data["the-graph"]?.usd ?? null;
+  } catch (error) {
+    console.error("Error fetching GRT price:", error);
+    return null;
+  }
+}
+
+export function formatUSD(amount: number, locale?: string): string {
+  if (!Number.isFinite(amount)) return "$0";
+  const nf = new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+  return nf.format(amount);
+}
+
+export function formatGRTWithUSD(
+  wei: string | number | bigint,
+  grtPrice: number | null | undefined,
+  opts: FormatGRTOptions = {},
+): string {
+  const grtAmount = formatGRT(wei, opts);
+  if (!grtPrice || typeof grtPrice !== "number") return grtAmount;
+
+  const bi = toWeiBigInt(wei);
+  if (bi == null) return grtAmount;
+
+  const asEthStr = formatEther(bi);
+  const asNum = Number.parseFloat(asEthStr);
+  if (!Number.isFinite(asNum)) return grtAmount;
+
+  const usdValue = asNum * grtPrice;
+  const usdFormatted = formatUSD(usdValue, opts.locale);
+
+  return `${grtAmount} (${usdFormatted})`;
 }

@@ -7,8 +7,6 @@ import React from "react";
 import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { createSchemaFetcher } from "@/lib/fetchers";
 import { COST_MODELS_LIST_QUERY, DELETE_COST_MODELS_MUTATION } from "@/lib/graphql/queries";

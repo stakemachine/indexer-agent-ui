@@ -6,8 +6,6 @@ import useSWR from "swr";
 import { DataGrid } from "@/components/data-grid";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { createSchemaFetcher } from "@/lib/fetchers";
 import { agentClient } from "@/lib/graphql/client";

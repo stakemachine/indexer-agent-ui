@@ -914,10 +914,7 @@ export function Rules() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Switch id="auto-refresh-control" checked={autoRefreshEnabled} onCheckedChange={setAutoRefreshEnabled} />
-          <Label htmlFor="auto-refresh-control">Auto-refresh</Label>
-        </div>
+        <div></div>
         <CreateRuleDialog onSuccess={() => mutate()} />
       </div>
       <DataGrid

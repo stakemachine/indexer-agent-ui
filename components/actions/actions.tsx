@@ -230,10 +230,6 @@ export function Actions() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-2">
-        <Switch id="auto-refresh-control" checked={autoRefreshEnabled} onCheckedChange={setAutoRefreshEnabled} />
-        <Label htmlFor="auto-refresh-control">Auto-refresh</Label>
-      </div>
       <DataGrid
         columns={columns}
         data={actions}

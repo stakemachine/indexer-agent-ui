@@ -208,10 +208,7 @@ export function CostModels() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Switch id="auto-refresh-control" checked={autoRefreshEnabled} onCheckedChange={setAutoRefreshEnabled} />
-          <Label htmlFor="auto-refresh-control">Auto-refresh</Label>
-        </div>
+        <div></div>
         <Button onClick={handleCreate} size="sm">
           <Plus className="h-4 w-4 mr-2" />
           Create Cost Model

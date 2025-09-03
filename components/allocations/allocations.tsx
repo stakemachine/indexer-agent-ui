@@ -496,8 +496,6 @@ function BatchRewardsControls({
       const { fetchPendingRewardsBatch } = await import("@/lib/contracts/rewards");
       const result = await fetchPendingRewardsBatch(activeAllocationIds, currentNetwork);
 
-      console.log("Batch rewards result:", result);
-
       // Update all the individual cell states with the results
       const rewardUpdates: Record<
         string,

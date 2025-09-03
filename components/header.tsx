@@ -42,7 +42,7 @@ export function Header() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Link href="/" className="font-semibold text-lg">
-            Agent UI
+            Indexer Agent UI
           </Link>
           {appVersion && (
             <span className="text-xs text-muted-foreground" title={`Version ${appVersion}`}>

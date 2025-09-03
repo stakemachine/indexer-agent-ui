@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={GeistSans.className}>
         <AppProviders>
-          <main className="container mx-auto p-4 space-y-6">{children}</main>
+          <main className="mx-auto p-4 space-y-6">{children}</main>
         </AppProviders>
         <Toaster />
       </body>

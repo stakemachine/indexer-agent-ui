@@ -1,6 +1,7 @@
 "use client";
 
 import { GithubIcon, LogInIcon, LogOutIcon } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -13,7 +14,12 @@ import { useNetworkStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
 
-const menuItems = [
+type NavItem<T extends string = string> = {
+  href: Route<T>;
+  label: string;
+};
+
+const menuItems: NavItem<Route>[] = [
   { href: "/allocations", label: "Allocations" },
   { href: "/actions", label: "Actions" },
   { href: "/subgraphs", label: "Subgraphs" },
@@ -100,7 +106,7 @@ export function Header() {
               aria-label="Logout"
               title="Logout"
               onClick={async () => {
-                await signOut({ callbackUrl: "/signin" });
+                await signOut({ callbackUrl: `/signin?callbackUrl=${encodeURIComponent(pathname)}` });
               }}
             >
               <LogOutIcon className="h-4 w-4" />

@@ -7,6 +7,7 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: version,
   },
+  typedRoutes: true,
   images: {
     remotePatterns: [
       {

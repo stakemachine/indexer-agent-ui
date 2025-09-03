@@ -32,7 +32,15 @@ export default function SignInPage() {
       return;
     }
     if (res?.ok) {
-      router.push(callbackUrl);
+      // Use router.push for client-side navigation with typed routes
+      // For dynamic callbackUrl from search params, we need to handle external vs internal URLs
+      if (callbackUrl.startsWith("/")) {
+        // Internal route - cast to never to satisfy typed routes
+        router.push(callbackUrl as never);
+      } else {
+        // External URL - use window.location
+        window.location.href = callbackUrl;
+      }
     }
   }
 

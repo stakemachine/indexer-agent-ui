@@ -573,3 +573,56 @@ export const CURRENT_EPOCH_QUERY = gql`
     }
   }
 `;
+
+// Indexer performance query for QoS subgraph
+// Example gateway_id: mainnet-arbitrum
+export const INDEXER_PERFORMANCE_QUERY = gql`
+  query IndexerPerformanceQuery(
+    $indexer: String!
+    $day_start: BigInt
+    $gateway_id: String!
+  ) {
+    indexerDailyDataPoints(
+      first: 1000
+      orderBy: dayNumber
+      orderDirection: desc
+      where: {
+          gateway_id: $gateway_id
+          indexer: $indexer
+          dayStart_gte: $day_start
+      }
+  ) {
+        dayNumber
+        chain_id
+        gateway_id
+        dayStart
+        avg_indexer_blocks_behind
+        avg_indexer_latency_ms
+        avg_query_fee
+        max_indexer_blocks_behind
+        max_indexer_latency_ms
+        max_query_fee
+        num_indexer_200_responses
+        query_count
+        proportion_indexer_200_responses
+    }
+}
+  `;
+
+// Query to get ENS names for a list of indexer addresses
+export const INDEXER_ENS_QUERY = gql`
+query IndexersENSQuery($addresses: [String!]!) {
+    domains(
+        where: { resolvedAddress_in: $addresses }
+        orderBy: createdAt
+        orderDirection: asc
+        first: 1000
+    ) {
+        name
+        resolvedAddress {
+            id
+        }
+        labelName
+    }
+}
+`;

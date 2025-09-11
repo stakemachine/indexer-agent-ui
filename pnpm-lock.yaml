@@ -79,8 +79,8 @@ importers:
         specifier: ^6.15.0
         version: 6.15.0
       geist:
-        specifier: ^1.4.2
-        version: 1.4.2(next@15.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))
+        specifier: ^1.5.1
+        version: 1.5.1(next@15.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1))
       graphql-request:
         specifier: ^6.1.0
         version: 6.1.0(graphql@16.10.0)
@@ -1711,8 +1711,8 @@ packages:
   function-bind@1.1.2:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
 
-  geist@1.4.2:
-    resolution: {integrity: sha512-OQUga/KUc8ueijck6EbtT07L4tZ5+TZgjw8PyWfxo16sL5FWk7gNViPNU8hgCFjy6bJi9yuTP+CRpywzaGN8zw==}
+  geist@1.5.1:
+    resolution: {integrity: sha512-mAHZxIsL2o3ZITFaBVFBnwyDOw+zNLYum6A6nIjpzCGIO8QtC3V76XF2RnZTyLx1wlDTmMDy8jg3Ib52MIjGvQ==}
     peerDependencies:
       next: '>=13.2.0'
 
@@ -2388,9 +2388,6 @@ packages:
     resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
-
-  tailwindcss@4.1.12:
-    resolution: {integrity: sha512-DzFtxOi+7NsFf7DBtI3BJsynR+0Yp6etH+nRPTbpWnS2pZBaSksv/JGctNwSWzbFjp0vxSqknaUylseZqMDGrA==}
 
   tailwindcss@4.1.13:
     resolution: {integrity: sha512-i+zidfmTqtwquj4hMEwdjshYYgMbOrPzb9a0M3ZgNa0JMoZeFC6bxZvO8yr8ozS6ix2SDz0+mvryPeBs2TFE+w==}
@@ -4107,7 +4104,7 @@ snapshots:
 
   function-bind@1.1.2: {}
 
-  geist@1.4.2(next@15.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)):
+  geist@1.5.1(next@15.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)):
     dependencies:
       next: 15.5.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
 
@@ -4762,8 +4759,6 @@ snapshots:
   tailwindcss-animate@1.0.7(tailwindcss@4.1.13):
     dependencies:
       tailwindcss: 4.1.13
-
-  tailwindcss@4.1.12: {}
 
   tailwindcss@4.1.13: {}
 

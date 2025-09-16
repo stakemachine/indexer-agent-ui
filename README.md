@@ -35,8 +35,6 @@ If you use different public port, you also need to set `NEXTAUTH_URL` to the pub
 
 `AGENT_NETWORK_ENDPOINT` should point to the Graph Network gateway base URL (not a specific subgraph), for example:
 
-- Mainnet: `https://gateway.thegraph.com/network`
-- Testnet: `https://gateway.testnet.thegraph.com/network`
 
 ### Access Credentials
 
@@ -62,6 +60,30 @@ pnpm biome:check
 pnpm biome:fix
 ```
 
+## Experimental: DataGrid Filter Sidebar
+
+An opt-in sidebar for column text filtering has been introduced under a pilot flag.
+
+Enable on a specific table:
+
+```tsx
+<DataGrid
+  columns={columns}
+  data={rows}
+  enableFilterSidebar
+  persistKey="allocations:filters:v1"
+  onFiltersChange={(filters) => console.log(filters)}
+/>
+```
+
+Features:
+- Per-string-column contains filters (AND semantics)
+- Debounced `onFiltersChange` callback (~150ms)
+- localStorage persistence via `persistKey`
+- Clear Filters button resets state and storage
+- Accessibility: labelled toggle, `<aside aria-label="Filters">`, live row count announcer
+
+Rollout strategy: enable on one page (currently allocations) before broader adoption.
 ## Support
 
 If you run into any issues while using the Indexer Agent UI, please open an issue in this repository.

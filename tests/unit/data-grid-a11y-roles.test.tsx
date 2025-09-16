@@ -23,7 +23,7 @@ describe("DataGrid filter sidebar accessibility", () => {
     // Row count live announcer present
     expect(screen.getByText(/rows$/)).toBeInTheDocument();
     // Close
-    fireEvent.click(screen.getByLabelText(/close filters/i));
+    fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
   });
 });

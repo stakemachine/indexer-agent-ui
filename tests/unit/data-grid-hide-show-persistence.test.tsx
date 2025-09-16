@@ -18,7 +18,7 @@ describe("DataGrid filter hide/show persistence", () => {
     const nameInput = screen.getByPlaceholderText(/filter name/i) as HTMLInputElement;
     fireEvent.change(nameInput, { target: { value: "Row 3" } });
     // Close
-    fireEvent.click(screen.getByLabelText(/close filters/i));
+    fireEvent.click(toggle);
     // Reopen
     fireEvent.click(toggle);
     const nameInputAgain = screen.getByPlaceholderText(/filter name/i) as HTMLInputElement;

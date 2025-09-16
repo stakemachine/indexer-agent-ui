@@ -16,10 +16,9 @@ import {
 } from "@tanstack/react-table";
 import { GeistMono } from "geist/font/mono";
 
-import { ChevronDownIcon, FilterIcon, RefreshCwIcon, XIcon } from "lucide-react";
+import { ChevronDownIcon, PanelRightClose, PanelRightOpen, RefreshCwIcon } from "lucide-react";
 import React, { useEffect, useRef } from "react";
 import { usePersistedFilters } from "@/components/data-grid-filters/usePersistedFilters";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -160,13 +159,17 @@ export function DataGrid<TData, TValue>({
   const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
   const [internalAutoRefresh, setInternalAutoRefresh] = React.useState(false);
   const autoRefresh = autoRefreshEnabled !== undefined ? autoRefreshEnabled : internalAutoRefresh;
-  const setAutoRefresh = (value: boolean) => {
-    if (onAutoRefreshChange) {
-      onAutoRefreshChange(value);
-    } else {
-      setInternalAutoRefresh(value);
-    }
-  };
+
+  const handleAutoRefreshChange = React.useCallback(
+    (enabled: boolean) => {
+      if (onAutoRefreshChange) {
+        onAutoRefreshChange(enabled);
+      } else {
+        setInternalAutoRefresh(enabled);
+      }
+    },
+    [onAutoRefreshChange],
+  );
 
   const autoRefreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -254,9 +257,6 @@ export function DataGrid<TData, TValue>({
     };
   }, [autoRefresh, onRefresh, autoRefreshInterval]);
 
-  const isFiltered =
-    table.getState().columnFilters.length > 0 || table.getState().globalFilter !== "" || sidebarFilters.length > 0;
-
   // Apply sidebarFilters to react-table columnFilters (simple text contains semantics)
   useEffect(() => {
     if (sidebarFilters.length === 0) return;
@@ -314,106 +314,29 @@ export function DataGrid<TData, TValue>({
   };
 
   const sidebarOpen = _enableFilterSidebar && isFilterSidebarOpen;
+
   return (
-    <div className="space-y-4 relative">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Input
-            placeholder="Search all columns..."
-            value={globalFilter ?? ""}
-            onChange={(e) => {
-              const value = e.target.value;
-              setGlobalFilter(value);
-            }}
-            className="max-w-sm"
-          />
-          {isFiltered && (
-            <Badge variant="secondary" className="h-8 px-3 flex items-center space-x-1">
-              <FilterIcon className="h-4 w-4" />
-              <span>Filtered</span>
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center space-x-2">
-          {onRefresh && (
-            <>
-              <Button variant="outline" onClick={onRefresh} disabled={isLoading || isValidating}>
-                <RefreshCwIcon className={`h-4 w-4 mr-2 ${isLoading || isValidating ? "animate-spin" : ""}`} />
-                Refresh
-              </Button>
-              <div className="flex items-center space-x-2">
-                <Switch id="auto-refresh" checked={autoRefresh} onCheckedChange={setAutoRefresh} />
-                <Label htmlFor="auto-refresh">Auto-refresh</Label>
-              </div>
-            </>
-          )}
-          {_enableFilterSidebar && (
-            <Button
-              variant="outline"
-              onClick={() => setIsFilterSidebarOpen((o) => !o)}
-              aria-expanded={isFilterSidebarOpen}
-              aria-controls="data-grid-filter-sidebar"
-            >
-              <FilterIcon className="h-4 w-4 mr-2" />
-              Filters
-            </Button>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Columns
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-      {/* Main data region: on desktop we constrain height to viewport so sidebar + table can scroll independently */}
-      <div
-        className={cn(
-          "md:flex md:gap-4 md:items-stretch md:overflow-hidden",
-          // Height calc leaves room for global header (outside component) + search/toolbar (above) + pagination (below)
-          // Adjust the 260px constant if surrounding layout spacing changes.
-          "md:h-[calc(100vh-260px)]",
-          sidebarOpen && "",
-        )}
-      >
-        {sidebarOpen && (
+    <div className="relative w-full">
+      {/* Main layout container with sidebar */}
+      <div className={cn("flex w-full", _enableFilterSidebar ? "h-screen" : "flex-col space-y-4")}>
+        {/* Sidebar - following the screenshot layout pattern */}
+        {_enableFilterSidebar && sidebarOpen && (
           <aside
             id="data-grid-filter-sidebar"
-            aria-label="Filters"
+            aria-labelledby="data-grid-filter-heading"
             data-overlay-mobile="true"
-            className="absolute top-0 left-0 h-full w-64 border-r bg-background shadow-lg z-10 flex flex-col md:static md:h-full md:shadow-none md:border md:border-r md:rounded-md md:w-64"
+            className="w-64 flex-shrink-0 bg-background border-r border-border flex flex-col"
           >
-            <div className="flex items-center justify-between px-4 py-2 border-b">
-              <h2 className="text-sm font-medium">Filters</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Close filters"
-                onClick={() => setIsFilterSidebarOpen(false)}
-              >
-                <XIcon className="h-4 w-4" />
-              </Button>
+            {/* Sidebar header */}
+            <div className="border-b border-border bg-background px-6 py-4 h-14">
+              <h2 id="data-grid-filter-heading" className="text-lg font-semibold text-foreground">
+                Filters
+              </h2>
             </div>
-            <div className="flex-1 overflow-y-auto p-4 min-h-0">
-              <div className="space-y-4">
+
+            {/* Sidebar content - scrollable */}
+            <div className="flex-1 px-6 py-4 overflow-y-auto">
+              <div className="space-y-6">
                 {textColumns.map((col) => {
                   const currentFilter = sidebarFilters.find((f) => f.id === col.id)?.value as
                     | SidebarFilterValue
@@ -426,8 +349,8 @@ export function DataGrid<TData, TValue>({
                   const facets = facetValues[col.id];
                   return (
                     <div key={col.id} className="space-y-2">
-                      <div className="space-y-1">
-                        <Label htmlFor={`filter-${col.id}`} className="text-xs font-medium uppercase tracking-wide">
+                      <div className="space-y-2">
+                        <Label htmlFor={`filter-${col.id}`} className="text-sm font-medium text-foreground">
                           {col.id}
                         </Label>
                         <Input
@@ -435,7 +358,7 @@ export function DataGrid<TData, TValue>({
                           value={textValue}
                           placeholder={`Filter ${col.id}`}
                           onChange={(e) => handleFilterInputChange(col.id, e.target.value)}
-                          className="h-8"
+                          className="h-9"
                         />
                       </div>
                       {facets && (
@@ -470,122 +393,236 @@ export function DataGrid<TData, TValue>({
                   );
                 })}
                 {textColumns.length === 0 && (
-                  <p className="text-xs text-muted-foreground">No text columns available.</p>
+                  <p className="text-sm text-muted-foreground">No text columns available.</p>
                 )}
               </div>
             </div>
-            <div className="border-t p-3 flex items-center justify-between">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={clearFilters}
-                disabled={sidebarFilters.length === 0 && !globalFilter}
-              >
-                Clear Filters
-              </Button>
-              <span className="text-xs text-muted-foreground">{sidebarFilters.length} active</span>
+
+            {/* Sidebar footer */}
+            <div className="border-t border-border bg-background px-6 py-4">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={clearFilters}
+                  disabled={sidebarFilters.length === 0 && !globalFilter}
+                >
+                  Clear Filters
+                </Button>
+                <span className="text-sm text-muted-foreground">{sidebarFilters.length} active</span>
+              </div>
             </div>
           </aside>
         )}
-        <div className="rounded-md border md:flex-1 md:order-2 flex flex-col overflow-hidden min-h-0">
-          <div className="flex-1 overflow-auto">
-            <Table className="relative">
-              <TableHeader className="sticky top-0 z-10 bg-background">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder ? null : (
-                          <div className="flex items-center space-x-2">
-                            {header.column.getCanSort() ? (
-                              <button
-                                type="button"
-                                className={cn(
-                                  "flex items-center space-x-2 cursor-pointer hover:bg-muted/50 p-2 rounded-md",
+
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col min-h-0 min-w-0">
+          {/* Toolbar */}
+          <div className="border-b border-border bg-background flex-shrink-0">
+            {/* Search bar - full width */}
+            <div className="px-6 py-4">
+              <Input
+                placeholder="Search all columns..."
+                value={globalFilter ?? ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setGlobalFilter(value);
+                }}
+                className="w-full h-8"
+              />
+            </div>
+
+            {/* Controls row */}
+            <div className="flex items-center justify-between px-6 py-4">
+              <div className="flex items-center space-x-4">
+                {_enableFilterSidebar && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsFilterSidebarOpen((o) => !o)}
+                    aria-expanded={isFilterSidebarOpen}
+                    aria-controls="data-grid-filter-sidebar"
+                    aria-label={isFilterSidebarOpen ? "Hide filters" : "Show filters"}
+                    className="h-8 px-3"
+                  >
+                    {isFilterSidebarOpen ? (
+                      <>
+                        <PanelRightOpen className="h-4 w-4" />
+                        Hide Filters
+                      </>
+                    ) : (
+                      <>
+                        <PanelRightClose className="h-4 w-4" />
+                        Show Filters
+                      </>
+                    )}
+                  </Button>
+                )}
+                <span className="text-sm text-muted-foreground">
+                  {table.getFilteredRowModel().rows.length} of {data.length} row(s) filtered
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                {onRefresh && (
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <Label htmlFor="auto-refresh-switch" className="text-sm whitespace-nowrap">
+                        Auto-refresh
+                      </Label>
+                      <Switch
+                        id="auto-refresh-switch"
+                        checked={autoRefresh}
+                        onCheckedChange={handleAutoRefreshChange}
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={onRefresh}
+                      disabled={isLoading || isValidating}
+                      aria-label="Refresh"
+                    >
+                      <RefreshCwIcon className={`h-4 w-4 ${isLoading || isValidating ? "animate-spin" : ""}`} />
+                    </Button>
+                  </>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" aria-label="Columns">
+                      <ChevronDownIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {table
+                      .getAllColumns()
+                      .filter((column) => column.getCanHide())
+                      .map((column) => {
+                        return (
+                          <DropdownMenuCheckboxItem
+                            key={column.id}
+                            className="capitalize"
+                            checked={column.getIsVisible()}
+                            onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                          >
+                            {column.id}
+                          </DropdownMenuCheckboxItem>
+                        );
+                      })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+          </div>
+
+          {/* Table container with chart area and main table */}
+          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+            {/* Table */}
+            <div className="flex-1 overflow-auto min-h-0">
+              <div className="relative w-full overflow-auto">
+                <Table className="w-full caption-bottom text-sm relative min-w-[600px]">
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    {table.getHeaderGroups().map((headerGroup) => (
+                      <TableRow key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                          <TableHead key={header.id}>
+                            {header.isPlaceholder ? null : (
+                              <div className="flex items-center space-x-2">
+                                {header.column.getCanSort() ? (
+                                  <button
+                                    type="button"
+                                    className={cn(
+                                      "flex items-center space-x-2 cursor-pointer hover:bg-muted/50 p-2 rounded-md",
+                                    )}
+                                    onClick={() => header.column.toggleSorting(header.column.getIsSorted() === "asc")}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter" || e.key === " ") {
+                                        header.column.toggleSorting(header.column.getIsSorted() === "asc");
+                                      }
+                                    }}
+                                    aria-label={`Sort by ${header.column.id}`}
+                                  >
+                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                  </button>
+                                ) : (
+                                  <span className="flex items-center space-x-2">
+                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                  </span>
                                 )}
-                                onClick={() => header.column.toggleSorting(header.column.getIsSorted() === "asc")}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" || e.key === " ") {
-                                    header.column.toggleSorting(header.column.getIsSorted() === "asc");
-                                  }
-                                }}
-                                aria-label={`Sort by ${header.column.id}`}
-                              >
-                                {flexRender(header.column.columnDef.header, header.getContext())}
-                              </button>
-                            ) : (
-                              <span className="flex items-center space-x-2">
-                                {flexRender(header.column.columnDef.header, header.getContext())}
-                              </span>
+                                {!header.isPlaceholder && header.column.getCanFilter() && (
+                                  <ColumnFilter column={header.column} />
+                                )}
+                              </div>
                             )}
-                            {!header.isPlaceholder && header.column.getCanFilter() && (
-                              <ColumnFilter column={header.column} />
-                            )}
-                          </div>
-                        )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHeader>
-              <TableBody className={cn(GeistMono.className)}>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                ) : error ? (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center text-red-500">
-                      {error}
-                    </TableCell>
-                  </TableRow>
-                ) : table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <React.Fragment key={row.id}>
-                      <TableRow data-state={row.getIsSelected() && "selected"}>
-                        {row.getVisibleCells().map((cell) => (
-                          <TableCell key={cell.id}>
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          </TableCell>
+                          </TableHead>
                         ))}
                       </TableRow>
-                      {row.getIsExpanded() && renderSubComponent && (
-                        <TableRow>
-                          <TableCell colSpan={columns.length}>{renderSubComponent(row.original as TData)}</TableCell>
-                        </TableRow>
-                      )}
-                    </React.Fragment>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      No results.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                    ))}
+                  </TableHeader>
+                  <TableBody className={cn(GeistMono.className)}>
+                    {isLoading ? (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className="h-24 text-center">
+                          Loading...
+                        </TableCell>
+                      </TableRow>
+                    ) : error ? (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className="h-24 text-center text-red-500">
+                          {error}
+                        </TableCell>
+                      </TableRow>
+                    ) : table.getRowModel().rows?.length ? (
+                      table.getRowModel().rows.map((row) => (
+                        <React.Fragment key={row.id}>
+                          <TableRow data-state={row.getIsSelected() && "selected"}>
+                            {row.getVisibleCells().map((cell) => (
+                              <TableCell key={cell.id}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                          {row.getIsExpanded() && renderSubComponent && (
+                            <TableRow>
+                              <TableCell colSpan={columns.length}>
+                                {renderSubComponent(row.original as TData)}
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </React.Fragment>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className="h-24 text-center">
+                          No results.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </div>
+
+          {/* Pagination and batch actions */}
+          <div className="flex items-center justify-between p-4 border-t border-border bg-background">
+            <div className="flex-1">
+              <DataTablePagination table={table} />
+            </div>
+            <div className="flex items-center space-x-2">
+              {batchActions?.map((action) => (
+                <Button
+                  key={action.label}
+                  onClick={() => action.onClick(table.getSelectedRowModel?.().rows.map((row) => row.original as TData))}
+                  disabled={table.getSelectedRowModel?.().rows.length === 0}
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <DataTablePagination table={table} />
-        </div>
-        <div className="flex items-center space-x-2">
-          {batchActions?.map((action) => (
-            <Button
-              key={action.label}
-              onClick={() => action.onClick(table.getSelectedRowModel?.().rows.map((row) => row.original as TData))}
-              disabled={table.getSelectedRowModel?.().rows.length === 0}
-            >
-              {action.label}
-            </Button>
-          ))}
-        </div>
-      </div>
+
+      {/* Accessibility */}
       <div aria-live="polite" className="sr-only" data-row-count-announcer>
         {table.getRowModel().rows.length} rows
       </div>

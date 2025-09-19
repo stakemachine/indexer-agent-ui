@@ -47,7 +47,13 @@
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Project proposals MUST align with the Constitution (v3.0.0):
+- Code Quality: TypeScript strict, Biome clean, proper Server/Client boundaries, env via `lib/env.ts`.
+- Testing Standards: Vitest tests co-located; new features and bug fixes include tests; a11y where relevant.
+- UX Consistency: Use shadcn/ui + Tailwind; SWR tuple keys and proxy routes; consistent patterns (Zustand/nuqs/TanStack).
+- Performance: Respect budgets (First Load JS, table interactivity, API p95); avoid N+1; memoize and dedupe.
+
+If any item cannot be met, document a time-boxed exception with mitigation and a follow-up issue.
 
 ## Project Structure
 
@@ -208,4 +214,4 @@ ios/ or android/
 - [ ] Complexity deviations documented
 
 ---
-*Based on Constitution v2.1.1 - See `/memory/constitution.md`*
+*Based on Constitution v3.0.0 - See `/memory/constitution.md`*

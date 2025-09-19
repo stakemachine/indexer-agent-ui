@@ -78,6 +78,12 @@ When creating this spec from a user prompt:
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+### Non-Functional Requirements (Quality Attributes)
+- **NFR-Quality**: Code MUST comply with Constitution Code Quality rules (TS strict, Biome clean, env via `lib/env.ts`).
+- **NFR-Testing**: Include Vitest tests (unit/integration) with a11y concerns for interactive UI.
+- **NFR-UX**: Use shadcn/ui + Tailwind, SWR tuple keys + proxy routes; avoid direct upstream calls.
+- **NFR-Performance**: Adhere to budgets (First Load JS, interactivity latency, API p95). Note risks.
+
 ### Key Entities *(include if feature involves data)*
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
@@ -94,6 +100,11 @@ When creating this spec from a user prompt:
 - [ ] All mandatory sections completed
 
 ### Requirement Completeness
+- **Constitution Alignment**
+   - [ ] Code Quality requirements addressed (TS strict, Biome, env handling)
+   - [ ] Testing plan defined (Vitest, a11y where applicable)
+   - [ ] UX consistency ensured (components, data fetching patterns)
+   - [ ] Performance targets and risks documented
 - [ ] No [NEEDS CLARIFICATION] markers remain
 - [ ] Requirements are testable and unambiguous  
 - [ ] Success criteria are measurable

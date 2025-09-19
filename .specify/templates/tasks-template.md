@@ -22,6 +22,7 @@
    → Different files = mark [P] for parallel
    → Same file = sequential (no [P])
    → Tests before implementation (TDD)
+   → Enforce Constitution gates (Code Quality, Testing, UX, Performance)
 5. Number tasks sequentially (T001, T002...)
 6. Generate dependency graph
 7. Create parallel execution examples
@@ -96,6 +97,7 @@ Task: "Integration test auth in tests/integration/test_auth.py"
 - Verify tests fail before implementing
 - Commit after each task
 - Avoid: vague tasks, same file conflicts
+ - Ensure Biome check and Vitest run clean before marking phases complete
 
 ## Task Generation Rules
 *Applied during main() execution*
@@ -125,3 +127,4 @@ Task: "Integration test auth in tests/integration/test_auth.py"
 - [ ] Parallel tasks truly independent
 - [ ] Each task specifies exact file path
 - [ ] No task modifies same file as another [P] task
+ - [ ] Constitution gates satisfied (Code Quality, Testing, UX, Performance)

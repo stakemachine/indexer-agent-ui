@@ -72,6 +72,19 @@ export function formatPercent(value: number | string, decimals = 2, locale?: str
   return `${nf.format(num)}%`;
 }
 
+// Convert a wei value to a normalized GRT numeric for comparisons (not for display precision)
+export function toGRTNumber(wei: string | number | bigint): number | null {
+  const bi = toWeiBigInt(wei);
+  if (bi == null) return null;
+  try {
+    const asEthStr = formatEther(bi);
+    const asNum = Number.parseFloat(asEthStr);
+    return Number.isFinite(asNum) ? asNum : null;
+  } catch {
+    return null;
+  }
+}
+
 // CoinGecko API utilities
 export async function fetchGRTPrice(): Promise<number | null> {
   try {

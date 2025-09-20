@@ -31,7 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
+import { cn, toGRTNumber } from "@/lib/utils";
 
 interface DataGridProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -88,7 +88,13 @@ interface MultiFacetFilterValue {
   values: string[];
 }
 
-type SidebarFilterValue = string | MultiFacetFilterValue;
+interface RangeFilterValue {
+  __range: true;
+  min?: number | null;
+  max?: number | null;
+}
+
+type SidebarFilterValue = string | MultiFacetFilterValue | RangeFilterValue;
 
 import { DataTablePagination } from "./data-table-pagination";
 
@@ -150,13 +156,13 @@ export function DataGrid<TData, TValue>({
 
   const autoRefreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Augment columns with custom filter function supporting text or multi-value facets
+  // Augment columns with custom filter function supporting text, multi-facet, and numeric ranges
   const augmentedColumns = React.useMemo(() => {
     return columns.map((c) => {
       const withAny = c as unknown as { filterFn?: unknown };
       return {
         ...c,
-        filterFn: withAny.filterFn || "textOrMulti",
+        filterFn: withAny.filterFn || "textMultiOrRange",
       } as ColumnDef<TData, TValue>;
     });
   }, [columns]);
@@ -190,12 +196,41 @@ export function DataGrid<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     filterFns: {
-      textOrMulti: (row, columnId, filterValue: SidebarFilterValue) => {
+      textMultiOrRange: (row, columnId, filterValue: SidebarFilterValue) => {
         const raw = row.getValue(columnId);
         if (filterValue == null || (typeof filterValue === "string" && filterValue === "")) return true;
+        // multi-value facet
         if (typeof filterValue === "object" && (filterValue as MultiFacetFilterValue).__multi) {
           const values = (filterValue as MultiFacetFilterValue).values;
           return values.length === 0 || values.includes(String(raw ?? ""));
+        }
+        // numeric range
+        if (typeof filterValue === "object" && (filterValue as RangeFilterValue).__range) {
+          const { min, max } = filterValue as RangeFilterValue;
+          // Coerce raw to number when possible
+          let n: number | null = null;
+          if (typeof raw === "number") {
+            n = raw;
+          } else if (typeof raw === "string") {
+            // Try normalized GRT from wei if this is a big-integer-like string; fallback to plain number
+            const grt = toGRTNumber(raw);
+            if (grt != null) n = grt;
+            else {
+              const parsed = Number(raw);
+              n = Number.isFinite(parsed) ? parsed : null;
+            }
+          } else if (typeof raw === "bigint") {
+            const grt = toGRTNumber(raw);
+            n = grt;
+          }
+          // If bounds are effectively empty, don't filter
+          const hasMin = typeof min === "number" && !Number.isNaN(min);
+          const hasMax = typeof max === "number" && !Number.isNaN(max);
+          if (!hasMin && !hasMax) return true;
+          if (n == null) return false; // cannot evaluate numeric range
+          if (hasMin && n < (min as number)) return false;
+          if (hasMax && n > (max as number)) return false;
+          return true;
         }
         // default substring match
         if (typeof raw === "string" && typeof filterValue === "string") {
@@ -245,19 +280,53 @@ export function DataGrid<TData, TValue>({
 
   // (persistence + debounced onChange handled in hook)
 
-  // Build list of text columns (string-like) for sidebar inputs
-  const textColumns = React.useMemo(() => {
+  // Helper: find the first non-empty sample value for a column from the pre-filtered rows
+  const firstNonEmptySample = React.useCallback(
+    (columnId: string) => {
+      const rows = table.getPreFilteredRowModel().flatRows;
+      for (let i = 0; i < rows.length; i++) {
+        const v = rows[i]?.getValue(columnId);
+        if (v === undefined || v === null) continue;
+        if (typeof v === "string" && v.trim() === "") continue;
+        return v;
+      }
+      return undefined;
+    },
+    [table],
+  );
+
+  // Build list of text columns (string-like) for sidebar inputs (recomputed each render)
+  const textColumns = (() => {
     if (!_enableFilterSidebar) return [] as Column<TData, TValue>[];
     return table
       .getAllLeafColumns()
       .filter((c) => c.getCanFilter())
       .filter((c) => {
-        // Try sample first row value to decide if string-like
-        const rows = table.getPreFilteredRowModel().flatRows;
-        const sample = rows[0]?.getValue(c.id);
-        return typeof sample === "string" || sample === undefined || sample === null;
+        const sample = firstNonEmptySample(c.id);
+        if (typeof sample === "string") {
+          const asNum = Number(sample);
+          return !Number.isFinite(asNum);
+        }
+        return false;
       });
-  }, [_enableFilterSidebar, table]);
+  })();
+
+  // Build list of numeric columns for sidebar range inputs (recomputed each render)
+  const numericColumns = (() => {
+    if (!_enableFilterSidebar) return [] as Column<TData, TValue>[];
+    return table
+      .getAllLeafColumns()
+      .filter((c) => c.getCanFilter())
+      .filter((c) => {
+        const sample = firstNonEmptySample(c.id);
+        if (typeof sample === "number") return true;
+        if (typeof sample === "string") {
+          const parsed = Number(sample);
+          return Number.isFinite(parsed);
+        }
+        return false;
+      });
+  })();
 
   // Build distinct value map for low-cardinality columns (<=10 distinct non-empty)
   const facetValues: Record<string, { value: string; count: number }[]> = (() => {
@@ -314,6 +383,54 @@ export function DataGrid<TData, TValue>({
             {/* Sidebar content - scrollable */}
             <div className="flex-1 px-6 py-4 overflow-y-auto">
               <div className="space-y-6">
+                {/* Numeric range filters */}
+                {numericColumns.map((col) => {
+                  const currentFilter = sidebarFilters.find((f) => f.id === col.id)?.value as
+                    | SidebarFilterValue
+                    | undefined;
+                  const range =
+                    typeof currentFilter === "object" && (currentFilter as RangeFilterValue)?.__range
+                      ? (currentFilter as RangeFilterValue)
+                      : ({ __range: true, min: null, max: null } as RangeFilterValue);
+                  const minVal = range.min ?? "";
+                  const maxVal = range.max ?? "";
+                  return (
+                    <div key={col.id} className="space-y-2">
+                      <Label className="text-sm font-medium text-foreground">{col.id}</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          placeholder="Min"
+                          value={minVal}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            const min = v === "" ? null : Number(v);
+                            upsertSidebarFilter(col.id, { __range: true, min, max: range.max } as RangeFilterValue);
+                          }}
+                          className="h-9"
+                          aria-label={`${col.id} min`}
+                        />
+                        <span className="text-muted-foreground">–</span>
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          placeholder="Max"
+                          value={maxVal}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            const max = v === "" ? null : Number(v);
+                            upsertSidebarFilter(col.id, { __range: true, min: range.min, max } as RangeFilterValue);
+                          }}
+                          className="h-9"
+                          aria-label={`${col.id} max`}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Text filters with facet chips */}
                 {textColumns.map((col) => {
                   const currentFilter = sidebarFilters.find((f) => f.id === col.id)?.value as
                     | SidebarFilterValue
@@ -369,7 +486,7 @@ export function DataGrid<TData, TValue>({
                     </div>
                   );
                 })}
-                {textColumns.length === 0 && (
+                {numericColumns.length === 0 && textColumns.length === 0 && (
                   <p className="text-sm text-muted-foreground">No text columns available.</p>
                 )}
               </div>

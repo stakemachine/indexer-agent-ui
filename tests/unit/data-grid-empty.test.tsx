@@ -12,14 +12,13 @@ const columns: ColumnDef<Row>[] = [
 ];
 
 describe("DataGrid empty dataset", () => {
-  it("opens sidebar with no rows and shows inputs (string cols inferred)", () => {
+  it("opens sidebar with no rows and shows fallback message (no inference)", () => {
     // biome-ignore lint/suspicious/noExplicitAny: test internal
     const DG = DataGrid as any;
     render(<DG columns={columns} data={[]} enableFilterSidebar />);
     const toggle = screen.getByRole("button", { name: /filters/i });
     fireEvent.click(toggle);
-    const nameInput = screen.getByPlaceholderText(/filter name/i);
-    expect(nameInput).toBeInTheDocument();
+    expect(screen.getByText(/no text columns available/i)).toBeInTheDocument();
     expect(screen.getByText(/0 active/)).toBeInTheDocument();
   });
 });

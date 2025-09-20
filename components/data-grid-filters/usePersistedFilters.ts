@@ -58,9 +58,15 @@ export function usePersistedFilters({ initial, persistKey, onChange, debounceMs 
       if (typeof val === "string") return val.trim() === "";
       if (Array.isArray(val)) return val.length === 0;
       if (typeof val === "object") {
-        const anyVal = val as { __multi?: unknown; values?: unknown };
+        const anyVal = val as { __multi?: unknown; values?: unknown; __range?: unknown; min?: unknown; max?: unknown };
         if (anyVal?.__multi && Array.isArray(anyVal.values)) {
           return (anyVal.values as unknown[]).length === 0;
+        }
+        if (anyVal?.__range) {
+          const min = anyVal.min as unknown;
+          const max = anyVal.max as unknown;
+          const empty = (v: unknown) => v == null || (typeof v === "number" && Number.isNaN(v));
+          return empty(min) && empty(max);
         }
       }
       return false;

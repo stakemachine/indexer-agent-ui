@@ -260,7 +260,8 @@ export function DataGrid<TData, TValue>({
   }, [_enableFilterSidebar, table]);
 
   // Build distinct value map for low-cardinality columns (<=10 distinct non-empty)
-  const facetValues = React.useMemo(() => {
+  const facetValues: Record<string, { value: string; count: number }[]> = (() => {
+    if (!_enableFilterSidebar) return {};
     const map: Record<string, { value: string; count: number }[]> = {};
     const rows = table.getPreFilteredRowModel().flatRows;
     textColumns.forEach((col) => {
@@ -277,7 +278,7 @@ export function DataGrid<TData, TValue>({
       }
     });
     return map;
-  }, [textColumns, table]);
+  })();
 
   const handleFilterInputChange = (columnId: string, value: string) => {
     upsertSidebarFilter(columnId, value);

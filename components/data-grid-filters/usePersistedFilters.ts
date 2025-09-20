@@ -53,9 +53,26 @@ export function usePersistedFilters({ initial, persistKey, onChange, debounceMs 
   }, [filters, onChange, debounceMs]);
 
   const upsert = React.useCallback((id: string, value: unknown) => {
+    const isInactive = (val: unknown) => {
+      if (val == null) return true;
+      if (typeof val === "string") return val.trim() === "";
+      if (Array.isArray(val)) return val.length === 0;
+      if (typeof val === "object") {
+        const anyVal = val as { __multi?: unknown; values?: unknown };
+        if (anyVal?.__multi && Array.isArray(anyVal.values)) {
+          return (anyVal.values as unknown[]).length === 0;
+        }
+      }
+      return false;
+    };
+
     setFilters((prev) => {
-      const existing = prev.find((f) => f.id === id);
-      if (existing) return prev.map((f) => (f.id === id ? { ...f, value } : f));
+      const exists = prev.some((f) => f.id === id);
+      if (isInactive(value)) {
+        // Remove filter if value is empty/inactive
+        return prev.filter((f) => f.id !== id);
+      }
+      if (exists) return prev.map((f) => (f.id === id ? { ...f, value } : f));
       return [...prev, { id, value }];
     });
   }, []);

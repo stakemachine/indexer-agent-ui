@@ -338,6 +338,28 @@ export function Subgraphs() {
         header: "Network",
       },
       {
+        accessorKey: "status",
+        header: "Status",
+        accessorFn: (row) => (row.deniedAt !== 0 ? "Denied" : "Active"),
+        cell: ({ row }) =>
+          row.original.deniedAt !== 0 ? (
+            <Badge variant="destructive">DENIED</Badge>
+          ) : (
+            <Badge variant="secondary">Active</Badge>
+          ),
+      },
+      {
+        accessorKey: "substreams",
+        header: "Substreams",
+        accessorFn: (row) => (row.poweredBySubstreams ? "Yes" : "No"),
+        cell: ({ row }) =>
+          row.original.poweredBySubstreams ? (
+            <Badge variant="secondary">Yes</Badge>
+          ) : (
+            <span className="text-muted-foreground text-sm">No</span>
+          ),
+      },
+      {
         id: "entities",
         header: "Entities",
         accessorFn: (row) => {
@@ -454,6 +476,8 @@ export function Subgraphs() {
         initialState={{
           sorting: [{ id: "currentSignalledTokens", desc: true }],
         }}
+        enableFilterSidebar
+        persistKey="subgraphs.filters"
       />
     </div>
   );

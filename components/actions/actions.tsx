@@ -240,6 +240,8 @@ export function Actions() {
         autoRefreshEnabled={autoRefreshEnabled}
         onAutoRefreshChange={setAutoRefreshEnabled}
         autoRefreshInterval={30000} // 30 seconds
+        enableFilterSidebar
+        persistKey="actions.filters"
         batchActions={[
           {
             label: "Approve",

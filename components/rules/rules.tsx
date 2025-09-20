@@ -927,6 +927,8 @@ export function Rules() {
         autoRefreshEnabled={autoRefreshEnabled}
         onAutoRefreshChange={setAutoRefreshEnabled}
         autoRefreshInterval={30000} // 30 seconds
+        enableFilterSidebar
+        persistKey="rules.filters"
         batchActions={[
           {
             label: "Delete",

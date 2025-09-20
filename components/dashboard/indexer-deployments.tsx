@@ -145,6 +145,8 @@ export function IndexerDeployments() {
         initialState={{
           sorting: [{ id: "behind", desc: true }],
         }}
+        enableFilterSidebar
+        persistKey="indexer-deployments.filters"
       />
     </div>
   );

@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -91,34 +90,12 @@ interface MultiFacetFilterValue {
 
 type SidebarFilterValue = string | MultiFacetFilterValue;
 
-import type { Column } from "@tanstack/react-table";
 import { DataTablePagination } from "./data-table-pagination";
 
 type RowWithSubRows<TData> = TData & { subRows?: RowWithSubRows<TData>[] };
 
-function ColumnFilter<TData, TValue>({ column }: { column: Column<TData, TValue> }) {
-  const columnFilterValue = column.getFilterValue();
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Filter {column.id}</span>
-          <ChevronDownIcon className="h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="end">
-        <Input
-          type="text"
-          value={(columnFilterValue ?? "") as string}
-          onChange={(event) => column.setFilterValue(event.target.value)}
-          placeholder={`Search ${column.id}...`}
-          className="max-w-sm"
-        />
-      </PopoverContent>
-    </Popover>
-  );
-}
+import type { Column } from "@tanstack/react-table";
+// Column header filter UI removed: filtering is handled exclusively by the sidebar.
 
 export function DataGrid<TData, TValue>({
   columns,
@@ -257,14 +234,13 @@ export function DataGrid<TData, TValue>({
     };
   }, [autoRefresh, onRefresh, autoRefreshInterval]);
 
-  // Apply sidebarFilters to react-table columnFilters (simple text contains semantics)
+  // Apply sidebarFilters to react-table columnFilters (exact mirror)
   useEffect(() => {
-    if (sidebarFilters.length === 0) return;
-    // Merge with any existing columnFilters (prioritize sidebar ones by id)
-    setColumnFilters((prev) => {
-      const others = prev.filter((p) => !sidebarFilters.some((s) => s.id === p.id));
-      return [...others, ...sidebarFilters.map((f) => ({ id: f.id, value: f.value }))];
-    });
+    if (sidebarFilters.length === 0) {
+      setColumnFilters([]);
+      return;
+    }
+    setColumnFilters(sidebarFilters.map((f) => ({ id: f.id, value: f.value })));
   }, [sidebarFilters]);
 
   // (persistence + debounced onChange handled in hook)
@@ -547,9 +523,7 @@ export function DataGrid<TData, TValue>({
                                     {flexRender(header.column.columnDef.header, header.getContext())}
                                   </span>
                                 )}
-                                {!header.isPlaceholder && header.column.getCanFilter() && (
-                                  <ColumnFilter column={header.column} />
-                                )}
+                                {/* Header filter controls removed; use sidebar filters instead. */}
                               </div>
                             )}
                           </TableHead>

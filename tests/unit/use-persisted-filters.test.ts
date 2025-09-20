@@ -30,4 +30,20 @@ describe("usePersistedFilters", () => {
     expect(result.current.filters).toEqual([]);
     expect(localStorage.getItem("pf:key")).toBeNull();
   });
+
+  it("removes filter when string value becomes empty", () => {
+    const { result } = renderHook(() => usePersistedFilters({ persistKey: "pf:key" }));
+    act(() => result.current.upsert("name", "Alice"));
+    expect(result.current.filters).toEqual([{ id: "name", value: "Alice" }]);
+    act(() => result.current.upsert("name", ""));
+    expect(result.current.filters).toEqual([]);
+  });
+
+  it("removes filter when multi selection becomes empty", () => {
+    const { result } = renderHook(() => usePersistedFilters({ persistKey: "pf:key" }));
+    act(() => result.current.upsert("status", { __multi: true, values: ["Active", "Denied"] }));
+    expect(result.current.filters[0].id).toBe("status");
+    act(() => result.current.upsert("status", { __multi: true, values: [] }));
+    expect(result.current.filters).toEqual([]);
+  });
 });

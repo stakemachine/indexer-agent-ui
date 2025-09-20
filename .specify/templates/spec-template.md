@@ -81,7 +81,7 @@ When creating this spec from a user prompt:
 ### Non-Functional Requirements (Quality Attributes)
 - **NFR-Quality**: Code MUST comply with Constitution Code Quality rules (TS strict, Biome clean, env via `lib/env.ts`).
 - **NFR-Testing**: Include Vitest tests (unit/integration) with a11y concerns for interactive UI.
-- **NFR-UX**: Use shadcn/ui + Tailwind, SWR tuple keys + proxy routes; avoid direct upstream calls.
+- **NFR-UX**: Use shadcn/ui + Tailwind; data fetching via SWR tuple keys + proxy routes; avoid direct upstream calls.
 - **NFR-Performance**: Adhere to budgets (First Load JS, interactivity latency, API p95). Note risks.
 
 ### Key Entities *(include if feature involves data)*
@@ -103,7 +103,7 @@ When creating this spec from a user prompt:
 - **Constitution Alignment**
    - [ ] Code Quality requirements addressed (TS strict, Biome, env handling)
    - [ ] Testing plan defined (Vitest, a11y where applicable)
-   - [ ] UX consistency ensured (components, data fetching patterns)
+      - [ ] UX consistency ensured (components, data fetching patterns without direct upstream calls)
    - [ ] Performance targets and risks documented
 - [ ] No [NEEDS CLARIFICATION] markers remain
 - [ ] Requirements are testable and unambiguous  

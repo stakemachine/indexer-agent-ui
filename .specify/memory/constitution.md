@@ -1,6 +1,6 @@
 <!--
 Sync Impact Report
-- Version change: 2.1.1 → 3.0.0
+- Version change: 3.0.0 → 3.0.1
 - Modified principles: Replaced example placeholders with project-specific principles
 	→ I. Code Quality (NON-NEGOTIABLE)
 	→ II. Testing Standards
@@ -52,8 +52,8 @@ Rationale: Tests provide executable specifications, prevent regressions, and doc
 - Accessibility is mandatory: semantic HTML, focus management, keyboard navigation, ARIA where needed.
 - Data fetching MUST use SWR with tuple keys and the provided `tupleFetcher`/clients. Components must
 	NOT call upstream Graph endpoints directly—use `/api/agent` and `/api/subgraph/[network]` proxies.
-- Adhere to established patterns: URL state via `nuqs` where appropriate, global state via Zustand,
-	and table patterns consistent with TanStack Table usage in this repo.
+- Adhere to established patterns: global state via Zustand and table patterns consistent with
+	TanStack Table usage in this repo.
 - Maintain consistent layout, spacing, and theming. Avoid surprising interactions.
 
 Rationale: Consistency reduces cognitive load, improves accessibility, and accelerates development.
@@ -96,4 +96,4 @@ Rationale: Meeting budgets maintains a responsive UI and keeps operational costs
 	- PATCH: Clarifications, wording, formatting
 - Compliance: Reviewers verify adherence during PR review and may request adjustments before merge.
 
-**Version**: 3.0.0 | **Ratified**: TODO(RATIFICATION_DATE): original adoption date unknown | **Last Amended**: 2025-09-19
+**Version**: 3.0.1 | **Ratified**: TODO(RATIFICATION_DATE): original adoption date unknown | **Last Amended**: 2025-09-20

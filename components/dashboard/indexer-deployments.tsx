@@ -26,6 +26,7 @@ const columns: ColumnDef<Deployment>[] = [
   {
     accessorKey: "subgraphDeployment",
     header: "Deployment ID",
+    meta: { disableFacetHelpers: true },
     cell: ({ row }) => <div className="w-[180px] truncate">{row.getValue("subgraphDeployment")}</div>,
   },
   {

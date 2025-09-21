@@ -313,6 +313,7 @@ export function Subgraphs() {
       {
         accessorKey: "displayName",
         header: "Name",
+        meta: { disableFacetHelpers: true },
         cell: ({ row }) => (
           <div className="flex items-center space-x-2 overflow-hidden">
             <Image

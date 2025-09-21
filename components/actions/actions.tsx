@@ -67,6 +67,7 @@ const columns: ColumnDef<Action>[] = [
   {
     accessorKey: "deploymentID",
     header: "Deployment ID",
+    meta: { disableFacetHelpers: true },
     cell: ({ row }) => {
       const v = row.getValue("deploymentID") as string | null | undefined;
       return <div className="w-[180px] truncate">{v || <span className="text-muted-foreground">—</span>}</div>;

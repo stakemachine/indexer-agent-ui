@@ -328,12 +328,17 @@ export function DataGrid<TData, TValue>({
       });
   })();
 
-  // Build distinct value map for low-cardinality columns (<=10 distinct non-empty)
+  // Build distinct value map for string columns; show up to TOP_K most frequent non-empty values
   const facetValues: Record<string, { value: string; count: number }[]> = (() => {
     if (!_enableFilterSidebar) return {};
     const map: Record<string, { value: string; count: number }[]> = {};
     const rows = table.getPreFilteredRowModel().flatRows;
     textColumns.forEach((col) => {
+      // Respect column meta flag to disable facet helpers
+      const meta = (col.columnDef as { meta?: Record<string, unknown> }).meta as
+        | { disableFacetHelpers?: boolean }
+        | undefined;
+      if (meta?.disableFacetHelpers) return;
       const freq: Record<string, number> = {};
       rows.forEach((r) => {
         const v = r.getValue(col.id);
@@ -342,8 +347,10 @@ export function DataGrid<TData, TValue>({
         }
       });
       const entries = Object.entries(freq).sort((a, b) => b[1] - a[1]);
-      if (entries.length > 0 && entries.length <= 10) {
-        map[col.id] = entries.map(([value, count]) => ({ value, count }));
+      if (entries.length > 0) {
+        const TOP_K = 10;
+        const top = entries.slice(0, TOP_K);
+        map[col.id] = top.map(([value, count]) => ({ value, count }));
       }
     });
     return map;
@@ -440,7 +447,10 @@ export function DataGrid<TData, TValue>({
                     typeof currentFilter === "object" && (currentFilter as MultiFacetFilterValue)?.__multi
                       ? (currentFilter as MultiFacetFilterValue).values
                       : [];
-                  const facets = facetValues[col.id];
+                  const meta = (col.columnDef as { meta?: Record<string, unknown> }).meta as
+                    | { disableFacetHelpers?: boolean }
+                    | undefined;
+                  const facets = meta?.disableFacetHelpers ? undefined : facetValues[col.id];
                   return (
                     <div key={col.id} className="space-y-2">
                       <div className="space-y-2">

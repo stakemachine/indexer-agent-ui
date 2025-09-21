@@ -297,6 +297,7 @@ const createColumns = (
   {
     accessorKey: "identifier",
     header: "Identifier",
+    meta: { disableFacetHelpers: true },
     cell: ({ row }) => (
       <EditableCell
         value={row.getValue("identifier")}

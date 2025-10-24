@@ -222,6 +222,8 @@ export function CostModels() {
         autoRefreshEnabled={autoRefreshEnabled}
         onAutoRefreshChange={setAutoRefreshEnabled}
         autoRefreshInterval={30000} // 30 seconds
+        enableFilterSidebar
+        persistKey="cost-models.filters"
         batchActions={[
           {
             label: "Delete",

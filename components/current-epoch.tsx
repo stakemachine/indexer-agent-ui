@@ -30,8 +30,8 @@ export function CurrentEpoch() {
 
   const epoch = data.epoches[0];
   const currentBlock = parseInt(data.graphNetwork.currentL1BlockNumber, 10);
-  const startBlock = parseInt(epoch.startBlock);
-  const endBlock = parseInt(epoch.endBlock);
+  const startBlock = parseInt(epoch.startBlock, 10);
+  const endBlock = parseInt(epoch.endBlock, 10);
 
   const progress = ((currentBlock - startBlock) / (endBlock - startBlock)) * 100;
   const blocksRemaining = endBlock - currentBlock;

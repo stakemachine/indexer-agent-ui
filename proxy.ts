@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { withAuth } from "next-auth/middleware";
+import withAuth from "next-auth/middleware";
 
-// Middleware no longer rewrites /api/agent or /api/subgraph/*.
+// Proxy no longer rewrites /api/agent or /api/subgraph/*.
 // Those paths are now handled by dedicated route handlers (app/api/agent, app/api/subgraph/[network]).
-// Removing rewrites eliminates the x-middleware-rewrite response header and preserves original request URL.
-export default withAuth(function middleware() {
+// Removing rewrites eliminates the x-proxy-rewrite response header and preserves original request URL.
+export default withAuth(function proxy() {
   return NextResponse.next();
 });
 

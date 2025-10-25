@@ -285,6 +285,20 @@ interface IndexerResponse {
   };
 }
 
+const StatusBadge = ({ healthy }: { healthy?: boolean }) => {
+  const cls =
+    healthy == null
+      ? "bg-gray-500/10 text-gray-500 border-0"
+      : healthy
+        ? "bg-emerald-500/10 text-emerald-500 border-0"
+        : "bg-red-500/10 text-red-500 border-0";
+  return (
+    <Badge variant="outline" className={cls}>
+      {healthy == null ? "Unknown" : healthy ? "Online" : "Offline"}
+    </Badge>
+  );
+};
+
 export function IndexerInfo() {
   const { indexerRegistration } = useIndexerRegistrationStore();
   const { currentNetwork } = useNetworkStore();
@@ -375,19 +389,6 @@ export function IndexerInfo() {
   const service = matched?.service;
   const statusEp = matched?.status;
 
-  const StatusBadge = ({ healthy }: { healthy?: boolean }) => {
-    const cls =
-      healthy == null
-        ? "bg-gray-500/10 text-gray-500 border-0"
-        : healthy
-          ? "bg-emerald-500/10 text-emerald-500 border-0"
-          : "bg-red-500/10 text-red-500 border-0";
-    return (
-      <Badge variant="outline" className={cls}>
-        {healthy == null ? "Unknown" : healthy ? "Online" : "Offline"}
-      </Badge>
-    );
-  };
   return (
     <div className="space-y-6">
       {/* Overview Cards */}

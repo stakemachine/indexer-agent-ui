@@ -67,13 +67,8 @@
     "@types/react-dom": "19.2.2",
     "@vitest/ui": "^3.2.4",
     "jsdom": "^26.1.0",
-<<<<<<< Updated upstream
-    "lefthook": "^2.0.0",
-    "typescript": "5.9.3",
-=======
     "lefthook": "^2.0.1",
     "typescript": "5.8.3",
->>>>>>> Stashed changes
     "vitest": "^3.2.4"
   },
   "pnpm": {

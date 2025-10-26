@@ -328,6 +328,8 @@ function AllocationsTable() {
         initialState={{
           sorting: [{ id: "createdAt", desc: true }],
         }}
+        // T022: Pilot enable filter sidebar only on allocations table
+        enableFilterSidebar
         batchActions={[
           {
             label: "Unallocate",

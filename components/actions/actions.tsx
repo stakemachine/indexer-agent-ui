@@ -67,6 +67,7 @@ const columns: ColumnDef<Action>[] = [
   {
     accessorKey: "deploymentID",
     header: "Deployment ID",
+    meta: { disableFacetHelpers: true },
     cell: ({ row }) => {
       const v = row.getValue("deploymentID") as string | null | undefined;
       return <div className="w-[180px] truncate">{v || <span className="text-muted-foreground">—</span>}</div>;
@@ -240,6 +241,8 @@ export function Actions() {
         autoRefreshEnabled={autoRefreshEnabled}
         onAutoRefreshChange={setAutoRefreshEnabled}
         autoRefreshInterval={30000} // 30 seconds
+        enableFilterSidebar
+        persistKey="actions.filters"
         batchActions={[
           {
             label: "Approve",

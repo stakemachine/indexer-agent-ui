@@ -297,6 +297,7 @@ const createColumns = (
   {
     accessorKey: "identifier",
     header: "Identifier",
+    meta: { disableFacetHelpers: true },
     cell: ({ row }) => (
       <EditableCell
         value={row.getValue("identifier")}
@@ -927,6 +928,8 @@ export function Rules() {
         autoRefreshEnabled={autoRefreshEnabled}
         onAutoRefreshChange={setAutoRefreshEnabled}
         autoRefreshInterval={30000} // 30 seconds
+        enableFilterSidebar
+        persistKey="rules.filters"
         batchActions={[
           {
             label: "Delete",

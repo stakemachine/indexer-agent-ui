@@ -26,6 +26,7 @@ const columns: ColumnDef<Deployment>[] = [
   {
     accessorKey: "subgraphDeployment",
     header: "Deployment ID",
+    meta: { disableFacetHelpers: true },
     cell: ({ row }) => <div className="w-[180px] truncate">{row.getValue("subgraphDeployment")}</div>,
   },
   {
@@ -145,6 +146,8 @@ export function IndexerDeployments() {
         initialState={{
           sorting: [{ id: "behind", desc: true }],
         }}
+        enableFilterSidebar
+        persistKey="indexer-deployments.filters"
       />
     </div>
   );

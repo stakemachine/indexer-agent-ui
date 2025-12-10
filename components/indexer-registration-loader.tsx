@@ -19,7 +19,7 @@ export function IndexerRegistrationLoader() {
     const client = agentClient();
 
     interface RegistrationResponse {
-      indexerRegistration?: IndexerRegistration;
+      indexerRegistration?: IndexerRegistration | IndexerRegistration[];
     }
     const fetchIndexerRegistration = async () => {
       try {
@@ -27,7 +27,15 @@ export function IndexerRegistrationLoader() {
           protocolNetwork: currentNetwork,
         });
         if (data?.indexerRegistration) {
-          setIndexerRegistration(data.indexerRegistration);
+          // Handle both array and object responses from the agent API
+          const registration = Array.isArray(data.indexerRegistration)
+            ? data.indexerRegistration[0]
+            : data.indexerRegistration;
+          if (registration) {
+            setIndexerRegistration(registration);
+          } else {
+            console.error("Indexer registration data is empty");
+          }
         } else {
           console.error("Indexer registration data is undefined or null");
         }

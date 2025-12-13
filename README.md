@@ -16,7 +16,29 @@ The Indexer Agent UI allows you to manage your indexer operations simply via web
 
 ## Screenshots
 
-![Dashboard](screenshots/dashboard.jpeg)
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Provisions
+![Provisions](screenshots/provisions.png)
+
+### Allocations
+![Allocations](screenshots/allocations.png)
+
+### Actions
+![Actions](screenshots/actions.png)
+
+### Subgraphs
+![Subgraphs](screenshots/subgraphs.png)
+
+### Rules
+![Rules](screenshots/rules.png)
+
+### Cost Models
+![Cost Models](screenshots/cost-models.png)
+
+### Disputes
+![Disputes](screenshots/disputes.png)
 
 ## How to run
 

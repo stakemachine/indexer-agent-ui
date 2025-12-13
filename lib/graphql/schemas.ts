@@ -92,8 +92,72 @@ export const CostModelsResponseSchema = z.object({
   costModels: z.array(CostModelSchema),
 });
 
+// ==================== Provision Management (Horizon) ====================
+
+export const ProvisionSchema = z.object({
+  id: z.string(),
+  dataService: z.string(),
+  indexer: z.string(),
+  tokensProvisioned: z.string(),
+  tokensAllocated: z.string(),
+  tokensThawing: z.string(),
+  thawingPeriod: z.string().or(z.number()),
+  maxVerifierCut: z.string().or(z.number()),
+  protocolNetwork: z.string(),
+  idleStake: z.string(),
+});
+
+export const ProvisionsResponseSchema = z.object({
+  provisions: z.array(ProvisionSchema),
+});
+
+export const ThawRequestSchema = z.object({
+  id: z.string(),
+  fulfilled: z.string().or(z.boolean()), // Agent returns string, but could be boolean
+  shares: z.string(),
+  thawingUntil: z.string().or(z.number()),
+  protocolNetwork: z.string(),
+});
+
+export const ThawRequestsResponseSchema = z.object({
+  thawRequests: z.array(ThawRequestSchema),
+});
+
+export const AddToProvisionResultSchema = z.object({
+  addToProvision: z.object({
+    dataService: z.string(),
+    protocolNetwork: z.string(),
+    tokensProvisioned: z.string(),
+  }),
+});
+
+export const ThawFromProvisionResultSchema = z.object({
+  thawFromProvision: z.object({
+    dataService: z.string(),
+    protocolNetwork: z.string(),
+    tokensThawing: z.string(),
+    thawingPeriod: z.string().or(z.number()),
+    thawingUntil: z.string(),
+  }),
+});
+
+export const RemoveFromProvisionResultSchema = z.object({
+  removeFromProvision: z.object({
+    indexer: z.string(),
+    tokensProvisioned: z.string(),
+    tokensThawing: z.string(),
+    tokensRemoved: z.string(),
+    protocolNetwork: z.string(),
+  }),
+});
+
 export type AgentAllocationsResponse = z.infer<typeof AgentAllocationsResponseSchema>;
 export type IndexerDeploymentsResponse = z.infer<typeof IndexerDeploymentsResponseSchema>;
 export type IndexingRulesResponse = z.infer<typeof IndexingRulesResponseSchema>;
 export type ActionsResponse = z.infer<typeof ActionsResponseSchema>;
 export type CostModelsResponse = z.infer<typeof CostModelsResponseSchema>;
+export type ProvisionsResponse = z.infer<typeof ProvisionsResponseSchema>;
+export type ThawRequestsResponse = z.infer<typeof ThawRequestsResponseSchema>;
+export type AddToProvisionResult = z.infer<typeof AddToProvisionResultSchema>;
+export type ThawFromProvisionResult = z.infer<typeof ThawFromProvisionResultSchema>;
+export type RemoveFromProvisionResult = z.infer<typeof RemoveFromProvisionResultSchema>;

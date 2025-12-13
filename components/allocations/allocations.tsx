@@ -25,6 +25,7 @@ interface RawAllocation {
   createdAt: string; // unix seconds string
   closedAt?: string | null;
   status: string;
+  isLegacy: boolean;
   indexingRewards: string;
   indexingIndexerRewards: string;
   indexingDelegatorRewards: string;
@@ -58,6 +59,7 @@ type Allocation = {
   createdAtEpoch: string;
   closedAt: number | null;
   status: string;
+  isLegacy: boolean;
   indexingRewards: string;
   queryFeesCollected: string;
   signalledTokens: string;
@@ -255,6 +257,7 @@ function AllocationsTable() {
         createdAtEpoch: a.createdAtEpoch,
         closedAt: a.closedAt ? Number.parseInt(a.closedAt, 10) : null,
         status: a.status,
+        isLegacy: a.isLegacy,
         indexingRewards: a.indexingRewards,
         queryFeesCollected: a.queryFeesCollected,
         signalledTokens: a.subgraphDeployment.signalledTokens,
@@ -281,6 +284,7 @@ function AllocationsTable() {
       priority: 0,
       allocationID: row.id,
       protocolNetwork: currentNetwork,
+      isLegacy: row.isLegacy,
     }));
 
     try {

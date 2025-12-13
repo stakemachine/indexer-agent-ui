@@ -28,6 +28,19 @@ export function resolveChainAlias(id: string): string {
   return id;
 }
 
+/**
+ * Convert a chain alias to its CAIP-2 identifier (EIP-155 format).
+ * If the input is already in EIP format, returns it unchanged.
+ * Falls back to the input if no mapping is found.
+ */
+export function toEip155(chainAlias: string): string {
+  // If already in EIP format, return as-is
+  if (chainAlias.startsWith("eip155:")) {
+    return chainAlias;
+  }
+  return Caip2ByChainAlias[chainAlias] || chainAlias;
+}
+
 // Numeric formatting helpers
 export type FormatGRTOptions = {
   decimals?: number; // number of fractional digits to keep

@@ -15,6 +15,7 @@ export interface ActionInput {
   status: ActionStatus;
   priority: number | undefined;
   protocolNetwork: string;
+  isLegacy: boolean;
 }
 
 export interface AllocationsListResponse {

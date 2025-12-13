@@ -227,6 +227,7 @@ export const CREATE_ACTION_MUTATION = gql`
       priority
       status
       protocolNetwork
+      isLegacy
     }
   }
 `;
@@ -380,6 +381,7 @@ export const ALLOCATIONS_BY_INDEXER_QUERY = gql`
       createdAt
       closedAt
       status
+      isLegacy
       indexingRewards
       indexingIndexerRewards
       indexingDelegatorRewards
@@ -625,4 +627,69 @@ query IndexersENSQuery($addresses: [String!]!) {
         labelName
     }
 }
+`;
+
+// ==================== Provision Management (Horizon) ====================
+
+export const PROVISIONS_QUERY = gql`
+  query provisions($protocolNetwork: String!) {
+    provisions(protocolNetwork: $protocolNetwork) {
+      id
+      dataService
+      indexer
+      tokensProvisioned
+      tokensAllocated
+      tokensThawing
+      thawingPeriod
+      maxVerifierCut
+      protocolNetwork
+      idleStake
+    }
+  }
+`;
+
+export const THAW_REQUESTS_QUERY = gql`
+  query thawRequests($protocolNetwork: String!) {
+    thawRequests(protocolNetwork: $protocolNetwork) {
+      id
+      fulfilled
+      shares
+      thawingUntil
+      protocolNetwork
+    }
+  }
+`;
+
+export const ADD_TO_PROVISION_MUTATION = gql`
+  mutation addToProvision($protocolNetwork: String!, $amount: String!) {
+    addToProvision(protocolNetwork: $protocolNetwork, amount: $amount) {
+      dataService
+      protocolNetwork
+      tokensProvisioned
+    }
+  }
+`;
+
+export const THAW_FROM_PROVISION_MUTATION = gql`
+  mutation thawFromProvision($protocolNetwork: String!, $amount: String!) {
+    thawFromProvision(protocolNetwork: $protocolNetwork, amount: $amount) {
+      dataService
+      protocolNetwork
+      tokensThawing
+      thawingPeriod
+      thawingUntil
+    }
+  }
+`;
+
+export const REMOVE_FROM_PROVISION_MUTATION = gql`
+  mutation removeFromProvision($protocolNetwork: String!) {
+    removeFromProvision(protocolNetwork: $protocolNetwork) {
+      indexer
+      tokensProvisioned
+      tokensThawing
+      tokensRemoved
+      protocolNetwork
+    }
+  }
 `;

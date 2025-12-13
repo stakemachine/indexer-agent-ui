@@ -262,7 +262,6 @@ export const GRAPH_NETWORK_INFO_QUERY = gql`
       networkGRTIssuance
       epochLength
       currentEpoch
-      epochLength
       maxAllocationEpochs
     }
   }

@@ -12,15 +12,15 @@ export function createSchemaFetcher<Schema extends ZodTypeAny>(options: {
   schema: Schema;
   /** Optional transform applied after schema parse */
   transform?: (data: z.infer<Schema>) => unknown;
-}) {
+}): (query: string, variables?: Variables | undefined) => Promise<z.infer<Schema>> {
   const client = new GraphQLClient(options.endpoint);
   // reference z to ensure runtime import isn't tree-shaken when schemas are provided dynamically
   void z.null();
-  return async (query: string, variables?: Variables | undefined) => {
+  return async (query: string, variables?: Variables | undefined): Promise<z.infer<Schema>> => {
     try {
       const raw = await client.request(query, variables as Variables);
-      const parsed = options.schema.parse(raw);
-      return options.transform ? options.transform(parsed) : parsed;
+      const parsed = options.schema.parse(raw) as z.infer<Schema>;
+      return options.transform ? (options.transform(parsed) as z.infer<Schema>) : parsed;
     } catch (err) {
       // Normalize into a fresh Error instance (avoid mutating original which can have read-only message)
       let baseMessage: string;

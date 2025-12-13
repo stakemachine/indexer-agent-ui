@@ -5,7 +5,7 @@ import { getToken } from "next-auth/jwt";
 // Those paths are now handled by dedicated route handlers (app/api/agent, app/api/subgraph/[network]).
 // Removing rewrites eliminates the x-proxy-rewrite response header and preserves original request URL.
 
-// Next.js 16 requires the exported function to be named `proxy` (not `middleware`)
+// Next.js 16 requires the exported function to be named `proxy`
 export async function proxy(request: NextRequest) {
   const token = await getToken({ req: request });
 

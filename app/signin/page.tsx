@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function SignInPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [username, setUsername] = useState("");
@@ -32,15 +31,9 @@ export default function SignInPage() {
       return;
     }
     if (res?.ok) {
-      // Use router.push for client-side navigation with typed routes
-      // For dynamic callbackUrl from search params, we need to handle external vs internal URLs
-      if (callbackUrl.startsWith("/")) {
-        // Internal route - cast to never to satisfy typed routes
-        router.push(callbackUrl as never);
-      } else {
-        // External URL - use window.location
-        window.location.href = callbackUrl;
-      }
+      // Use window.location for reliable navigation after auth state change
+      // router.push doesn't always work correctly with session updates
+      window.location.href = callbackUrl;
     }
   }
 

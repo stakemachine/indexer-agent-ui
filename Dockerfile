@@ -23,6 +23,7 @@ COPY lib ./lib
 COPY public ./public
 COPY styles ./styles
 COPY types ./types
+COPY proxy.ts ./
 COPY next.config.js tsconfig.json postcss.config.js ./
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN corepack enable && corepack prepare pnpm@10 --activate

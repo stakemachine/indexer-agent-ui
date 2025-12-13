@@ -12,7 +12,7 @@ The Indexer Agent UI allows you to manage your indexer operations simply via web
 - Explore subgraphs: find subgraphs to index
 - Deployments: monitor the progress of deployments you index
 - Allocations: watch and manage your allocations
-- Indexer info: view basic information about your indexer account
+- Indexer Info: view basic information about your indexer account
 
 ## Screenshots
 

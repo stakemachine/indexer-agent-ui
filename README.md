@@ -9,7 +9,7 @@ The Indexer Agent UI allows you to manage your indexer operations simply via web
 - Indexing Rules: create and manage indexing rules
 - Action queue: create actions and manage your actions queue
 - Cost models: set your cost models
-- Explore subgraphs: find subgraphs to index
+- Explore Subgraphs: find subgraphs to index
 - Deployments: monitor the progress of deployments you index
 - Allocations: watch and manage your allocations
 - Indexer Info: view basic information about your indexer account

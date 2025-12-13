@@ -44,7 +44,9 @@ The Indexer Agent UI allows you to manage your indexer operations simply via web
 
 ```bash
 docker run -p 3000:3000 -d --network=<indexer-network> \
+  --name indexer-agent-ui \
   -e NEXTAUTH_SECRET=$(openssl rand -base64 32) \
+  -e NEXTAUTH_URL=http://<your-url>:3000 \
   -e UI_LOGIN=<username> \
   -e UI_PASS=<SecurePassword> \
   -e AGENT_ENDPOINT=http://indexer-agent:8000 \

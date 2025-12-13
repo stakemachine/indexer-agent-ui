@@ -322,6 +322,7 @@ export function Subgraphs() {
               width={32}
               height={32}
               className="rounded-lg"
+              unoptimized
             />
             <div className="flex flex-col">
               <span className="font-medium">{row.getValue("displayName")}</span>

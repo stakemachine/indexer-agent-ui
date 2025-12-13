@@ -281,6 +281,11 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "_rewardsIssuer",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "_allocationID",
         "type": "address"
       }

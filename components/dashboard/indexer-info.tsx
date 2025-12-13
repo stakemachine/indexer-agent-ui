@@ -34,6 +34,11 @@ interface RawAllocation {
   subgraphDeployment: {
     ipfsHash: string;
   };
+  provision?: {
+    dataService?: {
+      id: string;
+    };
+  };
 }
 
 interface AllocationsQueryResponse {
@@ -46,7 +51,7 @@ function PendingRewardsSection({
   grtPrice,
   indexingRewardCut,
 }: {
-  allocations: Array<{ id: string; status: string }>;
+  allocations: Array<{ id: string; status: string; dataServiceAddress: string | null }>;
   grtPrice: number | null | undefined;
   indexingRewardCut?: number;
 }) {
@@ -66,7 +71,7 @@ function PendingRewardsDisplay({
   grtPrice,
   indexingRewardCut,
 }: {
-  allocations: Array<{ id: string; status: string }>;
+  allocations: Array<{ id: string; status: string; dataServiceAddress: string | null }>;
   grtPrice: number | null | undefined;
   indexingRewardCut?: number;
 }) {
@@ -75,17 +80,20 @@ function PendingRewardsDisplay({
   const [isBatchLoading, setIsBatchLoading] = useState(false);
 
   const handleLoadPendingRewards = async () => {
-    const activeAllocationIds = allocations
-      .filter((allocation) => allocation.status === "Active")
-      .map((allocation) => allocation.id);
+    const activeAllocations = allocations
+      .filter((allocation) => allocation.status === "Active" && allocation.dataServiceAddress)
+      .map((allocation) => ({
+        allocationId: allocation.id,
+        dataServiceAddress: allocation.dataServiceAddress as string,
+      }));
 
-    if (activeAllocationIds.length === 0) return;
+    if (activeAllocations.length === 0) return;
 
     setIsBatchLoading(true);
 
     try {
       const { fetchPendingRewardsBatch } = await import("@/lib/contracts/rewards");
-      const result = await fetchPendingRewardsBatch(activeAllocationIds, currentNetwork);
+      const result = await fetchPendingRewardsBatch(activeAllocations, currentNetwork);
 
       // Calculate total from the batch result
       if (result?.results) {
@@ -357,6 +365,7 @@ export function IndexerInfo() {
     return allocationsData.allocations.map((a) => ({
       id: a.id,
       status: a.status,
+      dataServiceAddress: a.provision?.dataService?.id ?? null,
     }));
   }, [allocationsData]);
 

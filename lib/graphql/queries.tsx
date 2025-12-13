@@ -387,6 +387,11 @@ export const ALLOCATIONS_BY_INDEXER_QUERY = gql`
       indexingDelegatorRewards
       queryFeesCollected
       poi
+      provision {
+        dataService {
+          id
+        }
+      }
       subgraphDeployment {
         manifest {
           network

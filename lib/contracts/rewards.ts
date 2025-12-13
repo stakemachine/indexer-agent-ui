@@ -13,6 +13,11 @@ export interface BatchRewardsResult {
   errors: string[];
 }
 
+export interface AllocationWithDataService {
+  allocationId: string;
+  dataServiceAddress: string;
+}
+
 /**
  * Get network configuration for rewards contract
  */
@@ -35,11 +40,20 @@ function createRewardsContract(networkId: string) {
 
 /**
  * Fetch pending rewards for a single allocation
+ * Post-Horizon upgrade: getRewards requires (rewardsIssuer, allocationId)
+ * @param allocationId - The allocation ID
+ * @param networkId - The network ID (e.g., 'arbitrum-one')
+ * @param dataServiceAddress - The data service (SubgraphService) address that acts as rewardsIssuer
  */
-export async function fetchPendingReward(allocationId: string, networkId: string): Promise<RewardResult> {
+export async function fetchPendingReward(
+  allocationId: string,
+  networkId: string,
+  dataServiceAddress: string,
+): Promise<RewardResult> {
   try {
     const contract = createRewardsContract(networkId);
-    const amount = await contract.getRewards(allocationId);
+    // Post-Horizon: getRewards(rewardsIssuer, allocationId) where rewardsIssuer is the data service
+    const amount = await contract.getRewards(dataServiceAddress, allocationId);
 
     return {
       allocationId,
@@ -56,16 +70,17 @@ export async function fetchPendingReward(allocationId: string, networkId: string
 }
 
 /**
- * Batch fetch pending rewards for multiple allocations using multicall approach
+ * Batch fetch pending rewards for multiple allocations
+ * Post-Horizon upgrade: Each allocation may have a different data service address
  */
 export async function fetchPendingRewardsBatch(
-  allocationIds: string[],
+  allocations: AllocationWithDataService[],
   networkId: string,
 ): Promise<BatchRewardsResult> {
   const results: RewardResult[] = [];
   const errors: string[] = [];
 
-  if (allocationIds.length === 0) {
+  if (allocations.length === 0) {
     return { results, errors };
   }
 
@@ -75,9 +90,10 @@ export async function fetchPendingRewardsBatch(
     const contract = new Contract(config.contractAddress, rewardsContractABI, provider);
 
     // Create batch call data
-    const calls = allocationIds.map((allocationId) => ({
+    // Post-Horizon: getRewards(rewardsIssuer, allocationId) where rewardsIssuer is the data service
+    const calls = allocations.map(({ allocationId, dataServiceAddress }) => ({
       target: config.contractAddress,
-      callData: contract.interface.encodeFunctionData("getRewards", [allocationId]),
+      callData: contract.interface.encodeFunctionData("getRewards", [dataServiceAddress, allocationId]),
       allocationId,
     }));
 
@@ -109,7 +125,7 @@ export async function fetchPendingRewardsBatch(
       if (result.status === "fulfilled") {
         results.push(result.value);
       } else {
-        const allocationId = allocationIds[index];
+        const { allocationId } = allocations[index];
         results.push({
           allocationId,
           amount: "0",
@@ -123,7 +139,7 @@ export async function fetchPendingRewardsBatch(
     const errorMessage = error instanceof Error ? error.message : "Batch call failed";
     errors.push(`Batch call failed: ${errorMessage}`);
 
-    allocationIds.forEach((allocationId) => {
+    allocations.forEach(({ allocationId }) => {
       results.push({
         allocationId,
         amount: "0",

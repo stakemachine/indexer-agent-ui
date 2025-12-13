@@ -31,6 +31,11 @@ interface RawAllocation {
   indexingDelegatorRewards: string;
   queryFeesCollected: string;
   poi: string;
+  provision?: {
+    dataService?: {
+      id: string;
+    };
+  };
   subgraphDeployment: {
     manifest: { network: string };
     ipfsHash: string;
@@ -72,6 +77,8 @@ type Allocation = {
   };
   // For unallocation - we need the deployment hash
   subgraphDeploymentHash: string;
+  // Data service address for rewards fetching (from provision)
+  dataServiceAddress: string | null;
 };
 
 const columns: ColumnDef<Allocation>[] = [
@@ -269,6 +276,7 @@ function AllocationsTable() {
           originalName: displayName || "N/A",
         },
         subgraphDeploymentHash: a.subgraphDeployment.ipfsHash,
+        dataServiceAddress: a.provision?.dataService?.id || null,
       };
     });
   }, [data]);
@@ -309,6 +317,7 @@ function AllocationsTable() {
     return allocations.map((a) => ({
       id: a.id,
       status: a.status,
+      dataServiceAddress: a.dataServiceAddress,
     }));
   }, [allocations]);
 
@@ -373,7 +382,7 @@ function PendingRewardsCell({
   const isActive = allocation.status === "Active";
   const rewardsSupported = isRewardsSupported(currentNetwork);
 
-  if (!isActive || !rewardsSupported) {
+  if (!isActive || !rewardsSupported || !allocation.dataServiceAddress) {
     return <div className="text-muted-foreground">—</div>;
   }
 
@@ -391,7 +400,7 @@ function PendingRewardsCell({
 
     try {
       const { fetchPendingReward } = await import("@/lib/contracts/rewards");
-      const result = await fetchPendingReward(allocation.id, currentNetwork);
+      const result = await fetchPendingReward(allocation.id, currentNetwork, allocation.dataServiceAddress as string);
 
       if (result.error) {
         onUpdateReward(allocation.id, {
@@ -453,7 +462,7 @@ function BatchRewardsControls({
   allocations,
   onUpdateRewards,
 }: {
-  allocations: Array<{ id: string; status: string }>;
+  allocations: Array<{ id: string; status: string; dataServiceAddress: string | null }>;
   onUpdateRewards: (
     updates: Record<
       string,
@@ -470,11 +479,15 @@ function BatchRewardsControls({
   const [batchLoading, setBatchLoading] = React.useState(false);
 
   const handleLoadAllRewards = async () => {
-    const activeAllocationIds = allocations
-      .filter((allocation) => allocation.status === "Active")
-      .map((allocation) => allocation.id);
+    // Only include active allocations that have a data service address
+    const activeAllocationsWithDataService = allocations
+      .filter((allocation) => allocation.status === "Active" && allocation.dataServiceAddress)
+      .map((allocation) => ({
+        allocationId: allocation.id,
+        dataServiceAddress: allocation.dataServiceAddress as string,
+      }));
 
-    if (activeAllocationIds.length === 0) return;
+    if (activeAllocationsWithDataService.length === 0) return;
 
     setBatchLoading(true);
 
@@ -489,8 +502,8 @@ function BatchRewardsControls({
       }
     > = {};
 
-    activeAllocationIds.forEach((id) => {
-      loadingUpdates[id] = {
+    activeAllocationsWithDataService.forEach(({ allocationId }) => {
+      loadingUpdates[allocationId] = {
         amount: "0",
         loading: true,
         error: false,
@@ -500,7 +513,7 @@ function BatchRewardsControls({
 
     try {
       const { fetchPendingRewardsBatch } = await import("@/lib/contracts/rewards");
-      const result = await fetchPendingRewardsBatch(activeAllocationIds, currentNetwork);
+      const result = await fetchPendingRewardsBatch(activeAllocationsWithDataService, currentNetwork);
 
       // Update all the individual cell states with the results
       const rewardUpdates: Record<
@@ -532,9 +545,9 @@ function BatchRewardsControls({
       });
 
       // Set any missing allocations as error
-      activeAllocationIds.forEach((id) => {
-        if (!rewardUpdates[id]) {
-          rewardUpdates[id] = {
+      activeAllocationsWithDataService.forEach(({ allocationId }) => {
+        if (!rewardUpdates[allocationId]) {
+          rewardUpdates[allocationId] = {
             amount: "0",
             loading: false,
             error: true,
@@ -574,8 +587,8 @@ function BatchRewardsControls({
         }
       > = {};
 
-      activeAllocationIds.forEach((id) => {
-        errorUpdates[id] = {
+      activeAllocationsWithDataService.forEach(({ allocationId }) => {
+        errorUpdates[allocationId] = {
           amount: "0",
           loading: false,
           error: true,

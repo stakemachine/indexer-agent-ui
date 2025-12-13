@@ -3,6 +3,9 @@ import { GraphQLClient } from "graphql-request";
 import type { ZodTypeAny } from "zod";
 import { z } from "zod"; // runtime schema creation
 
+// Maximum number of characters to include from an error message
+const MAX_ERROR_MESSAGE_LENGTH = 500;
+
 /**
  * Creates a typed GraphQL fetcher bound to a base endpoint. Supply a Zod schema to validate the response.
  * Returned fetcher is compatible with SWR: (key) => Promise<Data>
@@ -15,7 +18,7 @@ export function createSchemaFetcher<Schema extends ZodTypeAny>(options: {
 }): (query: string, variables?: Variables | undefined) => Promise<z.infer<Schema>> {
   const client = new GraphQLClient(options.endpoint);
   // reference z to ensure runtime import isn't tree-shaken when schemas are provided dynamically
-  void z.null();
+  const _ensureZodImport = z;
   return async (query: string, variables?: Variables | undefined): Promise<z.infer<Schema>> => {
     try {
       const raw = await client.request(query, variables as Variables);
@@ -25,7 +28,7 @@ export function createSchemaFetcher<Schema extends ZodTypeAny>(options: {
       // Normalize into a fresh Error instance (avoid mutating original which can have read-only message)
       let baseMessage: string;
       if (typeof err === "string") {
-        baseMessage = err.slice(0, 500);
+        baseMessage = err.slice(0, MAX_ERROR_MESSAGE_LENGTH);
       } else if (err instanceof Error) {
         baseMessage = err.message || err.name || "GraphQL error";
       } else {
@@ -56,7 +59,7 @@ export function createSchemaFetcher<Schema extends ZodTypeAny>(options: {
 export function jsonWithSchema<Schema extends ZodTypeAny>(url: string, schema: Schema, init?: RequestInit) {
   return fetch(url, init).then(async (r) => {
     if (!r.ok) {
-      const text = await r.text().catch(() => "");
+      const text = await r.text().catch(() => "Unable to read response body");
       throw new Error(`Request failed ${r.status}: ${text}`);
     }
     const json = await r.json();

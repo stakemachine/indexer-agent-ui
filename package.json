@@ -36,7 +36,7 @@
     "dayjs": "^1.11.19",
     "ethers": "^6.16.0",
     "geist": "^1.5.1",
-    "graphql-request": "^6.1.0",
+    "graphql-request": "^7.4.0",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.561.0",
     "next": "16.0.10",

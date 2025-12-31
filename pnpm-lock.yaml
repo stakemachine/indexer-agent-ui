@@ -134,10 +134,10 @@ importers:
         version: 1.0.7(tailwindcss@4.1.18)
       web3:
         specifier: ^4.16.0
-        version: 4.16.0(typescript@5.9.3)(zod@4.2.1)
+        version: 4.16.0(typescript@5.9.3)(zod@4.3.2)
       zod:
-        specifier: ^4.2.1
-        version: 4.2.1
+        specifier: ^4.3.2
+        version: 4.3.2
       zustand:
         specifier: ^5.0.9
         version: 5.0.9(@types/react@19.2.7)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
@@ -2694,6 +2694,7 @@ packages:
   whatwg-encoding@3.1.1:
     resolution: {integrity: sha512-6qN4hJdMwfYBtE3YBTTHhoeuUrDBPZmbQaxWAqSALV/MeEnR5z1xd8UKud2RAkFoPkmB+hli1TZSnyi84xz1vQ==}
     engines: {node: '>=18'}
+    deprecated: Use @exodus/bytes instead for a more spec-conformant and faster implementation
 
   whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -2773,8 +2774,8 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
-  zod@4.2.1:
-    resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
+  zod@4.3.2:
+    resolution: {integrity: sha512-b8L8yn4rIVfiXyHAmnr52/ZEpDumlT0bmxiq3Ws1ybrinhflGpt12Hvv54kYnEsGPRs6o/Ka3/ppA2OWY21IVg==}
 
   zustand@5.0.9:
     resolution: {integrity: sha512-ALBtUj0AfjJt3uNRQoL1tL2tMvj6Gp/6e39dnfT6uzpelGru8v1tPOGBzayOWbPJvujM8JojDk3E1LxeFisBNg==}
@@ -3876,11 +3877,11 @@ snapshots:
       '@vitest/pretty-format': 4.0.15
       tinyrainbow: 3.0.3
 
-  abitype@0.7.1(typescript@5.9.3)(zod@4.2.1):
+  abitype@0.7.1(typescript@5.9.3)(zod@4.3.2):
     dependencies:
       typescript: 5.9.3
     optionalDependencies:
-      zod: 4.2.1
+      zod: 4.3.2
 
   aes-js@4.0.0-beta.5: {}
 
@@ -4969,9 +4970,9 @@ snapshots:
     dependencies:
       web3-types: 1.10.0
 
-  web3-eth-abi@4.4.1(typescript@5.9.3)(zod@4.2.1):
+  web3-eth-abi@4.4.1(typescript@5.9.3)(zod@4.3.2):
     dependencies:
-      abitype: 0.7.1(typescript@5.9.3)(zod@4.2.1)
+      abitype: 0.7.1(typescript@5.9.3)(zod@4.3.2)
       web3-errors: 1.3.1
       web3-types: 1.10.0
       web3-utils: 4.3.3
@@ -4990,13 +4991,13 @@ snapshots:
       web3-utils: 4.3.3
       web3-validator: 2.0.6
 
-  web3-eth-contract@4.7.2(typescript@5.9.3)(zod@4.2.1):
+  web3-eth-contract@4.7.2(typescript@5.9.3)(zod@4.3.2):
     dependencies:
       '@ethereumjs/rlp': 5.0.2
       web3-core: 4.7.1
       web3-errors: 1.3.1
-      web3-eth: 4.11.1(typescript@5.9.3)(zod@4.2.1)
-      web3-eth-abi: 4.4.1(typescript@5.9.3)(zod@4.2.1)
+      web3-eth: 4.11.1(typescript@5.9.3)(zod@4.3.2)
+      web3-eth-abi: 4.4.1(typescript@5.9.3)(zod@4.3.2)
       web3-types: 1.10.0
       web3-utils: 4.3.3
       web3-validator: 2.0.6
@@ -5007,13 +5008,13 @@ snapshots:
       - utf-8-validate
       - zod
 
-  web3-eth-ens@4.4.0(typescript@5.9.3)(zod@4.2.1):
+  web3-eth-ens@4.4.0(typescript@5.9.3)(zod@4.3.2):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
       web3-core: 4.7.1
       web3-errors: 1.3.1
-      web3-eth: 4.11.1(typescript@5.9.3)(zod@4.2.1)
-      web3-eth-contract: 4.7.2(typescript@5.9.3)(zod@4.2.1)
+      web3-eth: 4.11.1(typescript@5.9.3)(zod@4.3.2)
+      web3-eth-contract: 4.7.2(typescript@5.9.3)(zod@4.3.2)
       web3-net: 4.1.0
       web3-types: 1.10.0
       web3-utils: 4.3.3
@@ -5032,10 +5033,10 @@ snapshots:
       web3-utils: 4.3.3
       web3-validator: 2.0.6
 
-  web3-eth-personal@4.1.0(typescript@5.9.3)(zod@4.2.1):
+  web3-eth-personal@4.1.0(typescript@5.9.3)(zod@4.3.2):
     dependencies:
       web3-core: 4.7.1
-      web3-eth: 4.11.1(typescript@5.9.3)(zod@4.2.1)
+      web3-eth: 4.11.1(typescript@5.9.3)(zod@4.3.2)
       web3-rpc-methods: 1.3.0
       web3-types: 1.10.0
       web3-utils: 4.3.3
@@ -5047,12 +5048,12 @@ snapshots:
       - utf-8-validate
       - zod
 
-  web3-eth@4.11.1(typescript@5.9.3)(zod@4.2.1):
+  web3-eth@4.11.1(typescript@5.9.3)(zod@4.3.2):
     dependencies:
       setimmediate: 1.0.5
       web3-core: 4.7.1
       web3-errors: 1.3.1
-      web3-eth-abi: 4.4.1(typescript@5.9.3)(zod@4.2.1)
+      web3-eth-abi: 4.4.1(typescript@5.9.3)(zod@4.3.2)
       web3-eth-accounts: 4.3.1
       web3-net: 4.1.0
       web3-providers-ws: 4.0.8
@@ -5147,17 +5148,17 @@ snapshots:
       web3-types: 1.10.0
       zod: 3.25.76
 
-  web3@4.16.0(typescript@5.9.3)(zod@4.2.1):
+  web3@4.16.0(typescript@5.9.3)(zod@4.3.2):
     dependencies:
       web3-core: 4.7.1
       web3-errors: 1.3.1
-      web3-eth: 4.11.1(typescript@5.9.3)(zod@4.2.1)
-      web3-eth-abi: 4.4.1(typescript@5.9.3)(zod@4.2.1)
+      web3-eth: 4.11.1(typescript@5.9.3)(zod@4.3.2)
+      web3-eth-abi: 4.4.1(typescript@5.9.3)(zod@4.3.2)
       web3-eth-accounts: 4.3.1
-      web3-eth-contract: 4.7.2(typescript@5.9.3)(zod@4.2.1)
-      web3-eth-ens: 4.4.0(typescript@5.9.3)(zod@4.2.1)
+      web3-eth-contract: 4.7.2(typescript@5.9.3)(zod@4.3.2)
+      web3-eth-ens: 4.4.0(typescript@5.9.3)(zod@4.3.2)
       web3-eth-iban: 4.0.7
-      web3-eth-personal: 4.1.0(typescript@5.9.3)(zod@4.2.1)
+      web3-eth-personal: 4.1.0(typescript@5.9.3)(zod@4.3.2)
       web3-net: 4.1.0
       web3-providers-http: 4.2.0
       web3-providers-ws: 4.0.8
@@ -5242,7 +5243,7 @@ snapshots:
 
   zod@3.25.76: {}
 
-  zod@4.2.1: {}
+  zod@4.3.2: {}
 
   zustand@5.0.9(@types/react@19.2.7)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3)):
     optionalDependencies:

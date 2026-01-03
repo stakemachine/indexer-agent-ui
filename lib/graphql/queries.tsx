@@ -697,3 +697,53 @@ export const REMOVE_FROM_PROVISION_MUTATION = gql`
     }
   }
 `;
+
+// ==================== Delegators ====================
+
+export const DELEGATORS_BY_INDEXER_QUERY = gql`
+  query delegatorsByIndexerQuery($indexer: String!) {
+    indexer(id: $indexer) {
+      delegatedTokens
+      delegatorShares
+    }
+    delegatedStakes(
+      first: 1000
+      orderBy: stakedTokens
+      orderDirection: desc
+      where: { indexer: $indexer }
+    ) {
+      id
+      delegator {
+        id
+        totalStakedTokens
+        totalUnstakedTokens
+        stakesCount
+        activeStakesCount
+        createdAt
+        totalRealizedRewards
+      }
+      indexer {
+        id
+      }
+      stakedTokens
+      shareAmount
+      lockedTokens
+      lockedUntil
+      realizedRewards
+      createdAt
+      lastDelegatedAt
+      lastUndelegatedAt
+      unstakedTokens
+    }
+  }
+`;
+
+export const DELEGATOR_COUNT_BY_INDEXER_QUERY = gql`
+  query delegatorCountByIndexerQuery($indexer: String!) {
+    delegatedStakes(
+      where: { indexer: $indexer, shareAmount_gt: "0" }
+    ) {
+      id
+    }
+  }
+`;

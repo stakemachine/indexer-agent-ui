@@ -15,6 +15,7 @@ import { agentClient, subgraphClient } from "@/lib/graphql/client";
 import {
   AGENT_INDEXER_REGISTRATION_QUERY,
   ALLOCATIONS_BY_INDEXER_QUERY,
+  DELEGATOR_COUNT_BY_INDEXER_QUERY,
   INDEXER_INFO_BY_ID_QUERY,
   INDEXER_OPERATORS_QUERY,
 } from "@/lib/graphql/queries";
@@ -348,6 +349,17 @@ export function IndexerInfo() {
     subgraphFetcherOperators,
   );
 
+  // Fetch delegator count
+  type DelegatorCountResponse = { delegatedStakes: Array<{ id: string }> };
+  const { data: delegatorCountData } = useSWR<DelegatorCountResponse>(
+    indexerRegistration?.address
+      ? [DELEGATOR_COUNT_BY_INDEXER_QUERY, { indexer: indexerRegistration?.address.toLowerCase() }]
+      : null,
+    (key: KeyTuple) => subgraphClient(currentNetwork).request<DelegatorCountResponse>(key[0], key[1]),
+  );
+
+  const delegatorCount = delegatorCountData?.delegatedStakes?.length ?? 0;
+
   // Fetch allocations for pending rewards
   const subgraphFetcherAllocations = (key: KeyTuple) =>
     subgraphClient(currentNetwork).request<AllocationsQueryResponse>(key[0], key[1]);
@@ -584,6 +596,17 @@ export function IndexerInfo() {
               opts={{ decimals: 0 }}
             />
             <TokenStatCard title="Token Capacity" wei={idx.tokenCapacity} grtPrice={grtPrice} opts={{ decimals: 0 }} />
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-sm text-muted-foreground">Delegators</div>
+                <div className="mt-2">
+                  <div className="text-2xl font-semibold">{delegatorCount}</div>
+                  <a href="/delegators" className="text-sm text-blue-500 hover:underline mt-1 inline-block">
+                    View all →
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </CardContent>
       </Card>

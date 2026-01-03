@@ -21,7 +21,10 @@ export const AgentAllocationsResponseSchema = z.object({
 export const IndexerDeploymentChainSchema = z.object({
   network: z.string(),
   earliestBlock: z.object({ number: z.number().or(z.string()) }),
-  latestBlock: z.object({ number: z.number().or(z.string()) }).optional(),
+  latestBlock: z
+    .object({ number: z.number().or(z.string()) })
+    .nullable()
+    .optional(),
   chainHeadBlock: z.object({ number: z.number().or(z.string()) }),
 });
 
@@ -151,6 +154,49 @@ export const RemoveFromProvisionResultSchema = z.object({
   }),
 });
 
+// ==================== Delegators ====================
+
+export const DelegatorSchema = z.object({
+  id: z.string(),
+  totalStakedTokens: z.string(),
+  totalUnstakedTokens: z.string(),
+  stakesCount: z.number(),
+  activeStakesCount: z.number(),
+  createdAt: z.number(),
+  totalRealizedRewards: z.string(),
+});
+
+export const DelegatedStakeSchema = z.object({
+  id: z.string(),
+  delegator: DelegatorSchema,
+  indexer: z.object({
+    id: z.string(),
+  }),
+  stakedTokens: z.string(),
+  shareAmount: z.string(),
+  lockedTokens: z.string(),
+  lockedUntil: z.number(),
+  realizedRewards: z.string(),
+  createdAt: z.number(),
+  lastDelegatedAt: z.number().nullable().optional(),
+  lastUndelegatedAt: z.number().nullable().optional(),
+  unstakedTokens: z.string(),
+});
+
+export const DelegatedStakesResponseSchema = z.object({
+  indexer: z
+    .object({
+      delegatedTokens: z.string(),
+      delegatorShares: z.string(),
+    })
+    .nullable(),
+  delegatedStakes: z.array(DelegatedStakeSchema),
+});
+
+export const DelegatorCountResponseSchema = z.object({
+  delegatedStakes: z.array(z.object({ id: z.string() })),
+});
+
 export type AgentAllocationsResponse = z.infer<typeof AgentAllocationsResponseSchema>;
 export type IndexerDeploymentsResponse = z.infer<typeof IndexerDeploymentsResponseSchema>;
 export type IndexingRulesResponse = z.infer<typeof IndexingRulesResponseSchema>;
@@ -161,3 +207,7 @@ export type ThawRequestsResponse = z.infer<typeof ThawRequestsResponseSchema>;
 export type AddToProvisionResult = z.infer<typeof AddToProvisionResultSchema>;
 export type ThawFromProvisionResult = z.infer<typeof ThawFromProvisionResultSchema>;
 export type RemoveFromProvisionResult = z.infer<typeof RemoveFromProvisionResultSchema>;
+export type DelegatedStakesResponse = z.infer<typeof DelegatedStakesResponseSchema>;
+export type DelegatorCountResponse = z.infer<typeof DelegatorCountResponseSchema>;
+export type Delegator = z.infer<typeof DelegatorSchema>;
+export type DelegatedStake = z.infer<typeof DelegatedStakeSchema>;

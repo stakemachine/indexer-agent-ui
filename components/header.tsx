@@ -22,6 +22,7 @@ type NavItem<T extends string = string> = {
 const menuItems: NavItem<Route>[] = [
   { href: "/provisions", label: "Provisions" },
   { href: "/allocations", label: "Allocations" },
+  { href: "/delegators", label: "Delegators" },
   { href: "/actions", label: "Actions" },
   { href: "/subgraphs", label: "Subgraphs" },
   { href: "/rules", label: "Rules" },

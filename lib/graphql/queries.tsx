@@ -413,12 +413,13 @@ export const ALLOCATIONS_BY_INDEXER_QUERY = gql`
 `;
 
 export const SUBGRAPHS_BY_STATUS_QUERY = gql`
-  query subgraphsByStatusQuery($indexer: String) {
+  query subgraphsByStatusQuery($indexer: String, $first: Int = 1000, $skip: Int = 0) {
     subgraphs(
-      first: 1000
+      first: $first
+      skip: $skip
       orderBy: currentSignalledTokens
       orderDirection: desc
-      where: { active: true, entityVersion: 2, currentVersion_not: null }
+      where: { active: true, entityVersion: 2, currentVersion_not: null, currentSignalledTokens_gt: 0}
     ) {
       metadata {
         id

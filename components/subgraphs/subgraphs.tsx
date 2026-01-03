@@ -227,6 +227,45 @@ function EntityCell({
   );
 }
 
+const PAGE_SIZE = 1000;
+
+// Paginated fetcher that loads all subgraphs
+async function fetchAllSubgraphs(
+  client: ReturnType<typeof subgraphClient>,
+  indexerAddress: string,
+): Promise<SubgraphsQueryResponse> {
+  let allSubgraphs: SubgraphsQueryResponse["subgraphs"] = [];
+  let skip = 0;
+  let graphNetwork: SubgraphsQueryResponse["graphNetwork"] | null = null;
+
+  while (true) {
+    const response = await client.request<SubgraphsQueryResponse>(SUBGRAPHS_BY_STATUS_QUERY, {
+      indexer: indexerAddress,
+      first: PAGE_SIZE,
+      skip,
+    });
+
+    // Store graphNetwork from first request
+    if (!graphNetwork) {
+      graphNetwork = response.graphNetwork;
+    }
+
+    allSubgraphs = [...allSubgraphs, ...response.subgraphs];
+
+    // If we got fewer than PAGE_SIZE, we've fetched all
+    if (response.subgraphs.length < PAGE_SIZE) {
+      break;
+    }
+
+    skip += PAGE_SIZE;
+  }
+
+  return {
+    graphNetwork: graphNetwork as SubgraphsQueryResponse["graphNetwork"],
+    subgraphs: allSubgraphs,
+  };
+}
+
 export function Subgraphs() {
   const { indexerRegistration } = useIndexerRegistrationStore();
   const { currentNetwork } = useNetworkStore();
@@ -237,10 +276,7 @@ export function Subgraphs() {
       ? [SUBGRAPHS_BY_STATUS_QUERY, currentNetwork, indexerRegistration.address.toLowerCase()]
       : null,
     async () => {
-      return await client.request<SubgraphsQueryResponse>(SUBGRAPHS_BY_STATUS_QUERY, {
-        indexer: indexerRegistration?.address.toLowerCase(),
-        protocolNetwork: currentNetwork,
-      });
+      return await fetchAllSubgraphs(client, indexerRegistration?.address.toLowerCase() || "");
     },
   );
 

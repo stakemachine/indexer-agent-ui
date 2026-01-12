@@ -46,7 +46,7 @@
     "postcss-cli": "^11.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-hook-form": "^7.70.0",
+    "react-hook-form": "^7.71.0",
     "react-hot-toast": "^2.6.0",
     "sharp": "^0.34.5",
     "swr": "^2.3.8",

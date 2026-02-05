@@ -55,7 +55,7 @@
     "tailwindcss-animate": "^1.0.7",
     "web3": "^4.16.0",
     "zod": "^4.3.6",
-    "zustand": "^5.0.10"
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.13",

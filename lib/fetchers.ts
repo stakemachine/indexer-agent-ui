@@ -18,7 +18,7 @@ export function createSchemaFetcher<Schema extends ZodTypeAny>(options: {
 }): (query: string, variables?: Variables | undefined) => Promise<z.infer<Schema>> {
   const client = new GraphQLClient(options.endpoint);
   // reference z to ensure runtime import isn't tree-shaken when schemas are provided dynamically
-  const _ensureZodImport = z;
+  const zodRuntimeReference = z;
   return async (query: string, variables?: Variables | undefined): Promise<z.infer<Schema>> => {
     try {
       const raw = await client.request(query, variables as Variables);
@@ -26,14 +26,7 @@ export function createSchemaFetcher<Schema extends ZodTypeAny>(options: {
       return options.transform ? (options.transform(parsed) as z.infer<Schema>) : parsed;
     } catch (err) {
       // Normalize into a fresh Error instance (avoid mutating original which can have read-only message)
-      let baseMessage: string;
-      if (typeof err === "string") {
-        baseMessage = err.slice(0, MAX_ERROR_MESSAGE_LENGTH);
-      } else if (err instanceof Error) {
-        baseMessage = err.message || err.name || "GraphQL error";
-      } else {
-        baseMessage = (err as { message?: unknown }).message?.toString() || String(err);
-      }
+      let baseMessage = extractErrorMessage(err);
       if (!baseMessage.startsWith("[GQL]")) baseMessage = `[GQL] ${baseMessage}`;
       const wrapped = new Error(baseMessage);
       // Preserve original error metadata when possible
@@ -59,7 +52,9 @@ export function createSchemaFetcher<Schema extends ZodTypeAny>(options: {
 export function jsonWithSchema<Schema extends ZodTypeAny>(url: string, schema: Schema, init?: RequestInit) {
   return fetch(url, init).then(async (r) => {
     if (!r.ok) {
-      const text = await r.text().catch(() => "Unable to read response body");
+      const text = await r
+        .text()
+        .catch((err) => `Unable to read response body: ${err instanceof Error ? err.message : String(err)}`);
       throw new Error(`Request failed ${r.status}: ${text}`);
     }
     const json = await r.json();
@@ -84,4 +79,21 @@ export function safeParse<Schema extends ZodTypeAny>(schema: Schema, data: unkno
     throw new ValidationError("Schema validation failed", issues);
   }
   return result.data;
+}
+
+// Helper function to extract an error message as a string for unknown error types
+function extractErrorMessage(err: unknown): string {
+  if (typeof err === "string") {
+    return err.length > MAX_ERROR_MESSAGE_LENGTH ? err.slice(0, MAX_ERROR_MESSAGE_LENGTH) + "..." : err;
+  } else if (err instanceof Error) {
+    return err.message || err.name || "GraphQL error";
+  } else if (err && typeof err === "object" && "message" in err) {
+    // message may be any type; try toString
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const msg = (err as any).message?.toString() ?? String(err);
+    return msg.length > MAX_ERROR_MESSAGE_LENGTH ? msg.slice(0, MAX_ERROR_MESSAGE_LENGTH) + "..." : msg;
+  } else {
+    const msg = String(err);
+    return msg.length > MAX_ERROR_MESSAGE_LENGTH ? msg.slice(0, MAX_ERROR_MESSAGE_LENGTH) + "..." : msg;
+  }
 }

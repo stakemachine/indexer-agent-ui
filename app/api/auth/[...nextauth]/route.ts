@@ -37,6 +37,7 @@ const options: NextAuthOptions = {
   },
 };
 const handler = NextAuth(options);
+
 //export default (req, res) => NextAuth(req, res, options);
 
 export { handler as POST, handler as GET };

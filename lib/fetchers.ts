@@ -17,8 +17,6 @@ export function createSchemaFetcher<Schema extends ZodTypeAny>(options: {
   transform?: (data: z.infer<Schema>) => unknown;
 }): (query: string, variables?: Variables | undefined) => Promise<z.infer<Schema>> {
   const client = new GraphQLClient(options.endpoint);
-  // reference z to ensure runtime import isn't tree-shaken when schemas are provided dynamically
-  const zodRuntimeReference = z;
   return async (query: string, variables?: Variables | undefined): Promise<z.infer<Schema>> => {
     try {
       const raw = await client.request(query, variables as Variables);
@@ -31,7 +29,9 @@ export function createSchemaFetcher<Schema extends ZodTypeAny>(options: {
       const wrapped = new Error(baseMessage);
       // Preserve original error metadata when possible
       if (err instanceof Error) {
-        wrapped.name = err.name || wrapped.name;
+        if (err.name) {
+          wrapped.name = err.name;
+        }
         // Attach stack only if exists and different
         if (err.stack) {
           wrapped.stack = err.stack;
